@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Page Eater",
+  "version": "1.0",
+
+  "description": "Eats all web pages.  Nom Nom Nom.",
+
+  "icons": {
+     "48": "icons/border-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.mozilla.org/*"],
+      "js": ["getDocumentTextBundle.js"]
+    }
+  ]
+}
