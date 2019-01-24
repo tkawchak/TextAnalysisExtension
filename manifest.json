@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Page Eater",
-  "version": "1.0",
+  "name": "Text Analysis Extension",
+  "version": "0.1",
 
-  "description": "Eats all web pages.  Nom Nom Nom.",
+  "description": "Performs text analysis on web pages.  Current text analysis performed is basic flesch-kincaid analysis and grade reading level analysis.  This will be sent to an azure function which will process the data and then ingest it to a cosmosDB that is set up in azure.",
 
   "icons": {
      "48": "icons/border-48.png"
