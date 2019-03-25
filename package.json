@@ -1,0 +1,27 @@
+{
+  "name": "textanalysisextension",
+  "version": "0.1.0",
+  "description": "Web browser extension to perform text analysis for web pages.",
+  "main": "getDocumentTextBundle.js",
+  "dependencies": {
+    "browserify": "^16.2.3",
+    "flesch-kincaid": "^1.0.0",
+    "request": "^2.88.0",
+    "webpack": "^4.28.3",
+    "wordcount": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkawchak/TextAnalysisExtension.git"
+  },
+  "author": "Tom Kawchak",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tkawchak/TextAnalysisExtension/issues"
+  },
+  "homepage": "https://github.com/tkawchak/TextAnalysisExtension#readme"
+}

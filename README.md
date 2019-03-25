@@ -2,19 +2,36 @@
 
 This tool is being built as a Firefox Extension to perform analysis on webpage text.
 
-## Setup
-In order for these commands to run, you must have run the following commands to set everything up:
+## Clone the Repo
 ```
-sudo npm install -g browserify
-npm install daveross/flesch-kincaid
+git clone https://github.com/tkawchak/TextAnalysisExtension.git
 ```
 
+## Install Dependencies
+In order for these commands to run, you must install the dependencies from the packages.json file.
+```
+npm install
+```
+There is a change you will need to add sudo to this command if you do not have proper permissions.
+```
+sudo npm install
+```
+
+## Build
 Run the browserify command to package everything into one .js file:
 ```
-browserify fleschKincaidPractice.js -o bundle.js
+browserify getDocumentText.js -o getDocumentTextBundle.js
 ```
 
-Then, run the file with node:
+## Run
+Open up a new window in firefox and go to the page 
 ```
-node bundle.js
+about:debugging#addons
 ```
+Click the button that says
+```
+Load Temporary Add-on...
+```
+And select the manifest.json file in this repository.
+
+The extension will work on any mozilla.org domain and subdomain now!
