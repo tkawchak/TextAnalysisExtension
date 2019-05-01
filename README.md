@@ -22,6 +22,9 @@ Run the browserify command to package everything into one .js file:
 ```
 browserify getDocumentText.js -o getDocumentTextBundle.js
 ```
+```
+browserify requestService.js -o requestServiceBundle.js
+```
 
 ## Run
 Open up a new window in firefox and go to the page 

@@ -14,5 +14,10 @@
       "matches": ["*://*.mozilla.org/*"],
       "js": ["getDocumentTextBundle.js"]
     }
+  ],
+
+  "permissions": [
+    "<all_urls>",
+    "webRequest"
   ]
 }

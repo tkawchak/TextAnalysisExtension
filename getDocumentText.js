@@ -5,6 +5,8 @@ var WordCount = require("wordcount");
 // Load the request library for making http requests
 const request = require('request');
 
+var sum = new Function('a', 'b', 'return a + b');
+
 // read the text content of the web page
 var documentText = document.body.textContent;
 var documentUrl = window.location.href;
@@ -25,7 +27,7 @@ console.log(`Word count for document text: ${documentWordCount}`);
 
 // send a request to the azure function
 request({
-    uri: "https://tkawchak-textanalysis.azurewebsites.net",
+    uri: "https://tkawchak-textanalysis.azurewebsites.net/api/HttpTrigger1",
     method: "GET",
     timeout: 10000,
     qs: {

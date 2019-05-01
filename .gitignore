@@ -82,4 +82,5 @@ typings/
 # Browserify packaged files
 bundle.js
 getDocumentTextBundle.js
+requestServiceBundle.js
 *practice*.js
