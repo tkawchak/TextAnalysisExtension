@@ -6,20 +6,20 @@ var getDocumentTextPort;
 
 function sendAnalyzeCommand() {
   if (getDocumentTextPort != undefined) {
-    getDocumentTextPort.postMessage({command: "analyze"});
+    getDocumentTextPort.postMessage({ command: "analyze" });
     console.log("Sent Analyze command to content script.");
   }
   else {
-      console.log("The content script port has not been initialized yet.");
+    console.log("The content script port has not been initialized yet.");
   }
 }
 
-function sendRequest() {
-  var documentTitle = "Background Test";
-  var documentUrl = "example.com";
-  var documentGrade = "2";
-  var documentScore = "72.39";
-  var documentWordCount = "12398123";
+function sendRequest(name, url, grade, score, wordCount) {
+  var documentTitle = name;
+  var documentUrl = url;
+  var documentGrade = grade;
+  var documentScore = score;
+  var documentWordCount = wordCount;
   // send a request to the azure function
   request({
     uri: "https://tkawchak-textanalysis.azurewebsites.net/api/HttpTrigger1",
@@ -43,7 +43,22 @@ function sendRequest() {
 // Function to handle to response messages from the content script
 function handleMessage(message) {
   console.log("In background script, received message from content script: ");
-  console.log(message);
+  if (getDocumentTextPort != undefined) {
+    getDocumentTextPort.postMessage({ status: "Received message from content script"});
+  }
+
+  // perform the request to send the data
+  if (message.data != undefined) {
+    getDocumentTextPort.postMessage({status: "received data!"});
+
+    sendRequest(
+      message.data.name,
+      message.data.url,
+      message.data.grade,
+      message.data.score,
+      message.data.wordCount
+    );
+  }
 }
 
 // Listener for the extension button clicked
