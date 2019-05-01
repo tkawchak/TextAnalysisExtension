@@ -84,3 +84,4 @@ bundle.js
 getDocumentTextBundle.js
 requestServiceBundle.js
 *practice*.js
+*.DS_Store
