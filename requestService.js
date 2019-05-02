@@ -4,6 +4,8 @@ const request = require('request');
 // Port to hold the connection to the content script
 var getDocumentTextPort;
 
+// Check to see if the connection has been set up and if so then
+// send a message to request the site data.
 function sendAnalyzeCommand() {
   if (getDocumentTextPort != undefined) {
     getDocumentTextPort.postMessage({ command: "analyze" });
@@ -15,6 +17,10 @@ function sendAnalyzeCommand() {
 }
 
 function sendRequest(name, url, grade, score, wordCount) {
+  if (name == null || url == null || grade == null || score == null || wordCount == null) {
+    console.log("All values were null.");
+    return null;
+  }
   var documentTitle = name;
   var documentUrl = url;
   var documentGrade = grade;
@@ -43,14 +49,14 @@ function sendRequest(name, url, grade, score, wordCount) {
 // Function to handle to response messages from the content script
 function handleMessage(message) {
   console.log("In background script, received message from content script: ");
+  alert("In background script, received message from content script.");
   if (getDocumentTextPort != undefined) {
     getDocumentTextPort.postMessage({ status: "Received message from content script"});
   }
 
   // perform the request to send the data
   if (message.data != undefined) {
-    getDocumentTextPort.postMessage({status: "received data!"});
-
+    console.log(message.data);
     sendRequest(
       message.data.name,
       message.data.url,
@@ -58,6 +64,8 @@ function handleMessage(message) {
       message.data.score,
       message.data.wordCount
     );
+
+    getDocumentTextPort.postMessage({status: "send data to azure function."});
   }
 }
 
@@ -68,7 +76,7 @@ browser.browserAction.onClicked.addListener(sendAnalyzeCommand);
 // to the main content script
 function connected(port) {
   getDocumentTextPort = port;
-  getDocumentTextPort.onMessage.addListener(handleMessage(message));
+  getDocumentTextPort.onMessage.addListener(handleMessage);
 }
 
 // Add a listener for the function run when the content script

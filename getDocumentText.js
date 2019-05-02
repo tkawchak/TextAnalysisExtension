@@ -94,4 +94,4 @@ requestServicePort.onMessage.addListener(function (message) {
 });
 
 // log to the console if the connection cannot be established
-requestServicePort.onDisconnect(function () { console.log("Connection failed."); });
+requestServicePort.onDisconnect.addListener(function () { console.log("Connection failed."); });

@@ -17,16 +17,15 @@ There is a change you will need to add sudo to this command if you do not have p
 sudo npm install
 ```
 
-## Build
-Run the browserify command to package everything into one .js file:
+## Package the Extension
 ```
-browserify getDocumentText.js -o getDocumentTextBundle.js
+npm run package
 ```
-```
-browserify requestService.js -o requestServiceBundle.js
-```
+Under the hood, this uses the browserify command to package everything into two .js files.  One is requestServiceBundle.js and the other is getDocumentText.js.  requestServiceBundle.js is the background script that communicates with the azure resources and handles the extension events.  getDocumentText.js is the content script that can interact with the active web page and send data to the background script to be processed and sent to Azure.
 
 ## Run
+Make sure to follow the instructions in [Package the Extension](##Package-the-Extension) prior to running the extension.
+
 Open up a new window in firefox and go to the page 
 ```
 about:debugging#addons
@@ -37,4 +36,7 @@ Load Temporary Add-on...
 ```
 And select the manifest.json file in this repository.
 
-The extension will work on any mozilla.org domain and subdomain now!
+The extension will work on any mozilla.org domain and subdomain right now.  Support for all web sites will be coming soon!
+
+
+Inquiries about how to get the data?  Contact [Tom](mailto:tkawchak@gmail.com)
