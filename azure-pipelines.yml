@@ -26,9 +26,9 @@ steps:
   inputs:
     command: 'custom'
     workingDir: '/'
-    customCommand: 'npm run test'
+    customCommand: 'run test'
 - task: Npm@1
   inputs:
     command: 'custom'
     workingDir: 'package'
-    customCommand: 'npm run package'
+    customCommand: 'run package'
