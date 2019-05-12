@@ -1,0 +1,21 @@
+pool:
+  vmImage: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+
+steps:
+- task: NodeTool@0 
+  inputs:
+    versionSpec: '10.x'
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: '/'
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: '/'
+    customCommand: 'npm run test'
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: 'package'
+    customCommand: 'npm run package'

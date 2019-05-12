@@ -16,6 +16,7 @@ function sendAnalyzeCommand() {
   }
 }
 
+// Send a request to the azure function with the properly formatted data.
 function sendRequest(name, url, grade, score, wordCount) {
   if (name == null || url == null || grade == null || score == null || wordCount == null) {
     console.log("All values were null.");
