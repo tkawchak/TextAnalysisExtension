@@ -30,5 +30,5 @@ steps:
 - task: Npm@1
   inputs:
     command: 'custom'
-    workingDir: 'package'
+    workingDir: ''
     customCommand: 'run package'
