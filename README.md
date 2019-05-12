@@ -2,6 +2,14 @@
 
 This tool is being built as a Firefox Extension to perform analysis on webpage text.
 
+## Current Project Status
+### Master Build
+[![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=master)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=master)
+
+### Develop Build
+[![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=develop)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=develop)
+
+# Get Started Developing / Using the Extension
 ## Clone the Repo
 ```
 git clone https://github.com/tkawchak/TextAnalysisExtension.git
