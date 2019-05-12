@@ -12,7 +12,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests specified!\"",
     "package": "browserify getDocumentText.js -o getDocumentTextBundle.js && browserify requestService.js -o requestServiceBundle.js"
   },
   "repository": {
