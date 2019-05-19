@@ -1,34 +1,129 @@
+variables:
+  - name: NPM_VERSIONSPEC
+    value: '10.x'
+  - name: VM_IMAGE
+    value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+  - name: AZURE_SUBSCRIPTION
+    value: "Visual Studio Enterprise (dfb55888-9a13-4ea3-b705-ddf6b0801b05)"
+  - name: ProcessTextFunctionArtifactName
+    value: 'ProcessTextFunc'
+  - name: ProcessTextFunctionAppName
+    value: 'ProcessTextFunc'
+  - name: ProcessTextFunctionName
+    value: 'ProcessTextHttp'
+  - name: ProcessTextFunctionPath
+    value: 'AzureFunctions/$(ProcessTextFunctionAppName)'
+
 trigger:
-  batch: true
+  batch: 'true'
   branches:
     include:
     - master
     - develop
 
 pr:
-  autoCancel: true
+  autoCancel: 'true'
   branches:
     include:
     - master
 
-pool:
-  vmImage: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+stages:
+  - stage: BuildWebExtension
+    displayName: Build Web Extension
+    jobs:
 
-steps:
-- task: NodeTool@0 
-  inputs:
-    versionSpec: '10.x'
-- task: Npm@1
-  inputs:
-    command: 'install'
-    workingDir: ''
-- task: Npm@1
-  inputs:
-    command: 'custom'
-    workingDir: ''
-    customCommand: 'run test'
-- task: Npm@1
-  inputs:
-    command: 'custom'
-    workingDir: ''
-    customCommand: 'run package'
+    # Build npm project
+    - job: BuildNpm
+      displayName: "Build Npm Project"
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: NodeTool@0
+        displayName: "Download Node"
+        inputs:
+          versionSpec: $(NPM_VERSIONSPEC)
+      - task: Npm@1
+        displayName: "Npm Install"
+        inputs:
+          command: 'install'
+          workingDir: ''
+      - task: Npm@1
+        displayName: "Package Files"
+        inputs:
+          command: 'custom'
+          workingDir: ''
+          customCommand: 'run package'
+
+    # Perform Npm unit tests
+    - job: TestNpm
+      displayName: "Test Npm Project"
+      dependsOn: BuildNpm
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: NodeTool@0
+        displayName: "Download Node"
+        inputs:
+          versionSpec: $(NPM_VERSIONSPEC)
+      - task: Npm@1
+        displayName: "Npm Test"
+        inputs:
+          command: 'custom'
+          workingDir: ''
+          customCommand: 'run test'
+    
+    # Perform C# Unit Tests
+
+  # Prepare Azure Function code for Deployment
+  - stage: PrepareArtifacts
+    displayName: "Prepare Azure Function Artifacts"
+    dependsOn: []
+    jobs:
+    - job: BuildAzureFunction
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: CopyFiles@2
+        displayName: Copy Azure Function Files to Artifacts Staging
+        inputs:
+          SourceFolder: '$(ProcessTextFunctionPath)'
+          Contents: '**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          CleanTargetFolder: true
+      - task: ArchiveFiles@2
+        displayName: "Create .zip file for Azure Function"
+        inputs:
+          rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          includeRootFolder: false
+          archiveType: 'zip'
+          archiveFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+          replaceExistingArchive: true
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Azure Function $(ProcessTextFunctionAppName) .zip file
+        inputs:
+          ArtifactName: $(ProcessTextFunctionArtifactName)
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+
+  # Deploy the Azure function to the App Service
+  - stage: DeployAzureFunction
+    displayName: "Deploy Azure Function"
+    dependsOn: PrepareArtifacts
+    jobs:
+    - job: DeployAzureFunction
+      displayName: Deploy Azure Function
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: '$(ProcessTextFunctionArtifactName)'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - task: AzureFunctionApp@1
+        inputs:
+          azureSubscription: $(AZURE_SUBSCRIPTION)
+          appType: 'functionApp'
+          appName: 'ProcessTextFunc'
+          package: '$(System.ArtifactsDirectory)/**/*.zip'
+          deploymentMethod: 'zipDeploy'
