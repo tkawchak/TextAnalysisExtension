@@ -12,7 +12,7 @@ variables:
   - name: ProcessTextFunctionName
     value: 'ProcessTextHttp'
   - name: ProcessTextFunctionPath
-    value: 'AzureFunctions/$(ProcessTextFunc)'
+    value: 'AzureFunctions/$(ProcessTextFunctionAppName)'
 
 trigger:
   batch: 'true'
@@ -67,8 +67,8 @@ stages:
     # Perform C# Unit Tests
 
   # Prepare Azure Function code for Deployment
-  - stage: BuildAzureFunction
-    displayName: Build Azure Function $(ProcessTextFunctionAppName)
+  - stage: Prepare Artifacts
+    displayName: Prepare Azure Function Artifacts
     jobs:
     - job: BuildAzureFunction
       pool:
@@ -77,9 +77,10 @@ stages:
       - task: CopyFiles@2
         displayName: Copy Azure Function Files to Artifacts Staging
         inputs:
-          CleanTargetFolder: true
+          SourceFolder: '$(ProcessTextFunctionPath)'
+          Contents: '**'
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
-          Contents: $(ProcessTextFunctionPath)
+          CleanTargetFolder: true
       - task: PublishBuildArtifacts@1
         displayName: Publish Azure Function $(ProcessTextFunctionAppName) .zip file
         inputs:
@@ -90,7 +91,7 @@ stages:
   - stage: DeployAzureFunction
     jobs:
     - job: DeployAzureFunction
-      displayName: Deploy Azure Function $(ProcessTextFunctionAppName)
+      displayName: Deploy Azure Function
       pool:
         vmImage: $(VM_IMAGE)
       steps:
