@@ -34,7 +34,6 @@ function getWebpageData() {
 // Create a port to connect to the background script
 console.log("Setting up content script connection to background script.");
 var requestServicePort = browser.runtime.connect({ name: "port-from-content-script" });
-// TODO: Figure out why this connection doesn't work??
 requestServicePort.postMessage({ greeting: "hello from content script" });
 
 // Create a listener for messages from the background script
