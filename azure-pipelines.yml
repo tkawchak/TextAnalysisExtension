@@ -4,7 +4,7 @@ variables:
   - name: VM_IMAGE
     value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
-    value: "Visual Studio Enterprise"
+    value: "Visual Studio Enterprise (dfb55888-9a13-4ea3-b705-ddf6b0801b05)"
   - name: ProcessTextFunctionArtifactName
     value: 'ProcessTextFunc.zip'
   - name: ProcessTextFunctionAppName
@@ -88,7 +88,6 @@ stages:
 
   # Deploy the Azure function to the App Service
   - stage: DeployAzureFunction
-    displayName: Deploy Azure Function $(ProcessTextFunctionAppName)
     jobs:
     - job: DeployAzureFunction
       displayName: Deploy Azure Function $(ProcessTextFunctionAppName)
