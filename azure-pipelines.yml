@@ -5,13 +5,13 @@ variables:
     value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
     value: "Visual Studio Enterprise"
-  - name: AzureFunctionArtifactName
+  - name: ProcessTextFunctionArtifactName
     value: 'ProcessTextFunc.zip'
-  - name: AzureFunctionAppName
+  - name: ProcessTextFunctionAppName
     value: 'ProcessTextFunc'
   - name: ProcessTextFunctionName
     value: 'ProcessTextHttp'
-  - name: ProcessTextFuncPath
+  - name: ProcessTextFunctionPath
     value: 'AzureFunctions/$(ProcessTextFunc)'
 
 trigger:
@@ -68,7 +68,7 @@ stages:
 
   # Prepare Azure Function code for Deployment
   - stage: BuildAzureFunction
-    displayName: Build Azure Function $(ProcessTextFunc)
+    displayName: Build Azure Function $(ProcessTextFunctionAppName)
     jobs:
     - job: BuildAzureFunction
       pool:
@@ -79,26 +79,26 @@ stages:
         inputs:
           CleanTargetFolder: true
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
-          Contents: $(ProcessTextFuncPath)
+          Contents: $(ProcessTextFunctionPath)
       - task: PublishBuildArtifacts@1
-        displayName: Publish Azure Function $(ProcessTextFunc) .zip file
+        displayName: Publish Azure Function $(ProcessTextFunctionAppName) .zip file
         inputs:
-          ArtifactName: $(AzureFunctionArtifactName)
+          ArtifactName: $(ProcessTextFunctionArtifactName)
           PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
   # Deploy the Azure function to the App Service
   - stage: DeployAzureFunction
-    displayName: Deploy Azure Function $(ProcessTextFunc)
+    displayName: Deploy Azure Function $(ProcessTextFunctionAppName)
     jobs:
     - job: DeployAzureFunction
-      displayName: Deploy Azure Function $(ProcessTextFunc)
+      displayName: Deploy Azure Function $(ProcessTextFunctionAppName)
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: AzureFunctionApp@1
-        displayName: Deploy $(ProcessTextFuncPath) Azure Function
+        displayName: Deploy $(ProcessTextFunctionAppName) Azure Function
         inputs:
           azureSubscription: $(AZURE_SUBSCRIPTION)
           appType: functionApp
-          appName: $(ProcessTextFuncPath)
-          package: $(System.DefaultWorkingDirectory)/$(AzureFunctionArtifactname)
+          appName: $(ProcessTextFunctionAppName)
+          package: $(System.DefaultWorkingDirectory)/$(ProcessTextFunctionArtifactName)
