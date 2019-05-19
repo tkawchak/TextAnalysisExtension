@@ -104,26 +104,26 @@ stages:
           ArtifactName: $(ProcessTextFunctionArtifactName)
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
 
-  # Deploy the Azure function to the App Service
-  - stage: DeployAzureFunction
-    displayName: "Deploy Azure Function"
-    dependsOn: PrepareArtifacts
-    jobs:
-    - job: DeployAzureFunction
-      displayName: Deploy Azure Function
-      pool:
-        vmImage: $(VM_IMAGE)
-      steps:
-      - task: DownloadBuildArtifacts@0
-        inputs:
-          buildType: 'current'
-          downloadType: 'single'
-          artifactName: '$(ProcessTextFunctionArtifactName)'
-          downloadPath: '$(System.ArtifactsDirectory)'
-      - task: AzureFunctionApp@1
-        inputs:
-          azureSubscription: $(AZURE_SUBSCRIPTION)
-          appType: 'functionApp'
-          appName: 'ProcessTextFunc'
-          package: '$(System.ArtifactsDirectory)/**/*.zip'
-          deploymentMethod: 'zipDeploy'
+  # # Deploy the Azure function to the App Service
+  # - stage: DeployAzureFunction
+  #   displayName: "Deploy Azure Function"
+  #   dependsOn: PrepareArtifacts
+  #   jobs:
+  #   - job: DeployAzureFunction
+  #     displayName: Deploy Azure Function
+  #     pool:
+  #       vmImage: $(VM_IMAGE)
+  #     steps:
+  #     - task: DownloadBuildArtifacts@0
+  #       inputs:
+  #         buildType: 'current'
+  #         downloadType: 'single'
+  #         artifactName: '$(ProcessTextFunctionArtifactName)'
+  #         downloadPath: '$(System.ArtifactsDirectory)'
+  #     - task: AzureFunctionApp@1
+  #       inputs:
+  #         azureSubscription: $(AZURE_SUBSCRIPTION)
+  #         appType: 'functionApp'
+  #         appName: 'ProcessTextFunc'
+  #         package: '$(System.ArtifactsDirectory)/**/*.zip'
+  #         deploymentMethod: 'zipDeploy'
