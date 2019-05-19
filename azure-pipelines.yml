@@ -29,6 +29,7 @@ pr:
 
 stages:
   - stage: BuildWebExtension
+    displayName: Build Web Extension
     jobs:
 
     # Build npm project
@@ -67,6 +68,7 @@ stages:
 
   # Prepare Azure Function code for Deployment
   - stage: BuildAzureFunction
+    displayName: Build Azure Function $(ProcessTextFunc)
     jobs:
     - job: BuildAzureFunction
       pool:
@@ -85,9 +87,11 @@ stages:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
   # Deploy the Azure function to the App Service
-  - stage: DeployAzureFunction $(ProcessTextfuncPath)
+  - stage: DeployAzureFunction
+    displayName: Deploy Azure Function $(ProcessTextFunc)
     jobs:
     - job: DeployAzureFunction
+      displayName: Deploy Azure Function $(ProcessTextFunc)
       pool:
         vmImage: $(VM_IMAGE)
       steps:
