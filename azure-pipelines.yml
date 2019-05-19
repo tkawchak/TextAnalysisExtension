@@ -34,17 +34,21 @@ stages:
 
     # Build npm project
     - job: BuildNpm
+      displayName: "Build Npm Project"
       pool:
         vmImage: $(VM_IMAGE)
       steps:
-      - task: NodeTool@0 
+      - task: NodeTool@0
+        displayName: "Download Node"
         inputs:
           versionSpec: $(NPM_VERSIONSPEC)
       - task: Npm@1
+        displayName: "Npm Install"
         inputs:
           command: 'install'
           workingDir: ''
       - task: Npm@1
+        displayName: "Package Files"
         inputs:
           command: 'custom'
           workingDir: ''
@@ -52,13 +56,16 @@ stages:
 
     # Perform Npm unit tests
     - job: TestNpm
+      displayName: "Test Npm Project"
       pool:
         vmImage: $(VM_IMAGE)
       steps:
-      - task: NodeTool@0 
+      - task: NodeTool@0
+        displayName: "Download Node"
         inputs:
           versionSpec: $(NPM_VERSIONSPEC)
       - task: Npm@1
+        displayName: "Npm Test"
         inputs:
           command: 'custom'
           workingDir: ''
@@ -107,4 +114,4 @@ stages:
           appType: 'functionApp'
           appName: 'ProcessTextFunc'
           package: '$(System.ArtifactsDirectory)/$(ProcessTextFunctionArtifactName)'
-          deploymentMethod: 'auto'
+          deploymentMethod: 'zipDeploy'
