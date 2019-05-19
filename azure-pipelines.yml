@@ -57,6 +57,7 @@ stages:
     # Perform Npm unit tests
     - job: TestNpm
       displayName: "Test Npm Project"
+      dependsOn: BuildNpm
       pool:
         vmImage: $(VM_IMAGE)
       steps:
@@ -75,7 +76,8 @@ stages:
 
   # Prepare Azure Function code for Deployment
   - stage: PrepareArtifacts
-    displayName: Prepare Azure Function Artifacts
+    displayName: "Prepare Azure Function Artifacts"
+    dependsOn: []
     jobs:
     - job: BuildAzureFunction
       pool:
@@ -96,6 +98,8 @@ stages:
 
   # Deploy the Azure function to the App Service
   - stage: DeployAzureFunction
+    displayName: "Deploy Azure Function"
+    dependsOn: PrepareArtifacts
     jobs:
     - job: DeployAzureFunction
       displayName: Deploy Azure Function
