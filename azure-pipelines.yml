@@ -98,6 +98,6 @@ stages:
         displayName: Deploy $(ProcessTextFunctionAppName) Azure Function
         inputs:
           azureSubscription: $(AZURE_SUBSCRIPTION)
-          appType: functionApp
+          appType: 'functionApp'
           appName: $(ProcessTextFunctionAppName)
-          package: $(System.DefaultWorkingDirectory)/$(ProcessTextFunctionArtifactName)
+          package: $(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)
