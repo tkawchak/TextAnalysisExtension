@@ -113,5 +113,5 @@ stages:
           azureSubscription: $(AZURE_SUBSCRIPTION)
           appType: 'functionApp'
           appName: 'ProcessTextFunc'
-          package: '$(System.ArtifactsDirectory)/$(ProcessTextFunctionArtifactName)'
+          package: '$(System.ArtifactsDirectory)/**/$(ProcessTextFunctionArtifactName)'
           deploymentMethod: 'zipDeploy'
