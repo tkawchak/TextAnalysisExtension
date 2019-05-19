@@ -85,3 +85,8 @@ getDocumentTextBundle.js
 requestServiceBundle.js
 *practice*.js
 *.DS_Store
+
+# Azure function files
+FunctionApp/bin/
+FunctionApp/obj/
+.vscode/
