@@ -101,4 +101,4 @@ stages:
           azureSubscription: $(AZURE_SUBSCRIPTION)
           appType: 'functionApp'
           appName: $(ProcessTextFunctionAppName)
-          package: $(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)
+          package: $(Build.ArtifactStagingDirectory)/**/$(ProcessTextFunctionArtifactName)
