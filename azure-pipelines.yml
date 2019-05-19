@@ -95,17 +95,16 @@ stages:
       pool:
         vmImage: $(VM_IMAGE)
       steps:
-      # - task: AzureFunctionApp@1
-      #   displayName: Deploy $(ProcessTextFunctionAppName) Azure Function
-      #   inputs:
-      #     azureSubscription: $(AZURE_SUBSCRIPTION)
-      #     appType: 'functionApp'
-      #     appName: $(ProcessTextFunctionAppName)
-      #     package: $(Build.ArtifactStagingDirectory)/**/$(ProcessTextFunctionArtifactName)
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: '$(ProcessTextFunctionArtifactName)'
+          downloadPath: '$(System.ArtifactsDirectory)'
       - task: AzureFunctionApp@1
         inputs:
-          azureSubscription: 'Visual Studio Enterprise(dfb55888-9a13-4ea3-b705-ddf6b0801b05)'
+          azureSubscription: $(AZURE_SUBSCRIPTION)
           appType: 'functionApp'
           appName: 'ProcessTextFunc'
-          package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+          package: '$(System.ArtifactsDirectory)/$(ProcessTextFunctionArtifactName)'
           deploymentMethod: 'auto'
