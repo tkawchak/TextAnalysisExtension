@@ -67,7 +67,7 @@ stages:
     # Perform C# Unit Tests
 
   # Prepare Azure Function code for Deployment
-  - stage: Prepare Artifacts
+  - stage: PrepareArtifacts
     displayName: Prepare Azure Function Artifacts
     jobs:
     - job: BuildAzureFunction
