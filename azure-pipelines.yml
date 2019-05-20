@@ -87,7 +87,9 @@ stages:
         displayName: Copy Azure Function Files to Artifacts Staging
         inputs:
           SourceFolder: '$(ProcessTextFunctionPath)'
-          Contents: '**'
+          Contents: |
+            **
+            !.gitignore
           TargetFolder: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
           CleanTargetFolder: true
       - task: ArchiveFiles@2
