@@ -30,8 +30,8 @@ pr:
 stages:
   - stage: BuildWebExtension
     displayName: Build Web Extension
+    dependsOn: []
     jobs:
-
     # Build npm project
     - job: BuildNpm
       displayName: "Build Npm Project"
@@ -54,21 +54,6 @@ stages:
           command: 'custom'
           workingDir: ''
           customCommand: 'run package'
-    
-    # Build the Azure Function Project
-    - job: BuildAzureFunction
-      displayName: "Build Azure Function Projects"
-      dependsOn: []
-      pool:
-        vmImage: $(VM_IMAGE)
-      steps:
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: 'build'
-          projects: 'AzureFunctions/**/*.csproj'
-          feedsToUse: 'select'
-          versioningScheme: 'off'
-
     # Perform Npm unit tests
     - job: TestNpm
       displayName: "Test Npm Project"
@@ -87,6 +72,24 @@ stages:
           workingDir: ''
           customCommand: 'run test'
     
+    # Stage to build azure function projects
+  - stage:  BuildFunctionProjects
+    displayName: "Build Azure Function Projects"
+    dependsOn: []
+    jobs:
+    # Build the Azure Function Project
+    - job: BuildAzureFunction
+      displayName: "Build Azure Function Projects"
+      dependsOn: []
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'build'
+          projects: 'AzureFunctions/**/*.csproj'
+          feedsToUse: 'select'
+          versioningScheme: 'off'
     # Perform C# Unit Tests
     - job: TestAzureFunctions
       displayName: "Test Azure Functions Projects"
@@ -102,10 +105,10 @@ stages:
           feedsToUse: 'select'
           versioningScheme: 'off'
 
-  # Prepare Azure Function code for Deployment
+  # Prepare Azure Function code for Deployment and publish artifacts
   - stage: PrepareArtifacts
     displayName: "Prepare Azure Function Artifacts"
-    dependsOn: []
+    dependsOn: BuildFunctionProjects
     jobs:
     - job: BuildAzureFunction
       pool:
