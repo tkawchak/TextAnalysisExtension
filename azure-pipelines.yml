@@ -30,11 +30,12 @@ pr:
 stages:
   - stage: BuildWebExtension
     displayName: Build Web Extension
+    dependsOn: []
     jobs:
-
     # Build npm project
     - job: BuildNpm
       displayName: "Build Npm Project"
+      dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
@@ -53,7 +54,6 @@ stages:
           command: 'custom'
           workingDir: ''
           customCommand: 'run package'
-
     # Perform Npm unit tests
     - job: TestNpm
       displayName: "Test Npm Project"
@@ -72,37 +72,79 @@ stages:
           workingDir: ''
           customCommand: 'run test'
     
+    # Stage to build azure function projects
+  - stage:  BuildFunctionProjects
+    displayName: "Build Azure Function Projects"
+    dependsOn: []
+    jobs:
+    # Build the Azure Function Project
+    - job: BuildAzureFunction
+      displayName: "Build Azure Function Projects"
+      dependsOn: []
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'build'
+          projects: 'AzureFunctions/**/*.csproj'
+          feedsToUse: 'select'
+          versioningScheme: 'off'
     # Perform C# Unit Tests
+    - job: TestAzureFunctions
+      displayName: "Test Azure Functions Projects"
+      dependsOn: BuildAzureFunction
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'test'
+          projects: 'AzureFunctions/**/*.Tests.csproj'
+          testRunTitle: 'Azure Function Tests'
+          feedsToUse: 'select'
+          versioningScheme: 'off'
 
-  # Prepare Azure Function code for Deployment
+  # Prepare Azure Function code for Deployment and publish artifacts
   - stage: PrepareArtifacts
     displayName: "Prepare Azure Function Artifacts"
-    dependsOn: []
+    dependsOn: BuildFunctionProjects
     jobs:
     - job: BuildAzureFunction
       pool:
         vmImage: $(VM_IMAGE)
       steps:
-      - task: CopyFiles@2
-        displayName: Copy Azure Function Files to Artifacts Staging
+
+      - task: DotNetCoreCLI@2
+        displayName: Publish
         inputs:
-          SourceFolder: '$(ProcessTextFunctionPath)'
-          Contents: '**'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
-          CleanTargetFolder: true
-      - task: ArchiveFiles@2
-        displayName: "Create .zip file for Azure Function"
-        inputs:
-          rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
-          includeRootFolder: false
-          archiveType: 'zip'
-          archiveFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
-          replaceExistingArchive: true
+          command: 'publish'
+          projects: 'AzureFunctions/**/*.csproj'
+          arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          zipAfterPublish: true
+          publishWebProjects: false
+      # - task: CopyFiles@2
+      #   displayName: Copy Azure Function Files to Artifacts Staging
+      #   inputs:
+      #     SourceFolder: '$(ProcessTextFunctionPath)'
+      #     Contents: |
+      #       **
+      #       !.gitignore
+      #     TargetFolder: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+      #     CleanTargetFolder: true
+      # - task: ArchiveFiles@2
+      #   displayName: "Create .zip file for Azure Function"
+      #   inputs:
+      #     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+      #     includeRootFolder: false
+      #     archiveType: 'zip'
+      #     archiveFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+      #     replaceExistingArchive: true
       - task: PublishBuildArtifacts@1
-        displayName: Publish Azure Function $(ProcessTextFunctionAppName) .zip file
+        displayName: Publish Azure Function
         inputs:
           ArtifactName: $(ProcessTextFunctionArtifactName)
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
 
   # # Deploy the Azure function to the App Service
   # - stage: DeployAzureFunction
