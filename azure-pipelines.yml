@@ -115,31 +115,31 @@ stages:
         vmImage: $(VM_IMAGE)
       steps:
 
-      - task: DotNetCoreCLI@2
-        displayName: Publish
+      # - task: DotNetCoreCLI@2
+      #   displayName: Publish
+      #   inputs:
+      #     command: 'publish'
+      #     projects: 'AzureFunctions/**/*.csproj'
+      #     arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+      #     zipAfterPublish: true
+      #     publishWebProjects: false
+      - task: CopyFiles@2
+        displayName: Copy Azure Function Files to Artifacts Staging
         inputs:
-          command: 'publish'
-          projects: 'AzureFunctions/**/*.csproj'
-          arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
-          zipAfterPublish: true
-          publishWebProjects: false
-      # - task: CopyFiles@2
-      #   displayName: Copy Azure Function Files to Artifacts Staging
-      #   inputs:
-      #     SourceFolder: '$(ProcessTextFunctionPath)'
-      #     Contents: |
-      #       **
-      #       !.gitignore
-      #     TargetFolder: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
-      #     CleanTargetFolder: true
-      # - task: ArchiveFiles@2
-      #   displayName: "Create .zip file for Azure Function"
-      #   inputs:
-      #     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
-      #     includeRootFolder: false
-      #     archiveType: 'zip'
-      #     archiveFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
-      #     replaceExistingArchive: true
+          SourceFolder: '$(ProcessTextFunctionPath)'
+          Contents: |
+            **
+            !.gitignore
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          CleanTargetFolder: true
+      - task: ArchiveFiles@2
+        displayName: "Create .zip file for Azure Function"
+        inputs:
+          rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          includeRootFolder: true
+          archiveType: 'zip'
+          archiveFile: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+          replaceExistingArchive: true
       - task: PublishBuildArtifacts@1
         displayName: Publish Azure Function
         inputs:
