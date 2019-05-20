@@ -144,7 +144,7 @@ stages:
         displayName: Publish Azure Function
         inputs:
           ArtifactName: $(ProcessTextFunctionArtifactName)
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
 
   # # Deploy the Azure function to the App Service
   # - stage: DeployAzureFunction
