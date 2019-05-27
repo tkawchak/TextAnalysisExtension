@@ -9,10 +9,17 @@ This tool is being built as a Firefox Extension to perform analysis on webpage t
 ### Develop Build
 [![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=develop)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=develop)
 
-# Get Started Developing / Using the Extension
-## Clone the Repo
+# Get the Code
 ```
 git clone https://github.com/tkawchak/TextAnalysisExtension.git
+```
+
+# Developing the Browser Extension
+
+## Navigate to the Browser Extension Folder
+Form the base folder of the repository, type:
+```
+cd BrowserExtension
 ```
 
 ## Install Dependencies
@@ -31,6 +38,15 @@ npm run package
 ```
 Under the hood, this uses the browserify command to package everything into two .js files.  One is requestServiceBundle.js and the other is getDocumentText.js.  requestServiceBundle.js is the background script that communicates with the azure resources and handles the extension events.  getDocumentText.js is the content script that can interact with the active web page and send data to the background script to be processed and sent to Azure.
 
+## Test the Extension
+```
+npm test
+```
+or
+```
+npm run test
+```
+
 ## Run
 Make sure to follow the instructions in [Package the Extension](##Package-the-Extension) prior to running the extension.
 
@@ -42,9 +58,56 @@ Click the button that says
 ```
 Load Temporary Add-on...
 ```
-And select the manifest.json file in this repository.
+And select the **manifest.json** file in this repository.  The extension will be working in your Firefix Browswer!
 
-The extension will work on any mozilla.org domain and subdomain right now.  Support for all web sites will be coming soon!
+# Developing the Azure Function to Process Text
+## Navigate to the Folder Containing the Azure Function
+From the root of the repository, type: 
+```
+cd ProcessText
+```
 
+## Install the Azure Function Development Tools
+Run the following command to install the npm package azure-function-core-tools globally.  Visit the [Azure Functions Docs](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local) for more information on Azure Functions.
+```
+npm install -g azure-functions-core-tools
+```
 
+## Set the local.settings.json file settings
+Edit or create the file at the location
+```
+ProcessText/ProcessTextFunc/local.settings.json
+```
+Replace the settings with the proper connections and values for the cosmosDB and Azure Functions Azure Resources.
+
+***TODO: Update this with the proper local contents of the local.settings.json file***
+
+## Run the Azure Function
+Change to the proper folder:
+```
+cd ProcessText/ProcessTextFunc
+```
+
+Start the Azure Functions host.  Run the Start Command.
+```
+func host start
+```
+or 
+```
+func start
+```
+
+## Test the Azure Function
+Change to the proper folder:
+```
+cd ProcessText/ProcessTextFunc.Tests
+```
+
+Run the dotnet test command:
+```
+dotnet test
+```
+This will run all tests in the project.
+
+# Contact
 Inquiries about how to get the data?  Contact [Tom](mailto:tkawchak@gmail.com)
