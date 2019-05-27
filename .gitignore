@@ -87,6 +87,7 @@ requestServiceBundle.js
 *.DS_Store
 
 # Azure function files
-FunctionApp/bin/
-FunctionApp/obj/
 .vscode/
+.vs/
+bin/
+obj/
