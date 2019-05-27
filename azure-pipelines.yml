@@ -2,7 +2,7 @@ variables:
   - name: NPM_VERSIONSPEC
     value: '10.x'
   - name: VM_IMAGE
-    value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+    value: 'vs2017-win2016' # examples of other options: 'ubuntu-16.04', 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
     value: "Visual Studio Enterprise (dfb55888-9a13-4ea3-b705-ddf6b0801b05)"
   - name: ProcessTextFunctionArtifactName
@@ -144,7 +144,7 @@ stages:
         displayName: Publish Azure Function
         inputs:
           ArtifactName: $(ProcessTextFunctionArtifactName)
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
 
   # # Deploy the Azure function to the App Service
   # - stage: DeployAzureFunction
