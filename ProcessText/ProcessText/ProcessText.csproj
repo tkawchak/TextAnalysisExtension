@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="PracticeTestProject\bin\Debug\netcoreapp2.1\PracticeTestProject.deps.json" />
+    <Content Remove="PracticeTestProject\bin\Debug\netcoreapp2.1\PracticeTestProject.runtimeconfig.dev.json" />
+    <Content Remove="PracticeTestProject\bin\Debug\netcoreapp2.1\PracticeTestProject.runtimeconfig.json" />
+    <Content Remove="PracticeTestProject\obj\project.assets.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="PracticeTestProject\UnitTest1.cs" />
+    <Compile Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.AssemblyInfo.cs" />
+    <Compile Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="PracticeTestProject\bin\Debug\netcoreapp2.1\xunit.runner.reporters.netcoreapp10.dll" />
+    <None Remove="PracticeTestProject\bin\Debug\netcoreapp2.1\xunit.runner.utility.netcoreapp10.dll" />
+    <None Remove="PracticeTestProject\bin\Debug\netcoreapp2.1\xunit.runner.visualstudio.dotnetcore.testadapter.dll" />
+    <None Remove="PracticeTestProject\obj\PracticeTestProject.csproj.nuget.cache" />
+    <None Remove="PracticeTestProject\obj\PracticeTestProject.csproj.nuget.g.props" />
+    <None Remove="PracticeTestProject\obj\PracticeTestProject.csproj.nuget.g.targets" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.AssemblyInfoInputs.cache" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.assets.cache" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.csproj.CoreCompileInputs.cache" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.csproj.FileListAbsolute.txt" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.csprojAssemblyReference.cache" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.dll" />
+    <None Remove="PracticeTestProject\obj\Debug\netcoreapp2.1\PracticeTestProject.pdb" />
+  </ItemGroup>
+</Project>
