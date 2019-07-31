@@ -1,0 +1,14 @@
+{
+  "name": "textextractionapi",
+  "version": "1.0.0",
+  "description": "Azure Function written on NodeJS to extract text from web pages behind an API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tom Kawchak",
+  "license": "ISC",
+  "dependencies": {
+    "@postlight/mercury-parser": "^2.1.1"
+  }
+}
