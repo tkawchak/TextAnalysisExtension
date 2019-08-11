@@ -1,5 +1,7 @@
 var Mercury = require('@postlight/mercury-parser');
 // var url = 'https://www.foxnews.com/us/armed-man-reportedly-shot-after-throwing-incendiary-devices-at-ice-detention-center';
+//var FleschKincaid = require("flesch-kincaid");
+var Readability = require('text-readability');
 
 function parseRequestInput(request, context) {
     context.log("Parsing request input");
@@ -41,7 +43,7 @@ function isValidUrl(url, context) {
     return true;
 }
 
-// for asynchronous functions
+// The main function that is executed in the azure function
 module.exports = async function (context, request) {
     var parsedInputResult = parseRequestInput(request, context);
     if (parsedInputResult.status != 200) {
@@ -63,10 +65,60 @@ module.exports = async function (context, request) {
         }
     }
 
+    // Compute a bunch of readability metrics
+    var syllableCount = Readability.syllableCount(parsedTextResult.content, lang='en-US');
+    var lexiconCount = Readability.lexiconCount(parsedTextResult.content, removePunctuation=true);
+    var sentenceCount = Readability.sentenceCount(parsedTextResult.content);
+    var difficultWords = Readability.difficultWords(parsedTextResult.content);
+    var averageSentenceLength = Readability.averageSentenceLength(parsedTextResult.content);
+    var lixReadabilityIndex = Readability.lix(parsedTextResult.content);
+    var fleschEase = Readability.fleschReadingEase(parsedTextResult.content);
+    var fleschKincaidGrade = Readability.fleschKincaidGrade(parsedTextResult.content);
+    var colemanLiauIndex = Readability.colemanLiauIndex(parsedTextResult.content);
+    var automatedReadabilityIndex = Readability.automatedReadabilityIndex(parsedTextResult.content);
+    var daleChallReadabilityScore = Readability.daleChallReadabilityScore(parsedTextResult.content);
+    var linsearWriteIndex = Readability.linsearWriteFormula(parsedTextResult.content);
+    var gunningFogIndex = Readability.gunningFog(parsedTextResult.content);
+    var smogIndex = Readability.smogIndex(parsedTextResult.content);
+    var overallScore = Readability.textStandard(parsedTextResult.content);
+
+    // Contruct the new response object
+    var responseBody = {
+        author: parsedTextResult.author,
+        content: parsedTextResult.content,
+        date_published: parsedTextResult.date_published,
+        //dek: parsedTextResult.dek,
+        // direction: parsedTextResult.direction,
+        domain: parsedTextResult.domain,
+        excerpt: parsedTextResult.excerpt,
+        lead_image_url: parsedTextResult.lead_image_url,
+        //next_page_url: parsedTextResult.next_page_url,
+        //rendered_pages: parsedTextResult.rendered_pages,
+        title: parsedTextResult.title,
+        //total_pages: parsedTextResult.total_pages,
+        url: parsedTextResult.url,
+        //word_count: parsedTextResult.word_count,
+        syllable_count: syllableCount,
+        lexicon_count: lexiconCount,
+        sentence_count: sentenceCount,
+        average_sentence_length: averageSentenceLength,
+        lix_readability_index: lixReadabilityIndex,
+        flesch_ease: fleschEase,
+        fleschkincaid_grade: fleschKincaidGrade,
+        coleman_liau_index: colemanLiauIndex,
+        automated_readability_index: automatedReadabilityIndex,
+        dale_chall_readability_score: daleChallReadabilityScore,
+        difficult_words: difficultWords,
+        linsear_write_index: linsearWriteIndex,
+        gunning_fog_index: gunningFogIndex,
+        smog_index: smogIndex,
+        overall_score: overallScore
+    };
+
     context.log("function executed successfully");
     var response = {
         status: 200,
-        body: parsedTextResult,
+        body: responseBody,
         headers: {
             "Content-Type": "application/json"
         }
