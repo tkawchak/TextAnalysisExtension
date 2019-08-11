@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ProcessTextFunc.Models;
 
 namespace ProcessTextFunc
 {
@@ -26,55 +25,64 @@ namespace ProcessTextFunc
             HttpResponseMessage httpResponse;
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            // Get information from the headers
-            string resultName = request.Query["name"];
-            string resultUrl = request.Query["url"];
-            string resultScore = request.Query["score"];
-            string resultGrade = request.Query["grade"];
-            string resultCount = request.Query["count"];
-            
             // format the data for the response message
-            string message = $"You sent a request with the values: name:{resultName}, url:{resultUrl}, score:{resultScore}, grade:{resultGrade}, and wordCount:{resultCount}";
+            string url = request.Query["url"];
+            string message = $"You sent a request to store data for webpage at {url}.";
             log.LogInformation(message);
 
-            // make a call to the text parse api
-            // https://textextractionfunc.azurewebsites.net/api/ExtractText?url=resultUrl&code=s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==
-            string functionCode = Environment.GetEnvironmentVariable("TextExtractionFuncCode");
-            log.LogInformation($"{functionCode}");
-            var requesturl = $"https://textextractionfunc.azurewebsites.net/api/ExtractText?url={resultUrl}&code={functionCode}";
-            var client = new HttpClient();
-            log.LogInformation("Parsing the url from the text extraction function api");
-            var textExtractionResponse = await client.GetAsync(requesturl);
-            TextExtractionResponse extractedText;
-            if (textExtractionResponse != null)
-            {
-                log.LogInformation(await textExtractionResponse.Content.ReadAsStringAsync());
-                extractedText = await textExtractionResponse.Content.ReadAsAsync<TextExtractionResponse>();
-                log.LogInformation("Received the parsed website data.");
-                log.LogInformation((extractedText == null).ToString());
-            }
-            else 
-            {
-                string errorMessage = "Unable to parse the website data.";
-                log.LogError(errorMessage);
-                httpResponse = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                httpResponse.Content = new StringContent(errorMessage);
-                return httpResponse;
-            }
-
-            log.LogInformation(extractedText.Author);
-            log.LogInformation(extractedText.Title);
-
             // Create a new document to store in cosmos db
-            // TODO: Think of what other data to put in here
-            // TODO: Include the published aritcle date
-            // TODO: Get the Fleisch-Kincaid index and the grade reading level in C#
+            // Specifies all of the fields that are stored in the db entry
+            // TODO: Figure out how to put these query parameters into the request body
+            // and parse the request body into an object.
+            // TODO: These are query parametrs so their values are strings.  How to parse
+            // as ints or dates, etc.
+            string author = request.Query["author"];
+            string text = request.Query["text"];
+            string date_published = request.Query["date_published"];
+            string domain = request.Query["domain"];
+            string excerpt = request.Query["excerpt"];
+            string lead_image_url = request.Query["lead_image_url"];
+            string title = request.Query["title"];
+            string syllable_count = request.Query["syllable_count"];
+            string lexicon_count = request.Query["lexicon_count"];
+            string sentence_count = request.Query["sentence_count"];
+            string average_sentence_length = request.Query["average_sentence_length"];
+            string lix_readability_index = request.Query["lix_readability_index"];
+            string flesch_ease = request.Query["flesch_ease"];
+            string fleschkincaid_grade = request.Query["fleschkincaid_grade"];
+            string coleman_liau_index = request.Query["coleman_liau_index"];
+            string automated_readability_index = request.Query["automated_readability_index"];
+            string dale_chall_readability_score = request.Query["dale_chall_readability_score"];
+            string difficult_words = request.Query["difficult_words"];
+            string linsear_write_index = request.Query["linsear_write_index"];
+            string gunning_fog_index = request.Query["gunning_fog_index"];
+            string smog_index = request.Query["smog_index"];
+            string overall_score = request.Query["overall_score"];
+
             await outputDocument.AddAsync( new {
-                name = extractedText.Title,
-                url = extractedText.Url,
-                grade = resultGrade,
-                score = resultScore,
-                count = extractedText.WordCount,
+                author = author,
+                text = text,
+                date_published = date_published,
+                domain = domain,
+                excerpt = excerpt,
+                lead_image_url = lead_image_url,
+                title = title,
+                url = url,
+                syllable_count = syllable_count,
+                lexicon_count = lexicon_count,
+                sentence_count = sentence_count,
+                average_sentence_length = average_sentence_length,
+                lix_readability_index = lix_readability_index,
+                flesch_ease = flesch_ease,
+                fleschkincaid_grade = fleschkincaid_grade,
+                coleman_liau_index = coleman_liau_index,
+                automated_readability_index = automated_readability_index,
+                dale_chall_readability_score = dale_chall_readability_score,
+                difficult_words = difficult_words,
+                linsear_write_index = linsear_write_index,
+                gunning_fog_index = gunning_fog_index,
+                smog_index = smog_index,
+                overall_score = overall_score,
                 datetime = DateTime.Now.ToString()
             });
 

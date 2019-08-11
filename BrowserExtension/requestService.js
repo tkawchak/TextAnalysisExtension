@@ -52,10 +52,6 @@ async function sendRequestToAzureFunction(data) {
     response = await axios.get(requestUrl, {
       params: {
         code: code,
-        name: data.title,
-        url: data.url,
-        grade: data.fleschkincaid_grade,
-        score: data.flesch_ease,
         author: data.author,
         text: data.content,
         date_published: data.date_published,
