@@ -2,7 +2,7 @@
 const request = require('request');
 const axios = require('axios');
 // TODO: Implement the configuration
-var config = require('./config/development.config.json');
+//var config = require('./config/development.config.json');
 
 // Port to hold the connection to the content script
 var getDocumentTextPort;
