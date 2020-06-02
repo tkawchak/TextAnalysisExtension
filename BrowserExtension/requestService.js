@@ -43,37 +43,37 @@ async function getWebpageData(url) {
 // Send a request to the azure function with the properly formatted data.
 // the data is then stored in the cosmos DB attached to it
 async function sendRequestToAzureFunction(data) {
-  var requestUrl = `https://tkawchak-textanalysis.azurewebsites.net/api/HttpTrigger1`;
+  // TODO: How to pass the code value as part of a header???
+  var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp`;
   var code = "HZcgMXeKKoZ92cnvsqAFMDKBVnP4cDBZ5mEcwKsgOGWfFEpsiQmGUg==";
 
   var response;
-  // TODO: Clean up which data gets sent to azure function
+  // TODO: Clean up which data gets sent to azure function??
   try {
-    response = await axios.get(requestUrl, {
-      params: {
-        code: code,
-        author: data.author,
-        text: data.content,
-        date_published: data.date_published,
-        domain: data.domain,
-        excerpt: data.excerpt,
-        lead_image_url: data.lead_image_url,
-        syllable_count: data.syllable_count,
-        word_count: data.lexicon_count,
-        sentence_count: data.sentence_count,
-        average_sentence_length: data.average_sentence_length,
-        lix_readability_index: data.lix_readability_index,
-        flesch_ease: data.flesch_ease,
-        fleschkincaid_grade: data.fleschkincaid_grade,
-        coleman_liau_index: data.coleman_liau_index,
-        automated_readability_index: data.automated_readability_index,
-        dale_chall_readability_score: data.dale_chall_readability_score,
-        difficult_words: data.difficult_words,
-        linsear_write_index: data.linsear_write_index,
-        gunning_fog_index: data.gunning_fog_index,
-        smog_index: data.smog_index,
-        overall_score: data.overall_score
-      }
+    response = await axios.post(requestUrl, {
+      // TODO: Code should not be sent to function in the body, but in a header or something
+      code: code,
+      author: data.author,
+      text: data.content,
+      date_published: data.date_published,
+      domain: data.domain,
+      excerpt: data.excerpt,
+      lead_image_url: data.lead_image_url,
+      syllable_count: data.syllable_count,
+      word_count: data.lexicon_count,
+      sentence_count: data.sentence_count,
+      average_sentence_length: data.average_sentence_length,
+      lix_readability_index: data.lix_readability_index,
+      flesch_ease: data.flesch_ease,
+      fleschkincaid_grade: data.fleschkincaid_grade,
+      coleman_liau_index: data.coleman_liau_index,
+      automated_readability_index: data.automated_readability_index,
+      dale_chall_readability_score: data.dale_chall_readability_score,
+      difficult_words: data.difficult_words,
+      linsear_write_index: data.linsear_write_index,
+      gunning_fog_index: data.gunning_fog_index,
+      smog_index: data.smog_index,
+      overall_score: data.overall_score
     });
   } catch (error) {
     console.log(error);
