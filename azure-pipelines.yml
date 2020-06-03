@@ -35,6 +35,11 @@ pr:
     include:
     - master
 
+pool:
+  name: 'Azure Pipelines'
+  vmImage: 'windows-2019'
+
+
 stages:
 
   # Stage to build the Web Extension
