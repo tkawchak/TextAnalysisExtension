@@ -157,7 +157,7 @@ stages:
         displayName: Package Text Extraction Function
         inputs:
           rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)"
-          includeRootFolder: true
+          includeRootFolder: false
           archiveFile: "$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip"
       - task: PublishBuildArtifacts@1
         displayName: Publish Text Extraction Function Artifacts
