@@ -153,6 +153,10 @@ stages:
       displayName: Publish Extract Text Function
       dependsOn: []
       steps:
+      - task: Npm@1
+        inputs:
+          command: 'install'
+          workingDir: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)'
       - task: ArchiveFiles@2
         displayName: Package Text Extraction Function
         inputs:
