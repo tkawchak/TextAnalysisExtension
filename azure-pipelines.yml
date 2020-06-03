@@ -1,6 +1,6 @@
 variables:
   - name: NPM_VERSIONSPEC
-    value: '10.x'
+    value: '12.x'
   - name: VM_IMAGE
     value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
@@ -17,6 +17,10 @@ variables:
     value: 'ProcessText'
   - name: BrowserExtensionPath
     value: 'BrowserExtension'
+  - name: TextExtractionFunctionPath
+    value: 'TextExtractionFunc'
+  - name: TextExtractionFunctionName
+    value: 'TextExtractionFunc'
 
 trigger:
   batch: 'true'
@@ -31,6 +35,11 @@ pr:
     include:
     - master
 
+pool:
+  name: 'Azure Pipelines'
+  vmImage: 'windows-2019'
+
+
 stages:
 
   # Stage to build the Web Extension
@@ -38,6 +47,7 @@ stages:
     displayName: Build Web Extension
     dependsOn: []
     jobs:
+
     - job: BuildNpm
       displayName: "Build Project with Npm"
       dependsOn: []
@@ -59,6 +69,7 @@ stages:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
           customCommand: 'run package'
+
     - job: TestNpm
       displayName: "Unit Test Npm Project"
       dependsOn: BuildNpm
@@ -81,6 +92,7 @@ stages:
     displayName: "Build Azure Function Projects"
     dependsOn: []
     jobs:
+
     - job: BuildAzureFunction
       displayName: "Build Azure Function Projects"
       dependsOn: []
@@ -94,6 +106,7 @@ stages:
           projects: '$(AzureFunctionPath)/**/*.csproj'
           feedsToUse: 'select'
           versioningScheme: 'off'
+
     - job: TestAzureFunctions
       displayName: "Unit Test Azure Function Projects"
       dependsOn: BuildAzureFunction
@@ -115,12 +128,15 @@ stages:
     displayName: "Azure Function Artifacts"
     dependsOn: BuildFunctionProjects
     jobs:
-    - job: BuildAzureFunction
+
+    - job: PublishProcessTextFunction
+      displayName: Publish Process text Function
+      dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: Publish Azure Function With Dotnet
+        displayName: Package Process text Function
         inputs:
           command: 'publish'
           projects: '$(ProcessTextFunctionPath)/*.csproj'
@@ -128,7 +144,27 @@ stages:
           zipAfterPublish: true
           publishWebProjects: false
       - task: PublishBuildArtifacts@1
-        displayName: Publish Azure Function Artifacts
+        displayName: Publish Process Text Function Artifacts
         inputs:
           ArtifactName: $(ProcessTextFunctionArtifactName)
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+      
+    - job: PublishExtractTextFunction
+      displayName: Publish Extract Text Function
+      dependsOn: []
+      steps:
+      - task: Npm@1
+        inputs:
+          command: 'install'
+          workingDir: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)'
+      - task: ArchiveFiles@2
+        displayName: Package Text Extraction Function
+        inputs:
+          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)"
+          includeRootFolder: false
+          archiveFile: "$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip"
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Text Extraction Function Artifacts
+        inputs:
+          PathtoPublish: '$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip'
+          ArtifactName: $(TextExtractionFunctionName)
