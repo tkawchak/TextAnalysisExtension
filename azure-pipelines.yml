@@ -116,6 +116,7 @@ stages:
     dependsOn: BuildFunctionProjects
     jobs:
     - job: BuildAzureFunction
+      displayName: Publish Azure Function Artifacts
       pool:
         vmImage: $(VM_IMAGE)
       steps:

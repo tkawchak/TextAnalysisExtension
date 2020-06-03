@@ -43,16 +43,13 @@ async function getWebpageData(url) {
 // Send a request to the azure function with the properly formatted data.
 // the data is then stored in the cosmos DB attached to it
 async function sendRequestToAzureFunction(data) {
-  // TODO: How to pass the code value as part of a header???
-  var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp`;
-  var code = "HZcgMXeKKoZ92cnvsqAFMDKBVnP4cDBZ5mEcwKsgOGWfFEpsiQmGUg==";
-
+  // TODO: How to pass the code value as part of a header?
+  var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=HZcgMXeKKoZ92cnvsqAFMDKBVnP4cDBZ5mEcwKsgOGWfFEpsiQmGUg==`;
   var response;
   // TODO: Clean up which data gets sent to azure function??
   try {
     response = await axios.post(requestUrl, {
       // TODO: Code should not be sent to function in the body, but in a header or something
-      code: code,
       author: data.author,
       text: data.content,
       date_published: data.date_published,
