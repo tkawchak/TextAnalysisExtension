@@ -1,6 +1,6 @@
 variables:
   - name: NPM_VERSIONSPEC
-    value: '10.x'
+    value: '12.x'
   - name: VM_IMAGE
     value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
@@ -42,6 +42,7 @@ stages:
     displayName: Build Web Extension
     dependsOn: []
     jobs:
+
     - job: BuildNpm
       displayName: "Build Project with Npm"
       dependsOn: []
@@ -63,6 +64,7 @@ stages:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
           customCommand: 'run package'
+
     - job: TestNpm
       displayName: "Unit Test Npm Project"
       dependsOn: BuildNpm
@@ -85,6 +87,7 @@ stages:
     displayName: "Build Azure Function Projects"
     dependsOn: []
     jobs:
+
     - job: BuildAzureFunction
       displayName: "Build Azure Function Projects"
       dependsOn: []
@@ -98,6 +101,7 @@ stages:
           projects: '$(AzureFunctionPath)/**/*.csproj'
           feedsToUse: 'select'
           versioningScheme: 'off'
+
     - job: TestAzureFunctions
       displayName: "Unit Test Azure Function Projects"
       dependsOn: BuildAzureFunction
@@ -119,6 +123,7 @@ stages:
     displayName: "Azure Function Artifacts"
     dependsOn: BuildFunctionProjects
     jobs:
+
     - job: PublishProcessTextFunction
       displayName: Publish Process text Function
       dependsOn: []
@@ -147,11 +152,10 @@ stages:
         displayName: Package Text Extraction Function
         inputs:
           rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)"
-          includeRootFolder: false
-          archiveFile: "$(System.ArtifactStagingDirectory)/TextExtraction/$(Build.BuildId).zip"
-
+          includeRootFolder: true
+          archiveFile: "$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip"
       - task: PublishBuildArtifacts@1
         displayName: Publish Text Extraction Function Artifacts
         inputs:
-          PathtoPublish: '$(System.ArtifactStagingDirectory)/TextExtraction/$(Build.BuildId).zip'
+          PathtoPublish: '$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip'
           ArtifactName: $(TextExtractionFunctionName)
