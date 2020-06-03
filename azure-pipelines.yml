@@ -146,12 +146,12 @@ stages:
       - task: ArchiveFiles@2
         displayName: Package Text Extraction Function
         inputs:
-          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/src/$(TextExtractionFunctionPath)"
+          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)"
           includeRootFolder: false
-          archiveFile: "$(System.DefaultWorkingDirectory)/TextExtraction/$(Build.BuildId).zip"
+          archiveFile: "$(System.ArtifactStagingDirectory)/TextExtraction/$(Build.BuildId).zip"
 
       - task: PublishBuildArtifacts@1
         displayName: Publish Text Extraction Function Artifacts
         inputs:
-          PathtoPublish: '$(System.DefaultWorkingDirectory)/TextExtraction/$(Build.BuildId).zip'
+          PathtoPublish: '$(System.ArtifactStagingDirectory)/TextExtraction/$(Build.BuildId).zip'
           ArtifactName: $(TextExtractionFunctionName)
