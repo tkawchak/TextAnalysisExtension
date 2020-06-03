@@ -17,6 +17,10 @@ variables:
     value: 'ProcessText'
   - name: BrowserExtensionPath
     value: 'BrowserExtension'
+  - name: TextExtractionFunctionPath
+    value: 'TextExtractionFunc'
+  - name: TextExtractionFunctionName
+    value: 'TextExtractionFunc'
 
 trigger:
   batch: 'true'
@@ -115,12 +119,14 @@ stages:
     displayName: "Azure Function Artifacts"
     dependsOn: BuildFunctionProjects
     jobs:
-    - job: BuildAzureFunction
+    - job: PublishProcessTextFunction
+      displayName: Publish Process text Function
+      dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: Publish Azure Function With Dotnet
+        displayName: Package Process text Function
         inputs:
           command: 'publish'
           projects: '$(ProcessTextFunctionPath)/*.csproj'
@@ -128,7 +134,24 @@ stages:
           zipAfterPublish: true
           publishWebProjects: false
       - task: PublishBuildArtifacts@1
-        displayName: Publish Azure Function Artifacts
+        displayName: Publish Process Text Function Artifacts
         inputs:
           ArtifactName: $(ProcessTextFunctionArtifactName)
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+      
+    - job: PublishExtractTextFunction
+      displayName: Publish Extract Text Function
+      dependsOn: []
+      steps:
+      - task: ArchiveFiles@2
+        displayName: Package Text Extraction Function
+        inputs:
+          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/src/$(TextExtractionFunctionPath)"
+          includeRootFolder: false
+          archiveFile: "$(System.DefaultWorkingDirectory)/TextExtraction/$(Build.BuildId).zip"
+
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Text Extraction Function Artifacts
+        inputs:
+          PathtoPublish: '$(System.DefaultWorkingDirectory)/TextExtraction/$(Build.BuildId).zip'
+          ArtifactName: $(TextExtractionFunctionName)
