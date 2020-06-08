@@ -27,7 +27,7 @@ In order for these commands to run, you must install the dependencies from the p
 ```
 npm install
 ```
-There is a change you will need to add sudo to this command if you do not have proper permissions.
+You will need to add sudo to this command if you do not have proper permissions.
 ```
 sudo npm install
 ```
@@ -82,7 +82,7 @@ Replace the settings with the proper connections and values for the cosmosDB and
 
 ***TODO: Update this with the proper local contents of the local.settings.json file***
 
-## Run the Azure Function
+## Run the Process Text Azure Function
 Change to the proper folder:
 ```
 cd ProcessText/ProcessTextFunc
@@ -90,14 +90,14 @@ cd ProcessText/ProcessTextFunc
 
 Start the Azure Functions host.  Run the Start Command.
 ```
-func host start
+func host start --port 7071
 ```
 or 
 ```
-func start
+func start --port 7071
 ```
 
-## Test the Azure Function
+## Test the Process Text Azure Function
 Change to the proper folder:
 ```
 cd ProcessText/ProcessTextFunc.Tests
@@ -108,6 +108,21 @@ Run the dotnet test command:
 dotnet test
 ```
 This will run all tests in the project.
+
+## Run the Text Extraction Azure Function
+Change to the proper folder:
+```
+cd TextExtractionFunc
+```
+
+Start the Azure Functions host.  This must be on a separate port form the Process Text Function
+```
+func host start --port 7072
+```
+or
+```
+func start --port 7072
+```
 
 # Contact
 Inquiries about how to get the data?  Contact [Tom](mailto:tkawchak@gmail.com)
