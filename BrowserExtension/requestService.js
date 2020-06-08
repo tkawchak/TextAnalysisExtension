@@ -19,24 +19,38 @@ function sendAnalyzeCommand() {
   }
 }
 
+function logAndSendMessage(message) {
+  if (getDocumentTextPort != undefined)
+  {
+    getDocumentTextPort.postMessage({ status: message });
+    console.log(message);
+  }
+  else {
+    console.log(message);
+  }
+}
+
 // Function to get web page data form a url.
 // Calls and api that parses the webpage text and then runs readability metrics on them.
 async function getWebpageData(url) {
   console.log(`Retrieving webpage data for ${url}`);
   var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-  var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
+  // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
+  var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
   var webpageData = {};
   try {
-    console.log(requestUrl);
     const webpageDataResponse = await axios.get(requestUrl);
     if (webpageDataResponse.status == 200) {
+      logAndSendMessage("Processed web page text successfully");
       webpageData = webpageDataResponse.data;
     }
+    else {
+      logAndSendMessage(`Unable to process webpage data.  ExtractText Status Code: ${webpageDataResponse.status}`);
+    }
   } catch (error) {
-    console.log(error);
+    logAndSendMessage(error);
   }
 
-  console.log("Finished processing web page text.");
   return webpageData;
 }
 
@@ -44,7 +58,8 @@ async function getWebpageData(url) {
 // the data is then stored in the cosmos DB attached to it
 async function sendRequestToAzureFunction(data) {
   // TODO: How to pass the code value as part of a header?
-  var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
+  // var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
+  var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
   var response;
   // TODO: Clean up which data gets sent to azure function??
   try {
@@ -74,7 +89,14 @@ async function sendRequestToAzureFunction(data) {
       overall_score: data.overall_score
     });
   } catch (error) {
-    console.log(error);
+    logAndSendMessage(error);
+  }
+
+  if (response.status == 200) {
+    logAndSendMessage("Successfully extracted data from webpage.");
+  }
+  else {
+    logAndSendMessage(`Unable to extract data from webpage.  ProcessTextHttp Response Code: ${response.status}`);
   }
 
   return response;
@@ -82,33 +104,27 @@ async function sendRequestToAzureFunction(data) {
 
 // Function to handle to response messages from the content script
 async function handleMessage(message) {
-  console.log("In background script, received message from content script: ");
-  // Uncomment this line to help with debugging.
-  // The log messages in the background script will only be visible this way.
-  // alert("In background script, received message from content script.");
-  if (getDocumentTextPort != undefined) {
-    getDocumentTextPort.postMessage({ status: "Received message from content script"});
-  }
+  logAndSendMessage("In background script, Received message from content script");
 
   // get the data from the given url
   // need to do this in JS if the extension will be able to give feedback to the user
   if (message.data != undefined) {
     url = message.data;
-    console.log(`url to analyze: ${url}`);
+    logAndSendMessage(`url to analyze: ${url}`);
     try {
       webpageTextData = await getWebpageData(url);
     } catch (error) {
-      console.log(error);
+      logAndSendMessage(error);
     }
-    console.log(webpageTextData);
+    logAndSendMessage(webpageTextData);
 
     // Send the data in a request to be processed and stored by the azure function
     var response = await sendRequestToAzureFunction(webpageTextData);
     if (response.status == 200) {
-      getDocumentTextPort.postMessage({status: `Successfully sent data to azure function with response ${response.data}.`});
+      logAndSendMessage(`Successfully sent data to azure function with response ${response.data}.`);
     }
     else {
-      getDocumentTextPort.postMessage({status: `Failed to send data to azure function successfully.`});
+      logAndSendMessage(`Failed to send data to azure function successfully.`);
     }
   }
 }
