@@ -1,8 +1,6 @@
 // Load the request library for making http requests
 const request = require('request');
 const axios = require('axios');
-// TODO: Implement the configuration
-//var config = require('./config/development.config.json');
 
 // Port to hold the connection to the content script
 var getDocumentTextPort;
@@ -35,8 +33,8 @@ function logAndSendMessage(message) {
 async function getWebpageData(url) {
   console.log(`Retrieving webpage data for ${url}`);
   var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-  // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
-  var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
+  var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
+  // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
   var webpageData = {};
   try {
     const webpageDataResponse = await axios.get(requestUrl);
@@ -58,8 +56,8 @@ async function getWebpageData(url) {
 // the data is then stored in the cosmos DB attached to it
 async function sendRequestToAzureFunction(data) {
   // TODO: How to pass the code value as part of a header?
-  // var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
-  var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
+  var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
+  // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
   var response;
   // TODO: Clean up which data gets sent to azure function??
   try {
