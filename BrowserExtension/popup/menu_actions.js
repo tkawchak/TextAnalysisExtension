@@ -70,7 +70,7 @@ function reportExecuteScriptError(error) {
  * and add a click handler.
  * If we couldn't inject the script, handle the error.
  */
-console.log("lIn popup script, loading the content script");
+console.log("In popup script, loading the getDocumentText content script");
 browser.tabs.executeScript({file: "/getDocumentText.bundle.js"})
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
