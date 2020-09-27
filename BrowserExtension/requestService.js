@@ -1,5 +1,8 @@
-// Load the request library for making http requests
-const request = require('request');
+// Load the logger to application insights
+// var logger = require("./telemetry/logging.js");
+// const logger = logs.logger;
+// import logger from "./telemetry/application-insights.js"
+
 const axios = require('axios');
 
 // Port to hold the connection to the content script
@@ -7,31 +10,33 @@ var getDocumentTextPort;
 
 // Check to see if the connection has been set up and if so then
 // send a message to request the site data.
-function sendAnalyzeCommand() {
-  if (getDocumentTextPort != undefined) {
-    getDocumentTextPort.postMessage({ command: "analyze" });
-    console.log("Sent Analyze command to content script.");
-  }
-  else {
-    console.log("The content script port has not been initialized yet.");
-  }
-}
+// function sendAnalyzeCommand() {
+//   console.log("In background script, sending analyze command...");
+//   if (getDocumentTextPort != undefined) {
+//     getDocumentTextPort.postMessage({ command: "analyze" });
+//     console.log("In background script, sent 'analyze' command to content script.");
+//   }
+//   else {
+//     console.log("In background script, The content script port has not been initialized yet.");
+//   }
+// }
 
 function logAndSendMessage(message) {
   if (getDocumentTextPort != undefined)
   {
     getDocumentTextPort.postMessage({ status: message });
-    console.log(message);
+    console.log(`In background script, ${message}`);
   }
   else {
-    console.log(message);
+    console.log("In background script, unable to send message to content script");
+    console.log(`In background script, ${message}`);
   }
 }
 
 // Function to get web page data form a url.
 // Calls and api that parses the webpage text and then runs readability metrics on them.
 async function getWebpageData(url) {
-  console.log(`Retrieving webpage data for ${url}`);
+  console.log(`In background script, Retrieving webpage data for ${url}`);
   var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
   var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
   // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
@@ -54,7 +59,7 @@ async function getWebpageData(url) {
 
 // Send a request to the azure function with the properly formatted data.
 // the data is then stored in the cosmos DB attached to it
-async function sendRequestToAzureFunction(data) {
+async function processTextData(data) {
   // TODO: How to pass the code value as part of a header?
   var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
   // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
@@ -102,7 +107,7 @@ async function sendRequestToAzureFunction(data) {
 
 // Function to handle to response messages from the content script
 async function handleMessage(message) {
-  logAndSendMessage("In background script, Received message from content script");
+  logAndSendMessage(`Received message from content script: ${JSON.stringify(message)}`);
 
   // get the data from the given url
   // need to do this in JS if the extension will be able to give feedback to the user
@@ -116,19 +121,19 @@ async function handleMessage(message) {
     }
     logAndSendMessage(webpageTextData);
 
-    // Send the data in a request to be processed and stored by the azure function
-    var response = await sendRequestToAzureFunction(webpageTextData);
+    // Send the data in a request to be processed and stored
+    var response = await processTextData(webpageTextData);
     if (response.status == 200) {
-      logAndSendMessage(`Successfully sent data to azure function with response ${response.data}.`);
+      logAndSendMessage(`Successfully processed text data ${response.data}.`);
     }
     else {
-      logAndSendMessage(`Failed to send data to azure function successfully.`);
+      logAndSendMessage(`Failed to process text data successfully. Status code: ${response.status}. Response: ${response.data}`);
     }
   }
 }
 
 // Listener for the extension button clicked
-browser.browserAction.onClicked.addListener(sendAnalyzeCommand);
+// browser.browserAction.onClicked.addListener(sendAnalyzeCommand);
 
 // Function to execute when the background script receives an event to connect
 // to the main content script

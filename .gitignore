@@ -80,9 +80,7 @@ typings/
 .dynamodb/
 
 # Browserify packaged files
-bundle.js
-getDocumentTextBundle.js
-requestServiceBundle.js
+*.bundle.js
 *practice*.js
 *.DS_Store
 
