@@ -2,10 +2,10 @@
   "name": "textanalysisextension",
   "version": "0.1.0",
   "description": "Web browser extension to perform text analysis for web pages.",
-  "main": "getDocumentTextBundle.js",
+  "main": "getDocumentText.bundle.js",
   "dependencies": {
+    "@microsoft/applicationinsights-web": "^2.5.8",
     "axios": "^0.19.0",
-    "browserify": "^16.2.3",
     "cheerio": "^1.0.0-rc.3",
     "flesch-kincaid": "^1.0.0",
     "linq": "^3.2.0",
@@ -14,10 +14,22 @@
     "wordcount": "^1.1.1",
     "x-ray": "^2.3.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "browserify": "^16.5.2",
+    "watchify": "^3.11.1"
+  },
   "scripts": {
     "test": "echo \"No tests specified!\"",
-    "package": "browserify getDocumentText.js -o getDocumentTextBundle.js && browserify requestService.js -o requestServiceBundle.js"
+    "clean": "rm -f *.bundle.js",
+    "package:clean": "npm run clean",
+    "package:text": "browserify getDocumentText.js -o getDocumentText.bundle.js --standalone getdocumenttext",
+    "package:text:watch": "watchify getDocumentText.js -o getDocumentText.bundle.js --standalone getdocumenttext -v",
+    "package:request": "browserify requestService.js -o requestService.bundle.js",
+    "package:request:watch": "watchify requestService.js -o requestService.bundle.js -v",
+    "package:actions": "browserify popup/menu_actions.js -o popup/menu_actions.bundle.js",
+    "package:actions:watch": "watchify popup/menu_actions.js -o popup/menu_actions.bundle.js -v",
+    "package:logging": "browserify telemetry/logging -o logging.bundle.js",
+    "package": "npm run clean && npm run package:actions && npm run package:text && npm run package:request"
   },
   "repository": {
     "type": "git",
@@ -28,5 +40,6 @@
   "bugs": {
     "url": "https://github.com/tkawchak/TextAnalysisExtension/issues"
   },
-  "homepage": "https://github.com/tkawchak/TextAnalysisExtension#readme"
+  "homepage": "https://github.com/tkawchak/TextAnalysisExtension#readme",
+  "type": "module"
 }

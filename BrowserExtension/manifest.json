@@ -12,23 +12,25 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["getDocumentTextBundle.js"]
+      "js": ["getDocumentText.bundle.js"]
     }
   ],
 
   "permissions": [
     "<all_urls>",
-    "webRequest"
+    "webRequest",
+    "activeTab"
   ],
 
   "browser_action": {
     "default_icon": {
       "32": "icons/TextAnalysisLogo32.png"
-    }
+    },
+    "default_title": "Analyze Text",
+    "default_popup": "popup/menu.html"
   },
 
   "background": {
-    "scripts": ["requestServiceBundle.js"]
+    "scripts": ["requestService.bundle.js"]
   }
-
 }
