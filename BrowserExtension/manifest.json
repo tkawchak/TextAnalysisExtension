@@ -12,13 +12,14 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["getDocumentTextBundle.js"]
+      "js": ["getDocumentText.bundle.js"]
     }
   ],
 
   "permissions": [
     "<all_urls>",
-    "webRequest"
+    "webRequest",
+    "activeTab"
   ],
 
   "browser_action": {
@@ -30,7 +31,6 @@
   },
 
   "background": {
-    "scripts": ["requestServiceBundle.js"]
+    "scripts": ["requestService.bundle.js"]
   }
-
 }
