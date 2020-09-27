@@ -91,6 +91,8 @@ async function processTextData(data) {
 async function handleMessage(message) {
   console.log(`In background script, Received message from content script: ${JSON.stringify(message)}`);
 
+  var result = "Unrecognized message received from content script";
+
   // get the data from the given url
   // need to do this in JS if the extension will be able to give feedback to the user
   if (message.data != undefined) {
@@ -105,12 +107,16 @@ async function handleMessage(message) {
     // Send the data in a request to be processed and stored
     var response = await processTextData(webpageTextData);
     if (response.status == 200) {
+      result = "Successfully processed url";
       console.log(`In background script, Successfully processed text data ${response.data}.`);
     }
     else {
       console.log(`In background script, Failed to process text data successfully. Status code: ${response.status}. Response: ${response.data}`);
     }
   }
+
+  // TODO: Figure out if this result can be used to send data back to the content script on a successful process text operation
+  return result
 }
 
 /** Function to execute when the background script receives an event to connect

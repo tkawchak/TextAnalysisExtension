@@ -5,10 +5,10 @@
 
 /**
  * Handle the response from analyzing the current web page
- * @param {*} resposne 
+ * @param {*} response 
  */
-function handleAnalyzeResult(resposne) {
-  console.log(`In popup script, recieved response from analyze command: ${response.response}`);
+function handleAnalyzeResult(response) {
+  console.log(`In popup script, recieved response from analyze command: ${JSON.stringify(response)}`);
   // TODO: Here we should take the results from analyzing the web page and display them in the popup window
 }
 

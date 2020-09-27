@@ -29,17 +29,20 @@ function getWebpageUrl() {
 async function popupScriptListener(message) {
   console.log(`In content script, received message from popup script: ${JSON.stringify(message)}`);
 
+  var result = `Unrecognized command`;
   if (message.command != undefined) {
     command = message.command;
     if (command == "analyze")
     {
       console.log("In content script, processing web page");
-      await processWebpage();
+      result = await processWebpage();
     }
     else {
       console.log(`In content script, received unrecognized command: ${command}`);
     }
   }
+
+  return result;
 }
 
 /**
@@ -61,12 +64,16 @@ async function handleMesssageFromRequestService(message) {
 /**
  * Send a webpage url to the request service for it to analyze
  * TODO: How to get this response data and send it back to the popup script?
+ * Would it be possible to add a method that would query the data via azure functions to get the most recent copy at the specific URL?
  */
 async function processWebpage() {
   console.log(`In content script, processing text`);
   var webpageUrl = getWebpageUrl();
   console.log(`In content script, sending URL to requestService background script for analysis: ${webpageUrl}`);
   requestServicePort.postMessage({ data: webpageUrl });
+
+  var result = "Sent command to process the webpage";
+  return result;
 }
 
 /**
