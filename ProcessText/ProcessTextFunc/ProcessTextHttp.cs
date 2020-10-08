@@ -54,8 +54,10 @@ namespace ProcessTextFunc
                 string message = "Request Body is empty.  Cannot process an empty body.";
                 log.LogError(message);
 
-                httpResponse = new HttpResponseMessage(HttpStatusCode.NoContent);
-                httpResponse.Content = new StringContent(message);
+                httpResponse = new HttpResponseMessage(HttpStatusCode.NoContent)
+                {
+                    Content = new StringContent(message)
+                };
             }
 
             return httpResponse;
