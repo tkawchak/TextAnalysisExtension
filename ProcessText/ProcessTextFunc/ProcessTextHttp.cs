@@ -1,17 +1,21 @@
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.IO;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using ProcessTextFunc.Contracts;
-using ProcessTextFunc.Exceptions;
-using Newtonsoft.Json;
+// <copyright file="ProcessTextHttp.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace ProcessTextFunc
 {
+    using System.IO;
+    using System.Net;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Http;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
+    using ProcessTextFunc.Contracts;
+    using ProcessTextFunc.Exceptions;
+
     public static class ProcessTextHttp
     {
         [FunctionName("ProcessTextHttp")]
@@ -22,8 +26,7 @@ namespace ProcessTextFunc
             [CosmosDB(
                 databaseName: "TextContent",
                 collectionName: "Web",
-                ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB"
-            )] IAsyncCollector<dynamic> outputDocument)
+                ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB")] IAsyncCollector<dynamic> outputDocument)
         {
             HttpResponseMessage httpResponse;
             log.LogInformation("C# ProcessTextHttp function received request.");
@@ -44,10 +47,12 @@ namespace ProcessTextFunc
                 {
                     throw new MissingPropertyException("Title not specified");
                 }
+
                 if (string.IsNullOrWhiteSpace(requestContent.Domain))
                 {
                     throw new MissingPropertyException("Domain not specified.");
                 }
+
                 log.LogInformation($"Received request to store data for webpage at {requestContent.Url}");
 
                 var outputDoc = Utils.Converters.ConvertProcessTextRequestToProcessedTextDocument(requestContent);
@@ -65,7 +70,7 @@ namespace ProcessTextFunc
 
                 httpResponse = new HttpResponseMessage(HttpStatusCode.NoContent)
                 {
-                    Content = new StringContent(message)
+                    Content = new StringContent(message),
                 };
             }
 

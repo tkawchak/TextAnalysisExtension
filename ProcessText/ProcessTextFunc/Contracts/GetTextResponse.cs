@@ -1,4 +1,4 @@
-// <copyright file="ProcessTextRequest.cs" company="PlaceholderCompany">
+// <copyright file="GetTextResponse.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -8,7 +8,7 @@ namespace ProcessTextFunc.Contracts
     using Newtonsoft.Json;
 
     [Serializable]
-    public class ProcessTextRequest
+    public class GetTextResponse
     {
         [JsonProperty("author")]
         public string Author { get; set; }
@@ -63,6 +63,9 @@ namespace ProcessTextFunc.Contracts
 
         [JsonProperty("overall_score")]
         public string OverallScore { get; set; }
+
+        [JsonProperty("processed_time")]
+        public DateTime ProcessedTime { get; set; }
 
         [JsonProperty("sentence_count")]
         public int SentenceCount { get; set; }
