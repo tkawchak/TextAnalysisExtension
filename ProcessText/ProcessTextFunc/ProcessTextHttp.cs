@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using ProcessTextFunc.Contracts;
+using ProcessTextFunc.Exceptions;
 using Newtonsoft.Json;
 
 namespace ProcessTextFunc
@@ -19,8 +20,8 @@ namespace ProcessTextFunc
                 AuthorizationLevel.Function, "post", Route = null)] HttpRequest request,
             ILogger log,
             [CosmosDB(
-                databaseName: "AzureFunConnectionTest",
-                collectionName: "testDocuments",
+                databaseName: "TextContent",
+                collectionName: "Web",
                 ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB"
             )] IAsyncCollector<dynamic> outputDocument)
         {
@@ -39,7 +40,15 @@ namespace ProcessTextFunc
             if (!bodyContent.Equals(string.Empty))
             {
                 requestContent = JsonConvert.DeserializeObject<ProcessTextRequest>(bodyContent);
-                log.LogInformation($"Received request to store data for webpage at {requestContent.Domain}");
+                if (string.IsNullOrWhiteSpace(requestContent.Title))
+                {
+                    throw new MissingPropertyException("Title not specified");
+                }
+                if (string.IsNullOrWhiteSpace(requestContent.Domain))
+                {
+                    throw new MissingPropertyException("Domain not specified.");
+                }
+                log.LogInformation($"Received request to store data for webpage at {requestContent.Url}");
 
                 var outputDoc = Utils.Converters.ConvertProcessTextRequestToProcessedTextDocument(requestContent);
                 await outputDocument.AddAsync(outputDoc);

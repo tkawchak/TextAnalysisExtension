@@ -50,5 +50,7 @@ namespace ProcessTextFunc.Contracts
         public float SmogIndex {get; set;}
         [JsonProperty("overall_score")]
         public string OverallScore {get; set;}
+        [JsonProperty("url")]
+        public string Url {get; set;}
     }
 }

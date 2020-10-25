@@ -8,6 +8,7 @@ namespace ProcessTextFunc.Utils
         public static ProcessedText ConvertProcessTextRequestToProcessedTextDocument(ProcessTextRequest request)
         {
             var processedText = new ProcessedText {
+                Id = request.Title,
                 Author = request.Author,
                 AutomatedReadabilityIndex = request.AutomatedReadabilityIndex,
                 AverageSentenceLength = request.AverageSentenceLength,
@@ -30,7 +31,8 @@ namespace ProcessTextFunc.Utils
                 SentenceCount = request.SentenceCount,
                 SmogIndex = request.SmogIndex,
                 SyllableCount = request.SyllableCount,
-                Title = request.Title
+                Title = request.Title,
+                Url = request.Url
             };
             return processedText;
         }

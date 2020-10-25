@@ -6,6 +6,8 @@ namespace ProcessTextFunc.Contracts
     [Serializable]
     public class ProcessedText
     {
+        [JsonProperty("id")]
+        public string Id {get; set;}
         [JsonProperty("author")]
         public string Author {get; set;}
         [JsonProperty("content")]
@@ -52,5 +54,7 @@ namespace ProcessTextFunc.Contracts
         public string OverallScore {get; set;}
         [JsonProperty("processed_time")]
         public DateTime ProcessedTime {get; set;}
+        [JsonProperty("url")]
+        public string Url {get; set;}
     }
 }

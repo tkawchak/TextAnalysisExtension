@@ -16,11 +16,11 @@ namespace ProcessTextFunc
                 AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
             ILogger log,
             [CosmosDB(
-                databaseName: "AzureFunConnectionTest",
-                collectionName: "testDocuments",
+                databaseName: "TextContent",
+                collectionName: "Web",
                 ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB",
                 Id = "{Query.id}",
-                PartitionKey = "{Query.partitionKey}"
+                PartitionKey = "{Query.domain}"
             )] ProcessedText document)
         {
             log.LogInformation("C# GetProcessedText function received request.");
