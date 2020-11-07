@@ -6,5 +6,5 @@
             "protocol": "Https"
         }
     },
-    "functions": ["ProcessTextHttp"]
+    "functions": ["ProcessTextHttp", "GetProcessedText"]
 }
