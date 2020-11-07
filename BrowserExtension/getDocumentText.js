@@ -3,6 +3,8 @@
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights"
 
+const axios = require('axios');
+
 // Load the request library for making http requests
 /**
  * Check and set a global guard variable.
@@ -37,6 +39,11 @@ async function popupScriptListener(message) {
       console.log("In content script, processing web page");
       result = await processWebpage();
     }
+    else if (command == "fetch")
+    {
+      console.log("In content script, fetching data for web page");
+      result = await fetchWebpageData();
+    }
     else {
       console.log(`In content script, received unrecognized command: ${command}`);
     }
@@ -52,8 +59,12 @@ async function popupScriptListener(message) {
 async function handleMesssageFromRequestService(message) {
   console.log(`In content script, received message from background script: ${JSON.stringify(message)}`);
 
-  if (message.status != undefined) {
-    console.log(`In content script, background script status: ${message.status}`);
+  if (message.analyzeResult != undefined) {
+    console.log(`In content script, background script analyze result: ${message.analyzeResult}`);
+  }
+
+  else if (message.fetchResult != undefined) {
+    console.log(`In content script, background script fetch result: ${message.fetchResult}`);
   }
 
   else {
@@ -67,12 +78,22 @@ async function handleMesssageFromRequestService(message) {
  * Would it be possible to add a method that would query the data via azure functions to get the most recent copy at the specific URL?
  */
 async function processWebpage() {
-  console.log(`In content script, processing text`);
+  console.log(`In content script, processing web page data`);
   var webpageUrl = getWebpageUrl();
   console.log(`In content script, sending URL to requestService background script for analysis: ${webpageUrl}`);
-  requestServicePort.postMessage({ data: webpageUrl });
+  requestServicePort.postMessage({ data: webpageUrl, command: "analyze" });
 
-  var result = "Sent command to process the webpage";
+  var result = "Sent analyze command to process the web page data";
+  return result;
+}
+
+async function fetchWebpageData() {
+  console.log(`In content script, fetching web page data`);
+  var webpageUrl = getWebpageUrl();
+  console.log(`In content script, fetching webpage data from URL ${webpageUrl}`);
+  requestServicePort.postMessage({ data: webpageUrl, command: "fetch" });
+
+  var result = "sent fetch command to fetch web page data";
   return result;
 }
 

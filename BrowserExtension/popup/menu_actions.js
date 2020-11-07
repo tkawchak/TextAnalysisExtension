@@ -13,6 +13,15 @@ function handleAnalyzeResult(response) {
 }
 
 /**
+ * Handle the response from fetching the current web page data
+ * @param {*} response 
+ */
+function handleFetchResult(response) {
+  console.log(`In popup script, recieved response from fetch command: ${JSON.stringify(response)}`);
+  // TODO: Show the results
+}
+
+/**
  * Logs the error message
  * @param {*} error The error message
  */
@@ -36,6 +45,16 @@ function sendAnalyzeCommandToContentScript(tabs) {
   }
 }
 
+function sendGetWebsiteDataCommandToContentScript(tabs) {
+  for (var tab of tabs)
+  {
+    console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
+    browser.tabs.sendMessage(tab.id, { "command": "fetch" })
+      .then(handleFetchResult)
+      .catch(logError);
+  }
+}
+
 /**
  * Listen for clicks in the popup page.
  * Determine what action to take depending on what button was clicked
@@ -51,8 +70,19 @@ function listenForClicks() {
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
     }
+    else if (e.target.classList.contains("fetch-button")) {
+      console.log("In popup script, fetch button was clicked");
+      browser.tabs.query({
+        currentWindow: true,
+        active: true
+      })
+        .then(sendGetWebsiteDataCommandToContentScript)
+        .catch(logError);
+    }
     return;
   });
+
+  return;
 }
 
 /**

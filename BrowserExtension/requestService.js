@@ -77,12 +77,41 @@ async function processTextData(data) {
 
   if (response.status == 200) {
     console.log("In background script, Successfully extracted data from webpage.");
+    return response.data;
   }
   else {
     console.log(`In background script, Unable to extract data from webpage.  ProcessTextHttp Response Code: ${response.status}`);
+    return "Did not process text successfully";
+  }
+}
+
+/**
+ * Fetch the data for a webpage
+ */
+async function fetchWebpageData(webpageData) {
+  console.log(`In content script, fetching data for webpage ${webpageData.url}`);
+  var code = "2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==";
+  var title = webpageData.title;
+  var domain = webpageData.domain;
+  // var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?d=${title}&domain=${domain}&code=${code}`;
+  var requestUrl = `http://localhost:7071/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
+  var response;
+  try {
+    response = await axios.get(requestUrl);
+    console.log(`Response code: ${response.status}`);
+    console.log(`Response body: ${JSON.stringify(response.data)}`);
+  } catch (error) {
+    console.error(error);
   }
 
-  return response;
+  if (response.status == 200) {
+    console.log("In content script, Successfully fetched data from webpage.");
+    return response.data;
+  }
+  else {
+    console.log(`In content script, Unable to fetch data from webpage. GetProcessedText Response Code: ${response.status}`);
+    return {};
+  }
 }
 
 /** Function to handle to response messages from the content script
@@ -90,8 +119,6 @@ async function processTextData(data) {
  */ 
 async function handleMessage(message) {
   console.log(`In background script, Received message from content script: ${JSON.stringify(message)}`);
-
-  var result = "Unrecognized message received from content script";
 
   // get the data from the given url
   // need to do this in JS if the extension will be able to give feedback to the user
@@ -103,20 +130,39 @@ async function handleMessage(message) {
     } catch (error) {
       console.log(error);
     }
+  
+    if (message.command == "analyze")
+    {
+      // Send the data in a request to be processed and stored
+      var response = await processTextData(webpageTextData);
 
-    // Send the data in a request to be processed and stored
-    var response = await processTextData(webpageTextData);
-    if (response.status == 200) {
-      result = "Successfully processed url";
-      console.log(`In background script, Successfully processed text data ${response.data}.`);
+      if (getDocumentTextPort != undefined)
+      {
+        console.log(`In background script, Sending analyze result to content script`);
+        getDocumentTextPort.postMessage({ analyzeResult: response });
+      }
+      else
+      {
+        console.log(`In background script, getDocumentTextPort is not defined. Unable to send analyze result.`);
+      }
     }
-    else {
-      console.log(`In background script, Failed to process text data successfully. Status code: ${response.status}. Response: ${response.data}`);
+    else if (message.command == "fetch")
+    {
+      var response = await fetchWebpageData(webpageTextData);
+
+      if (getDocumentTextPort != undefined)
+      {
+        console.log(`In background script, Sending fetch result to content script`);
+        getDocumentTextPort.postMessage({ fetchResult: response });
+      }
+      else
+      {
+        console.log(`In background script, getDocumentTextPort is not defined. Unable to send analyze result.`);
+      }
     }
   }
 
-  // TODO: Figure out if this result can be used to send data back to the content script on a successful process text operation
-  return result
+  return;
 }
 
 /** Function to execute when the background script receives an event to connect
