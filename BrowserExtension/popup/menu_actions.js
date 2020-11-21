@@ -17,8 +17,28 @@ function handleAnalyzeResult(response) {
  * @param {*} response 
  */
 function handleFetchResult(response) {
-  console.log(`In popup script, recieved response from fetch command: ${JSON.stringify(response)}`);
-  // TODO: Show the results
+  var responseText = JSON.stringify(response);
+  console.log(`In popup script, recieved response from fetch command: ${responseText}`);
+  var resultList = document.getElementById("result-items");
+  var keysToDisplay = ["author", "sentence_count", "overall_score", "flesch_ease", "sentence_count"];
+  // keysToDisplay.forEach(showResponseItem(key, response, resultList));
+  for (var i=0; i < keysToDisplay.length; i++)
+  {
+    var key = keysToDisplay[i];
+    console.log(`Creating response item for key ${key}`);
+    var newKey = document.createElement("div");
+    newKey.className = "result-key";
+    newKey.innerHTML = `${key}: `;
+    var newValue = document.createElement("div");
+    newValue.className = "result-value";
+    newValue.innerHTML = response[key];
+    var newItem = document.createElement("div");
+    newItem.className = "result";
+    newItem.appendChild(newKey);
+    newItem.appendChild(newValue);
+    resultList.appendChild(newItem);
+  }
+  // document.getElementById("result-text").textContent = responseText;
 }
 
 /**
