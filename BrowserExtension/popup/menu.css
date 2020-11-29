@@ -27,5 +27,5 @@ html, body {
       padding: 5px;
       background-color: #a6bcc5;
       display: flex;
-      justify-content: center;
+      justify-content: left;
   }

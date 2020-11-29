@@ -3,25 +3,9 @@
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
 
-/**
- * Handle the response from analyzing the current web page
- * @param {*} response 
- */
-function handleAnalyzeResult(response) {
-  console.log(`In popup script, recieved response from analyze command: ${JSON.stringify(response)}`);
-  // TODO: Here we should take the results from analyzing the web page and display them in the popup window
-}
-
-/**
- * Handle the response from fetching the current web page data
- * @param {*} response 
- */
-function handleFetchResult(response) {
-  var responseText = JSON.stringify(response);
-  console.log(`In popup script, recieved response from fetch command: ${responseText}`);
+function displayAnalysisResults(response) {
   var resultList = document.getElementById("result-items");
   var keysToDisplay = ["author", "sentence_count", "overall_score", "flesch_ease", "sentence_count"];
-  // keysToDisplay.forEach(showResponseItem(key, response, resultList));
   for (var i=0; i < keysToDisplay.length; i++)
   {
     var key = keysToDisplay[i];
@@ -38,7 +22,29 @@ function handleFetchResult(response) {
     newItem.appendChild(newValue);
     resultList.appendChild(newItem);
   }
-  // document.getElementById("result-text").textContent = responseText;
+}
+
+// TODO: Add some handling to the handleAnalyzeResult and handleFetchResult functions if there are no results yet
+// or if there is problem getting the results
+
+/**
+ * Handle the response from analyzing the current web page and display the results
+ * @param {*} response 
+ */
+function handleAnalyzeResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(`In popup script, recieved response from analyze command: ${responseText}`);
+  displayAnalysisResults(response);
+}
+
+/**
+ * Handle the response from fetching the current web page data
+ * @param {*} response 
+ */
+function handleFetchResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(`In popup script, recieved response from fetch command: ${responseText}`);
+  displayAnalysisResults(response);
 }
 
 /**
