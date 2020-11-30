@@ -1,0 +1,48 @@
+html, body {
+  width: 250px;
+}
+
+.hidden {
+  display: none;
+}
+
+.button {
+  margin: 3% auto;
+  padding: 5px;
+  text-align: center;
+  /* font-size: 1.5em; */
+  cursor: pointer;
+}
+
+.menuitem:hover {
+  background-color: #677575;
+}
+
+.menuitem {
+  background-color: #E5F2F2;
+}
+
+.result {
+    margin: 3% auto;
+    padding: 5px;
+    background-color: #a6bcc5;
+    display: flex;
+    justify-content: left;
+}
+
+#analyze-results {
+  overflow-y: scroll;
+  overflow-x: auto;
+  max-height: 500px;
+}
+
+#error-content {
+  background-color: #d64b62;
+}
+
+#error-message {
+  margin: 3% auto;
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+}

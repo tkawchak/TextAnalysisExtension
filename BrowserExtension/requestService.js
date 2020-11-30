@@ -2,6 +2,11 @@
 const request = require('request');
 const axios = require('axios');
 
+// Load the logger to application insights
+// var logger = require("./telemetry/logging.js");
+// const logger = logs.logger;
+// import logger from "./telemetry/application-insights.js"
+
 // Port to hold the connection to the content script
 var getDocumentTextPort;
 
@@ -17,44 +22,43 @@ function sendAnalyzeCommand() {
   }
 }
 
-function logAndSendMessage(message) {
-  if (getDocumentTextPort != undefined)
-  {
-    getDocumentTextPort.postMessage({ status: message });
-    console.log(message);
-  }
-  else {
-    console.log(message);
-  }
-}
+const axios = require('axios');
 
-// Function to get web page data form a url.
-// Calls and api that parses the webpage text and then runs readability metrics on them.
+/**
+ * Function to get web page data form a url.
+ * Calls and api that parses the webpage text and then runs readability metrics on them.
+ * 
+ * @param {*} url The url to get webpage data from
+ */
 async function getWebpageData(url) {
-  console.log(`Retrieving webpage data for ${url}`);
+  console.log(`In background script, Retrieving webpage data for ${url}`);
   var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
   var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
   // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
   var webpageData = {};
   try {
+    console.log("In background script, sending request to get webpage data");
     const webpageDataResponse = await axios.get(requestUrl);
     if (webpageDataResponse.status == 200) {
-      logAndSendMessage("Processed web page text successfully");
+      console.log("In background script, processed web page text successfully");
       webpageData = webpageDataResponse.data;
     }
     else {
-      logAndSendMessage(`Unable to process webpage data.  ExtractText Status Code: ${webpageDataResponse.status}`);
+      console.log(`In background script, Unable to process webpage data.  ExtractText Status Code: ${webpageDataResponse.status}`);
     }
   } catch (error) {
-    logAndSendMessage(error);
+    console.error(error);
   }
 
   return webpageData;
 }
 
-// Send a request to the azure function with the properly formatted data.
-// the data is then stored in the cosmos DB attached to it
-async function sendRequestToAzureFunction(data) {
+/**
+ * Send a request to the azure function with the properly formatted data.
+ * the data is then stored in the cosmos DB attached to it
+ * @param {*} data The data from the webpage
+ */
+async function processTextData(data) {
   // TODO: How to pass the code value as part of a header?
   var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
   // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
@@ -87,55 +91,109 @@ async function sendRequestToAzureFunction(data) {
       overall_score: data.overall_score
     });
   } catch (error) {
-    logAndSendMessage(error);
+    console.error(error);
   }
 
   if (response.status == 200) {
-    logAndSendMessage("Successfully extracted data from webpage.");
+    console.log("In background script, Successfully extracted data from webpage.");
+    return response.data;
   }
   else {
-    logAndSendMessage(`Unable to extract data from webpage.  ProcessTextHttp Response Code: ${response.status}`);
+    console.log(`In background script, Unable to extract data from webpage.  ProcessTextHttp Response Code: ${response.status}`);
+    return "Did not process text successfully";
   }
-
-  return response;
 }
 
-// Function to handle to response messages from the content script
+/**
+ * Fetch the data for a webpage
+ */
+async function fetchWebpageData(webpageData) {
+  console.log(`In content script, fetching data for webpage ${webpageData.url}`);
+  var code = "2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==";
+  var title = webpageData.title;
+  var domain = webpageData.domain;
+  // var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?d=${title}&domain=${domain}&code=${code}`;
+  var requestUrl = `http://localhost:7071/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
+  var response;
+  try {
+    response = await axios.get(requestUrl);
+    console.log(`Response code: ${response.status}`);
+    console.log(`Response body: ${JSON.stringify(response.data)}`);
+  } catch (error) {
+    console.error(error);
+  }
+
+  if (response.status == 200) {
+    console.log("In content script, Successfully fetched data from webpage.");
+    return response.data;
+  }
+  else {
+    console.log(`In content script, Unable to fetch data from webpage. GetProcessedText Response Code: ${response.status}`);
+    return {};
+  }
+}
+
+/** Function to handle to response messages from the content script
+ * param {*} message
+ */ 
 async function handleMessage(message) {
-  logAndSendMessage("In background script, Received message from content script");
+  console.log(`In background script, Received message from content script: ${JSON.stringify(message)}`);
 
   // get the data from the given url
   // need to do this in JS if the extension will be able to give feedback to the user
   if (message.data != undefined) {
     url = message.data;
-    logAndSendMessage(`url to analyze: ${url}`);
+    console.log(`In background script, url to analyze: ${url}`);
     try {
       webpageTextData = await getWebpageData(url);
     } catch (error) {
-      logAndSendMessage(error);
+      console.log(error);
     }
-    logAndSendMessage(webpageTextData);
+  
+    if (message.command == "analyze")
+    {
+      // Send the data in a request to be processed and stored
+      var response = await processTextData(webpageTextData);
 
-    // Send the data in a request to be processed and stored by the azure function
-    var response = await sendRequestToAzureFunction(webpageTextData);
-    if (response.status == 200) {
-      logAndSendMessage(`Successfully sent data to azure function with response ${response.data}.`);
+      if (getDocumentTextPort != undefined)
+      {
+        console.log(`In background script, Sending analyze result to content script`);
+        getDocumentTextPort.postMessage({ analyzeResult: response });
+      }
+      else
+      {
+        console.log(`In background script, getDocumentTextPort is not defined. Unable to send analyze result.`);
+      }
     }
-    else {
-      logAndSendMessage(`Failed to send data to azure function successfully.`);
+    else if (message.command == "fetch")
+    {
+      var response = await fetchWebpageData(webpageTextData);
+
+      if (getDocumentTextPort != undefined)
+      {
+        console.log(`In background script, Sending fetch result to content script`);
+        getDocumentTextPort.postMessage({ fetchResult: response });
+      }
+      else
+      {
+        console.log(`In background script, getDocumentTextPort is not defined. Unable to send analyze result.`);
+      }
     }
   }
+
+  return;
 }
 
-// Listener for the extension button clicked
-browser.browserAction.onClicked.addListener(sendAnalyzeCommand);
-
-// Function to execute when the background script receives an event to connect
-// to the main content script
+/** Function to execute when the background script receives an event to connect
+ * to the main content script
+ */
 function connected(port) {
   getDocumentTextPort = port;
   getDocumentTextPort.onMessage.addListener(handleMessage);
 }
+
+// Port to hold the connection to the content script
+var getDocumentTextPort;
 
 // Add a listener for the function run when the content script
 // wants to connect to the function

@@ -1,35 +1,84 @@
-// Get the webpage url
-async function getWebpageUrl() {
-  var url = window.location.href;
-  console.log(`url: ${url}`)
-  return url;
+// Load the logger to application insights
+// var logger = require("./telemetry/logging.js");
+// const logger = logs.logger;
+// import logger from "./telemetry/application-insights"
+
+const client = require('./client.js');
+
+// Load the request library for making http requests
+/**
+ * Check and set a global guard variable.
+ * If this content script is injected into the same page again,
+ * it will do nothing next time.
+ */
+if (window.hasRun) {
+  return;
+}
+window.hasRun = true;
+
+/**
+ * A listener that will handle any messages coming from the popup script
+ * @param {*} message The message from the popup script
+ */
+async function popupScriptListener(message) {
+  console.log(`In content script, received message from popup script: ${JSON.stringify(message)}`);
+
+  var result = `Unrecognized command`;
+  if (message.command != undefined) {
+    command = message.command;
+    if (command == "analyze") {
+      console.log("In content script, processing web page");
+      result = await client.processWebpage();
+    }
+    else if (command == "fetch") {
+      console.log("In content script, fetching data for web page");
+      result = await client.fetchWebpageData();
+    }
+    else {
+      console.log(`In content script, received unrecognized command: ${command}`);
+    }
+  }
+
+  return result;
 }
 
-// Create a port to connect to the background script
-console.log("Setting up content script connection to background script.");
-var requestServicePort = browser.runtime.connect({ name: "port-from-content-script" });
-requestServicePort.postMessage({ greeting: "hello from content script" });
+/**
+ * Handle messages from the request service background script.
+ * @param {*} message 
+ */
+async function handleMesssageFromRequestService(message) {
+  console.log(`In content script, received message from background script: ${JSON.stringify(message)}`);
 
-// Create a listener for messages from the background script
-requestServicePort.onMessage.addListener(async function (message) {
-  console.log("In content script, received message from background script: ");
+  if (message.analyzeResult != undefined) {
+    console.log(`In content script, background script analyze result: ${message.analyzeResult}`);
+    insertDataIntoWebpage(message.analyzeResult);
+  }
 
-  if (message.status != undefined) {
-    console.log("background script status");
-    console.log(message.status);
+  else if (message.fetchResult != undefined) {
+    console.log(`In content script, background script fetch result: ${message.fetchResult}`);
+    insertDataIntoWebpage(message.fetchResult);
   }
-  else if (message.command != undefined && message.command == "analyze") {
-    console.log(message.command);
-    var webpageUrl = await getWebpageUrl();
-    console.log("Sending URL to requestService background script for analysis...");
-    console.log(webpageUrl);
-    requestServicePort.postMessage({data: webpageUrl});
-  }
+
   else {
-    console.log("Unrecognized message");
-    console.log(message);
+    console.warn(`In content script, Unrecognized message received from background script: '${JSON.stringify(message)}'`);
   }
-});
+}
 
-// log to the console if the connection cannot be established
-requestServicePort.onDisconnect.addListener(function () { console.log("Connection failed."); });
+/**
+ * Log a disconnect event error message
+ */
+function logDisconnect() {
+  console.error("In content script, Connection to background script failed.");
+}
+
+// Add a listener to handle messages from the popup script
+browser.runtime.onMessage.addListener(popupScriptListener);
+
+// Create a port to connect to the background script
+console.log("In content script, Setting up content script connection to background script.");
+var requestServicePort = browser.runtime.connect({ name: "port-from-content-script" });
+// handle disconnections of the port to background script
+requestServicePort.onDisconnect.addListener(logDisconnect);
+
+// Create a listener for messages from the background script on the specified port
+requestServicePort.onMessage.addListener(handleMesssageFromRequestService);
