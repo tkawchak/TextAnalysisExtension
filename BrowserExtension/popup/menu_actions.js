@@ -4,8 +4,16 @@
 // import logger from "./telemetry/application-insights.js"
 
 function displayAnalysisResults(response) {
+  // Get the desired element for result items
   var resultList = document.getElementById("result-items");
   var keysToDisplay = ["author", "sentence_count", "overall_score", "flesch_ease", "sentence_count"];
+
+  // clear the result items
+  while (resultList.lastElementChild) {
+    resultList.removeChild(resultList.lastElementChild);
+  }
+
+  // display the new result items
   for (var i=0; i < keysToDisplay.length; i++)
   {
     var key = keysToDisplay[i];
@@ -52,7 +60,11 @@ function handleFetchResult(response) {
  * @param {*} error The error message
  */
 function logError(error) {
-  console.error(`In popup script received error: ${error}`);
+  var errorElement = document.querySelector("#error-message");
+  errorElement.innerHTML = error.message;
+  var errorContent = document.querySelector("#error-content");
+  errorContent.classList.remove("hidden");
+  console.error(`In popup script, received error: ${error}`);
 }
 
 /**
@@ -71,7 +83,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
   }
 }
 
-function sendGetWebsiteDataCommandToContentScript(tabs) {
+function sendFetchCommandToContentScript(tabs) {
   for (var tab of tabs)
   {
     console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
@@ -102,7 +114,7 @@ function listenForClicks() {
         currentWindow: true,
         active: true
       })
-        .then(sendGetWebsiteDataCommandToContentScript)
+        .then(sendFetchCommandToContentScript)
         .catch(logError);
     }
     return;
