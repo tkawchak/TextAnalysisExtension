@@ -3,13 +3,58 @@
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
 
+function displayAnalysisResults(response) {
+  // Get the desired element for result items
+  var resultList = document.getElementById("result-items");
+  var keysToDisplay = ["author", "overall_score", "sentence_count", "processed_time", "syllable_count", "difficult_words", "average_sentence_length", 
+    "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
+    "lix_readability_index", "smog_index"];
+
+  // clear the result items
+  while (resultList.lastElementChild) {
+    resultList.removeChild(resultList.lastElementChild);
+  }
+
+  // display the new result items
+  for (var i=0; i < keysToDisplay.length; i++)
+  {
+    var key = keysToDisplay[i];
+    console.log(`Creating response item for key ${key}`);
+    var newKey = document.createElement("div");
+    newKey.className = "result-key";
+    newKey.innerHTML = `${key}: `;
+    var newValue = document.createElement("div");
+    newValue.className = "result-value";
+    newValue.innerHTML = response[key];
+    var newItem = document.createElement("div");
+    newItem.className = "result";
+    newItem.appendChild(newKey);
+    newItem.appendChild(newValue);
+    resultList.appendChild(newItem);
+  }
+}
+
+// TODO: Add some handling to the handleAnalyzeResult and handleFetchResult functions if there are no results yet
+// or if there is problem getting the results
+
 /**
- * Handle the response from analyzing the current web page
+ * Handle the response from analyzing the current web page and display the results
  * @param {*} response 
  */
 function handleAnalyzeResult(response) {
-  console.log(`In popup script, recieved response from analyze command: ${JSON.stringify(response)}`);
-  // TODO: Here we should take the results from analyzing the web page and display them in the popup window
+  var responseText = JSON.stringify(response);
+  console.log(`In popup script, recieved response from analyze command: ${responseText}`);
+  displayAnalysisResults(response);
+}
+
+/**
+ * Handle the response from fetching the current web page data
+ * @param {*} response 
+ */
+function handleFetchResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(`In popup script, recieved response from fetch command: ${responseText}`);
+  displayAnalysisResults(response);
 }
 
 /**
@@ -17,7 +62,11 @@ function handleAnalyzeResult(response) {
  * @param {*} error The error message
  */
 function logError(error) {
-  console.error(`In popup script received error: ${error}`);
+  var errorElement = document.querySelector("#error-message");
+  errorElement.innerHTML = error.message;
+  var errorContent = document.querySelector("#error-content");
+  errorContent.classList.remove("hidden");
+  console.error(`In popup script, received error: ${error}`);
 }
 
 /**
@@ -32,6 +81,16 @@ function sendAnalyzeCommandToContentScript(tabs) {
     console.log(`In popup script, sending analyze command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "analyze" })
       .then(handleAnalyzeResult)
+      .catch(logError);
+  }
+}
+
+function sendFetchCommandToContentScript(tabs) {
+  for (var tab of tabs)
+  {
+    console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
+    browser.tabs.sendMessage(tab.id, { "command": "fetch" })
+      .then(handleFetchResult)
       .catch(logError);
   }
 }
@@ -51,8 +110,19 @@ function listenForClicks() {
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
     }
+    else if (e.target.classList.contains("fetch-button")) {
+      console.log("In popup script, fetch button was clicked");
+      browser.tabs.query({
+        currentWindow: true,
+        active: true
+      })
+        .then(sendFetchCommandToContentScript)
+        .catch(logError);
+    }
     return;
   });
+
+  return;
 }
 
 /**
