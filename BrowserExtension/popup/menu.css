@@ -30,6 +30,12 @@ html, body {
     justify-content: left;
 }
 
+#analyze-results {
+  overflow-y: scroll;
+  overflow-x: auto;
+  max-height: 500px;
+}
+
 #error-content {
   background-color: #d64b62;
 }
