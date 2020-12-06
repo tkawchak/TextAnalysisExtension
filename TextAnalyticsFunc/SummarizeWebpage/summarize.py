@@ -1,0 +1,86 @@
+from nltk import download
+from nltk.corpus import stopwords
+from nltk.cluster.util import cosine_distance
+import numpy as np
+import networkx as nx
+
+import logging
+from typing import List
+
+def get_sentences(content: str) -> List[str]:
+    article = content.split(". ")
+    sentences = []
+    
+    for sentence in article:
+        # print(sentence)
+        sentences.append(sentence.replace("[^a-zA-Z]", " ").split(" "))
+    
+    return sentences
+    # TODO: Can this be a generate to make it optimized?
+    # for sentence in sentences:
+    #     yield sentence
+
+def sentence_similarity(sentence1: str, sentence2: str, stopwords: List[str]=None):
+    if stopwords is None:
+        stopwords = []
+
+    sentence1_wordlist = [word.lower() for word in sentence1]
+    sentence2_wordlist = [word.lower() for word in sentence2]
+
+    all_words = list(set(sentence1_wordlist + sentence2_wordlist))
+
+    # TODO: Can we use np.zeros for this?
+    sentence1_vector = [0] * len(all_words)
+    sentence2_vector = [0] * len(all_words)
+
+    for word in sentence1_wordlist:
+        if word in stopwords:
+            continue
+        sentence1_vector[all_words.index(word)] += 1
+
+    for word in sentence2_wordlist:
+        if word in stopwords:
+            continue
+        sentence2_vector[all_words.index(word)] += 1
+
+    return 1 - cosine_distance(sentence1_vector, sentence2_vector)
+
+def build_similarity_matrix(sentences: List[str], stop_words: List[str]):
+    # Create an empty similarity matrix
+    similarity_matrix = np.zeros((len(sentences), len(sentences)))
+
+    for idx1 in range(len(sentences)):
+        for idx2 in range(len(sentences)):
+            if idx1 == idx2: #ignore if both are same sentences
+                continue 
+            similarity_matrix[idx1][idx2] = sentence_similarity(sentences[idx1], sentences[idx2], stop_words)
+    
+    return similarity_matrix
+
+def generate_summary(content: str, top_n: int=5) -> str:
+    download('stopwords')
+    stop_words = stopwords.words('english')
+    summarize_text = []
+    
+    # Get a list of sentences
+    sentences =  get_sentences(content)
+    # print(sentences)
+    
+    # Generate Similary Martix across sentences
+    sentence_similarity_martix = build_similarity_matrix(sentences, stop_words)
+    
+    # Rank sentences in similarity martix using pagerank
+    sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_martix)
+    scores = nx.pagerank(sentence_similarity_graph)
+    
+    # Sort the sentences by rank and pick top sentences
+    ranked_sentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
+    
+    if top_n > len(ranked_sentences):
+        logging.info(f"There are only {len(ranked_sentences)} sentences, which is less than summary length of {top_n} sentences. Returning sentences based on rank.")
+        top_n = len(ranked_sentences)
+    for i in range(top_n):
+        summarize_text.append(" ".join(ranked_sentences[i][1]))
+
+    summary = ". ".join(summarize_text)
+    return summary

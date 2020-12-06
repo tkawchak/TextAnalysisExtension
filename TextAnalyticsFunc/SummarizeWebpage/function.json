@@ -10,6 +10,16 @@
       "databaseName": "TextContent",
       "collectionName": "Web",
       "createLeaseCollectionIfNotExists": "true"
+    },
+    {
+      "name": "$return",
+      "type": "cosmosDB",
+      "direction": "out",
+      "leaseCollectionName": "leases",
+      "connectionStringSetting": "tkawchaktextanalysis_DOCUMENTDB",
+      "databasename": "TextContent",
+      "collectionName": "Web",
+      "creaseLeaseCollectionIfNotExists": "true"
     }
   ]
 }
