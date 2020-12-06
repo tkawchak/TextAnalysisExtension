@@ -1,7 +1,7 @@
 import logging
 import azure.functions as func
 
-from summarize import generate_summary
+from analytics.summarize import generate_summary
 
 def main(documents: func.DocumentList) -> func.Document:
     if documents:
