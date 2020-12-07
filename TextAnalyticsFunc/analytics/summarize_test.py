@@ -1,5 +1,6 @@
+from analytics.summarize import get_sentences
+
 import unittest
-from ...analytics.summarize import get_sentences
 
 class TestSummarize(unittest.TestCase):
 
