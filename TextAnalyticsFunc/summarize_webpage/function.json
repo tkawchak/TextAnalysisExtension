@@ -12,7 +12,7 @@
       "createLeaseCollectionIfNotExists": "true"
     },
     {
-      "name": "$return",
+      "name": "outputdocument",
       "type": "cosmosDB",
       "direction": "out",
       "leaseCollectionName": "leases",
@@ -20,6 +20,11 @@
       "databasename": "TextContent",
       "collectionName": "Web",
       "creaseLeaseCollectionIfNotExists": "true"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
     }
   ]
 }
