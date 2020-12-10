@@ -21,6 +21,10 @@ variables:
     value: 'TextExtractionFunc'
   - name: TextExtractionFunctionName
     value: 'TextExtractionFunc'
+  - name: TextAnalyticsFunctionName
+    value: 'TextAnalyticsFunc'
+  - name: TextAnalyticsFunctionPath
+    value: 'TextAnalyticsFunc'
 
 trigger:
   batch: 'true'
@@ -114,7 +118,7 @@ stages:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: "Unit Test Azure Functions with Dotnet"
+        displayName: "Unit Test ProcessTextFunc Functions"
         inputs:
           command: 'test'
           projects: '$(AzureFunctionPath)/**/*.Tests.csproj'
@@ -122,6 +126,17 @@ stages:
           feedsToUse: 'select'
           versioningScheme: 'off'
           nobuild: true
+      
+      - task: PowerShell@2
+        displayName: "Unit Test TextAnalyticsFunc Functions"
+        inputs:
+          targetType: 'inline'
+          script: |
+            pip install -r requirements.txt
+            pip install -r requirements_test.txt
+            python -m unittest discover -s ./ -p "*_test.py" -v
+          pwsh: true
+          workingDirectory: '$(TextAnalyticsFunctionPath)'
 
   # Prepare Azure Function code for Deployment and publish artifacts
   - stage: PrepareArtifacts
