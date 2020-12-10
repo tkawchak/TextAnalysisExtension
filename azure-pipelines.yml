@@ -2,7 +2,7 @@ variables:
   - name: NPM_VERSIONSPEC
     value: '12.x'
   - name: VM_IMAGE
-    value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+    value: 'ubuntu-latest' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
     value: "Visual Studio Enterprise (dfb55888-9a13-4ea3-b705-ddf6b0801b05)"
   - name: ProcessTextFunctionArtifactName
@@ -41,7 +41,7 @@ pr:
 
 pool:
   name: 'Azure Pipelines'
-  vmImage: 'windows-2019'
+  vmImage: '$(VM_IMAGE)'
 
 
 stages:
@@ -53,39 +53,39 @@ stages:
     jobs:
 
     - job: BuildNpm
-      displayName: "Build Project with Npm"
+      displayName: Build Browser Extension
       dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: NodeTool@0
-        displayName: "Download Node"
+        displayName: Download Node
         inputs:
           versionSpec: $(NPM_VERSIONSPEC)
       - task: Npm@1
-        displayName: "Npm Install"
+        displayName: Install Npm Packages
         inputs:
           command: 'install'
           workingDir: $(BrowserExtensionPath)
       - task: Npm@1
-        displayName: "Package Files with Npm"
+        displayName: Package Extension Files
         inputs:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
           customCommand: 'run package'
 
     - job: TestNpm
-      displayName: "Unit Test Npm Project"
+      displayName: Browser Extension Tests
       dependsOn: BuildNpm
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: NodeTool@0
-        displayName: "Download Node"
+        displayName: Download Node
         inputs:
           versionSpec: $(NPM_VERSIONSPEC)
       - task: Npm@1
-        displayName: "Npm Test"
+        displayName: Npm Tests
         inputs:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
@@ -93,18 +93,18 @@ stages:
     
     # Stage to build azure function projects
   - stage:  BuildFunctionProjects
-    displayName: "Build Azure Function Projects"
+    displayName: Build Azure Function Projects
     dependsOn: []
     jobs:
 
     - job: BuildAzureFunction
-      displayName: "Build Azure Function Projects"
+      displayName: Build Azure Function Projects
       dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: "Build Azure Functions with Dotnet"
+        displayName: Build Process Text Azure Functions
         inputs:
           command: 'build'
           projects: '$(AzureFunctionPath)/**/*.csproj'
@@ -112,13 +112,13 @@ stages:
           versioningScheme: 'off'
 
     - job: TestAzureFunctions
-      displayName: "Unit Test Azure Function Projects"
+      displayName: Unit Test Azure Function Projects
       dependsOn: BuildAzureFunction
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: "Unit Test ProcessTextFunc Functions"
+        displayName: Unit Test Process Text Functions
         inputs:
           command: 'test'
           projects: '$(AzureFunctionPath)/**/*.Tests.csproj'
@@ -128,7 +128,7 @@ stages:
           nobuild: true
       
       - task: PowerShell@2
-        displayName: "Unit Test TextAnalyticsFunc Functions"
+        displayName: Unit Test Text Analytics Functions
         inputs:
           targetType: 'inline'
           script: |
@@ -140,7 +140,7 @@ stages:
 
   # Prepare Azure Function code for Deployment and publish artifacts
   - stage: PrepareArtifacts
-    displayName: "Azure Function Artifacts"
+    displayName: Prepare Azure Function Artifacts
     dependsOn: BuildFunctionProjects
     jobs:
 
@@ -169,6 +169,7 @@ stages:
       dependsOn: []
       steps:
       - task: Npm@1
+        displayName: Install npm packages
         inputs:
           command: 'install'
           workingDir: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)'
