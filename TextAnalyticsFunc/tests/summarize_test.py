@@ -4,7 +4,7 @@ import unittest
 
 class TestSummarize(unittest.TestCase):
 
-    def test_get_sentences(self):
+    def test_get_sentences_number_of_sentences_correct(self):
         text = "Hi. My name. Is Tom. I Like to. Write. TESTS!"
         sentences = get_sentences(text)
 

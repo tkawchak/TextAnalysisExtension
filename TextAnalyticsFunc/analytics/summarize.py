@@ -7,13 +7,15 @@ import networkx as nx
 import logging
 from typing import List
 
+TEXT_TO_REMOVE = ["\n"]
+
 def get_sentences(content: str) -> List[str]:
-    article = content.split(". ")
+    article = content.split(".")
     sentences = []
     
     for sentence in article:
         # print(sentence)
-        sentences.append(sentence.replace("[^a-zA-Z]", " ").split(" "))
+        sentences.append(sentence.replace("[^a-zA-Z]", " ").strip().split(" "))
     
     return sentences
     # TODO: Can this be a generate to make it optimized?
@@ -57,10 +59,18 @@ def build_similarity_matrix(sentences: List[str], stop_words: List[str]):
     
     return similarity_matrix
 
+def remove_unwanted_chars(text: str) -> str:
+    for string in TEXT_TO_REMOVE:
+        text = text.replace(string, "")
+    
+    return text
+
 def generate_summary(content: str, top_n: int=5) -> str:
     download('stopwords')
     stop_words = stopwords.words('english')
     summarize_text = []
+
+    content = remove_unwanted_chars(content)
     
     # Get a list of sentences
     sentences =  get_sentences(content)
@@ -76,11 +86,15 @@ def generate_summary(content: str, top_n: int=5) -> str:
     # Sort the sentences by rank and pick top sentences
     ranked_sentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
     
-    if top_n > len(ranked_sentences):
-        logging.info(f"There are only {len(ranked_sentences)} sentences, which is less than summary length of {top_n} sentences. Returning sentences based on rank.")
-        top_n = len(ranked_sentences)
+    num_sentences = len(ranked_sentences)
+    if top_n > num_sentences:
+        logging.info(f"There are only {num_sentences} sentences, which is less than summary length of {top_n} sentences. Returning sentences based on rank.")
+        top_n = num_sentences
+    
+    logging.info(f"Summarizing {num_sentences} sentences with top {top_n} sentences.")
     for i in range(top_n):
-        summarize_text.append(" ".join(ranked_sentences[i][1]))
+        sentence = " ".join(ranked_sentences[i][1]).strip()
+        summarize_text.append(sentence)
 
-    summary = ". ".join(summarize_text)
+    summary = ". ".join(summarize_text) + "."
     return summary
