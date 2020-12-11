@@ -132,7 +132,7 @@ stages:
       displayName: Test Text Analysis Functions
       dependsOn: []
       pool:
-        $(VM_IMAGE)
+        vmImage: $(VM_IMAGE)
       steps:
 
       - task: UsePythonVersion@0
