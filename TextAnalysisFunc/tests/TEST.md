@@ -6,10 +6,6 @@
 ```bash
 pip install -r requirements.txt
 ```
-and
-```bash
-pip install -r requirements_test.txt
-```
 
 # Run all Tets
 From the TextAnalyticsFunc folder, run the following command:

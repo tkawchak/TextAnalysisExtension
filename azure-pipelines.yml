@@ -127,14 +127,27 @@ stages:
           feedsToUse: 'select'
           versioningScheme: 'off'
           nobuild: true
+
+    - job: TestTextAnalysis
+      displayName: Test Text Analysis Functions
+      dependsOn: []
+      pool:
+        $(VM_IMAGE)
+      steps:
+
+      - task: UsePythonVersion@0
+        displayName: Install Python 3.8
+        inputs:
+          versionSpec: '3.8'
+          addToPath: true
+          architecture: 'x64'
       
       - task: PowerShell@2
-        displayName: Unit Test Text Analytics Functions
+        displayName: Unit Test Text Analysis Functions
         inputs:
           targetType: 'inline'
           script: |
-            pip install -r requirements.txt
-            pip install -r requirements_test.txt
+            python -m pip install -r requirements.txt
             python -m unittest discover -s ./ -p "*_test.py" -v
           pwsh: true
           workingDirectory: '$(TextAnalysisFunctionPath)'
@@ -190,6 +203,12 @@ stages:
       displayName: Publish Text Analysis Function
       dependsOn: []
       steps:
+        - task: UsePythonVersion@0
+          displayName: Install Python 3.8
+          inputs:
+            versionSpec: '3.8'
+            addToPath: true
+            architecture: 'x64'
         - task: PowerShell@2
           displayName: Pip install Requirements
           inputs:
@@ -197,7 +216,7 @@ stages:
             pwsh: true
             workingDirectory: '$(TextAnalysisFunctionPath)'
             script: |
-              pip install -r requirements.txt
+              python -m pip install -r requirements.txt
         - task: ArchiveFiles@2
           displayName: Package Text Analysis Function
           inputs:
