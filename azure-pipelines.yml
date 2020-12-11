@@ -9,6 +9,8 @@ variables:
     value: 'ProcessTextFunc'
   - name: ProcessTextProjectPath
     value: '$(System.DefaultWorkingDirectory)/ProcessText'
+  - name: ProcessTextFunctionAppName
+    value: 'ProcessTextFunc'
   - name: ProcessTextFunctionPath
     value: '$(ProcessTextProjectPath)/$(ProcessTextFunctionAppName)'
   - name: BrowserExtensionPath
@@ -106,7 +108,7 @@ stages:
         displayName: Build Process Text Azure Functions
         inputs:
           command: 'build'
-          projects: '$(AzureFunctionPath)/**/*.csproj'
+          projects: '$(ProcessTextProjectPath)/**/*.csproj'
           feedsToUse: 'select'
           versioningScheme: 'off'
 
@@ -120,7 +122,7 @@ stages:
         displayName: Unit Test Process Text Functions
         inputs:
           command: 'test'
-          projects: '$(AzureFunctionPath)/**/*.Tests.csproj'
+          projects: '$(ProcessTextProjectPath)/**/*.Tests.csproj'
           testRunTitle: 'Azure Function Tests'
           feedsToUse: 'select'
           versioningScheme: 'off'
