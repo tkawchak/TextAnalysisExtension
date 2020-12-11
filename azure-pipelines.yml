@@ -5,26 +5,26 @@ variables:
     value: 'ubuntu-latest' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
     value: "Visual Studio Enterprise (dfb55888-9a13-4ea3-b705-ddf6b0801b05)"
-  - name: ProcessTextFunctionArtifactName
-    value: 'ProcessTextFunc'
-  - name: ProcessTextFunctionAppName
-    value: 'ProcessTextFunc'
   - name: ProcessTextFunctionName
-    value: 'ProcessTextHttp'
+    value: 'ProcessTextFunc'
+  - name: ProcessTextProjectPath
+    value: '$(System.DefaultWorkingDirectory)/ProcessText'
   - name: ProcessTextFunctionPath
-    value: 'ProcessText/$(ProcessTextFunctionAppName)'
-  - name: AzureFunctionPath
-    value: 'ProcessText'
+    value: '$(ProcessTextProjectPath)/$(ProcessTextFunctionAppName)'
   - name: BrowserExtensionPath
-    value: 'BrowserExtension'
-  - name: TextExtractionFunctionPath
-    value: 'TextExtractionFunc'
+    value: '$(System.DefaultWorkingDirectory)/BrowserExtension'
   - name: TextExtractionFunctionName
     value: 'TextExtractionFunc'
-  - name: TextAnalyticsFunctionName
-    value: 'TextAnalyticsFunc'
-  - name: TextAnalyticsFunctionPath
-    value: 'TextAnalyticsFunc'
+  - name: TextExtractionFunctionPath
+    value: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionName)'
+  - name: TextExtractionFunctionArtifactPath
+    value: '$(Build.ArtifactStagingDirectory)/$(TextExtractionFunctionName)'
+  - name: TextAnalysisFunctionName
+    value: 'TextAnalysisFunc'
+  - name: TextAnalysisFunctionPath
+    value: '$(System.DefaultWorkingDirectory)/$(TextAnalysisFunctionName)'
+  - name: TextAnalysisFunctionArtifactPath
+    value: '$(Build.ArtifactStagingDirectory)/$(TextAnalysisFunctionName)'
 
 trigger:
   batch: 'true'
@@ -42,7 +42,6 @@ pr:
 pool:
   name: 'Azure Pipelines'
   vmImage: '$(VM_IMAGE)'
-
 
 stages:
 
@@ -136,7 +135,7 @@ stages:
             pip install -r requirements_test.txt
             python -m unittest discover -s ./ -p "*_test.py" -v
           pwsh: true
-          workingDirectory: '$(TextAnalyticsFunctionPath)'
+          workingDirectory: '$(TextAnalysisFunctionPath)'
 
   # Prepare Azure Function code for Deployment and publish artifacts
   - stage: PrepareArtifacts
@@ -155,14 +154,14 @@ stages:
         inputs:
           command: 'publish'
           projects: '$(ProcessTextFunctionPath)/*.csproj'
-          arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip --configuration Release'
+          arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionName)/$(Build.BuildId).zip --configuration Release'
           zipAfterPublish: true
           publishWebProjects: false
       - task: PublishBuildArtifacts@1
         displayName: Publish Process Text Function Artifacts
         inputs:
-          ArtifactName: $(ProcessTextFunctionArtifactName)
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+          ArtifactName: $(ProcessTextFunctionName)
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionName)/$(Build.BuildId).zip'
       
     - job: PublishExtractTextFunction
       displayName: Publish Extract Text Function
@@ -172,15 +171,39 @@ stages:
         displayName: Install npm packages
         inputs:
           command: 'install'
-          workingDir: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)'
+          workingDir: '$(TextExtractionFunctionPath)'
       - task: ArchiveFiles@2
         displayName: Package Text Extraction Function
         inputs:
-          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)"
+          rootFolderOrFile: "$(TextExtractionFunctionPath)"
           includeRootFolder: false
-          archiveFile: "$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip"
+          archiveFile: "$(TextExtractionFunctionArtifactPath)/$(Build.BuildId).zip"
       - task: PublishBuildArtifacts@1
         displayName: Publish Text Extraction Function Artifacts
         inputs:
-          PathtoPublish: '$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip'
+          PathtoPublish: '$(TextExtractionFunctionArtifactPath)/$(Build.BuildId).zip'
           ArtifactName: $(TextExtractionFunctionName)
+
+    - job: PublishTextAnalysisFunction
+      displayName: Publish Text Analysis Function
+      dependsOn: []
+      steps:
+        - task: PowerShell@2
+          displayName: Pip install Requirements
+          inputs:
+            targetType: 'inline'
+            pwsh: true
+            workingDirectory: '$(TextAnalysisFunctionPath)'
+            script: |
+              pip install -r requirements.txt
+        - task: ArchiveFiles@2
+          displayName: Package Text Analysis Function
+          inputs:
+            rootFolderOrFile: "$(TextAnalysisFunctionPath)"
+            includeRootFolder: false
+            archiveFile: "$(TextAnalysisFunctionArtifactPath)/$(Build.BuildId).zip"
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Text Analysis Function Artifacts
+          inputs:
+            PathtoPublish: '$(TextAnalysisFunctionArtifactPath)/$(Build.BuildId).zip'
+            ArtifactName: $(TextAnalysisFunctionName)
