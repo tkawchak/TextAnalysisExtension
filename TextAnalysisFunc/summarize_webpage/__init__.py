@@ -17,7 +17,7 @@ def main(documents: func.DocumentList, outputdocument: func.Out[func.Document]) 
             else:
                 continue
     
-    return "OK"
+    return func.HttpResponse("OK", status_code=200)
 
 def get_value_from_document(document: func.Document, key: str) -> str:
     if key in document.keys():
