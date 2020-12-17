@@ -216,7 +216,7 @@ stages:
             pwsh: true
             workingDirectory: '$(TextAnalysisFunctionPath)'
             script: |
-              python -m pip install -r requirements.txt
+              python -m pip install --target="$(TextAnalysisFunctionPath)/.python_packages/lib/site-packages" -r requirements.txt
         - task: ArchiveFiles@2
           displayName: Package Text Analysis Function
           inputs:
