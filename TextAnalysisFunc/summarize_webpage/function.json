@@ -20,11 +20,6 @@
       "databasename": "TextContent",
       "collectionName": "Web",
       "creaseLeaseCollectionIfNotExists": "true"
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
     }
   ]
 }

@@ -5,7 +5,7 @@ from analytics.summarize import generate_summary
 
 NUM_SENTENCES = 4
 
-def main(documents: func.DocumentList, outputdocument: func.Out[func.Document]) -> func.HttpResponse:
+def main(documents: func.DocumentList, outputdocument: func.Out[func.Document]):
     if documents:
         for document in documents:
             document_id = get_value_from_document(document, "id")
@@ -17,7 +17,7 @@ def main(documents: func.DocumentList, outputdocument: func.Out[func.Document]) 
             else:
                 continue
     
-    return func.HttpResponse("OK", status_code=200)
+    return
 
 def get_value_from_document(document: func.Document, key: str) -> str:
     if key in document.keys():
