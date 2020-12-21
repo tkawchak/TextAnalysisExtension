@@ -101,7 +101,7 @@ def generate_summary(content: str, top_n: int=5) -> str:
     # Rank sentences in similarity martix using pagerank
     sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_matrix)
     # print(sentence_similarity_graph)
-    scores = nx.pagerank_scipy(G=sentence_similarity_graph, max_iter=500)
+    scores = nx.pagerank(G=sentence_similarity_graph, max_iter=500)
     
     # Sort the sentences by rank and pick top sentences
     ranked_sentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
