@@ -67,6 +67,7 @@ namespace ProcessTextFunc.Utils
                 ProcessedTime = document.ProcessedTime,
                 SentenceCount = document.SentenceCount,
                 SmogIndex = document.SmogIndex,
+                Summary = document.Summary,
                 SyllableCount = document.SyllableCount,
                 Title = document.Title,
                 Url = document.Url,
