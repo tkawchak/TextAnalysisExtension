@@ -118,7 +118,7 @@ async function fetchCurrentWebpageData() {
     var code = "Ds7yQ3yWjKLFc1bkg9B4FO4UOx5Coa4Dzy7tCt8I3NbrItaOeQYbfA==";
     var title = webpageData.title;
     var domain = webpageData.domain;
-    var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?d=${title}&domain=${domain}&code=${code}`;
+    var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
     // var requestUrl = `http://localhost:7071/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
     var response;
     response = await axios.get(requestUrl);

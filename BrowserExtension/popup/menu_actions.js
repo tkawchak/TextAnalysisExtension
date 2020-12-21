@@ -19,7 +19,12 @@ function displayAnalysisResults(response) {
   // display the summary
   if (response.hasOwnProperty("summary"))
   {
-    summary.innerText = response["summary"]
+    console.log(`[menu_actions.js] summary: ${response["summary"]}`);
+    summary.innerHTML = response["summary"]
+  }
+  else
+  {
+    console.warn("Summary has not been computed yet.");
   }
 
   // display the new result items

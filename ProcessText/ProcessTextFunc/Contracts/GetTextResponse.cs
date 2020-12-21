@@ -73,6 +73,9 @@ namespace ProcessTextFunc.Contracts
         [JsonProperty("smog_index")]
         public float SmogIndex { get; set; }
 
+        [JsonProperty("summary")]
+        public string Summary { get; set; }
+
         [JsonProperty("syllable_count")]
         public int SyllableCount { get; set; }
 
