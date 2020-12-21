@@ -1,6 +1,7 @@
 from nltk import download
 from nltk.corpus import stopwords
 from nltk.cluster.util import cosine_distance
+import nltk.data
 import numpy as np
 import networkx as nx
 
@@ -8,17 +9,34 @@ import logging
 from typing import List
 
 TEXT_TO_REMOVE = ["\n"]
+nltk.download("punkt")
 
 def get_sentences(content: str) -> List[str]:
-    article = content.split(".")
+    content = content.strip()
+    # lines = content.splitlines()
+    lines = content.split("\\n")
+    # print("lines: ", lines)
     sentences = []
+    sentence_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+    for line in lines:
+        line = line.strip()
+        # print(line)
+        line_sentences = sentence_detector.tokenize(line)
+        for sentence in line_sentences:
+            sentence.strip()
+            # print(sentence)
+            sentences.append(sentence)
     
-    for sentence in article:
+    sentence_word_lists = []
+    for sentence in sentences:
         # print(sentence)
-        sentences.append(sentence.replace("[^a-zA-Z]", " ").strip().split(" "))
+        sentence_text = sentence.replace("[^a-zA-Z0-9]", " ").strip()
+        sentence_words = sentence_text.split(" ")
+
+        sentence_word_lists.append(sentence_words)
     
-    return sentences
-    # TODO: Can this be a generate to make it optimized?
+    return sentence_word_lists
+    # TODO: Can this be a generaor to make it optimized?
     # for sentence in sentences:
     #     yield sentence
 
@@ -74,14 +92,16 @@ def generate_summary(content: str, top_n: int=5) -> str:
     
     # Get a list of sentences
     sentences =  get_sentences(content)
-    # print(sentences)
     
     # Generate Similary Martix across sentences
-    sentence_similarity_martix = build_similarity_matrix(sentences, stop_words)
+    # print(sentences)
+    sentence_similarity_matrix = build_similarity_matrix(sentences, stop_words)
+    # print(sentence_similarity_matrix)
     
     # Rank sentences in similarity martix using pagerank
-    sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_martix)
-    scores = nx.pagerank(sentence_similarity_graph)
+    sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_matrix)
+    # print(sentence_similarity_graph)
+    scores = nx.pagerank_scipy(G=sentence_similarity_graph, max_iter=500)
     
     # Sort the sentences by rank and pick top sentences
     ranked_sentences = sorted(((scores[i],s) for i,s in enumerate(sentences)), reverse=True)
@@ -96,5 +116,5 @@ def generate_summary(content: str, top_n: int=5) -> str:
         sentence = " ".join(ranked_sentences[i][1]).strip()
         summarize_text.append(sentence)
 
-    summary = ". ".join(summarize_text) + "."
+    summary = " ".join(summarize_text)
     return summary

@@ -28,8 +28,8 @@ async function getCurrentWebpageData() {
 async function getWebpageData(url) {
     console.log(`[client.js] Retrieving webpage data for ${url}`);
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-    // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
-    var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
+    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
+    // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
     console.log("[client.js] sending request to get webpage data");
     var webpageData = {};
     var response = await axios.get(requestUrl);
@@ -68,8 +68,8 @@ async function processWebpage() {
 async function processWebpageData(data) {
     // TODO: How to pass the code value as part of a header?
     var code = `2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
-    // var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=${code}`;
-    var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=${code}`;
+    var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=${code}`;
+    // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=${code}`;
     var response;
     // TODO: Clean up which data gets sent to azure function??
     response = await axios.post(requestUrl, {
@@ -118,8 +118,8 @@ async function fetchCurrentWebpageData() {
     var code = "Ds7yQ3yWjKLFc1bkg9B4FO4UOx5Coa4Dzy7tCt8I3NbrItaOeQYbfA==";
     var title = webpageData.title;
     var domain = webpageData.domain;
-    // var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?d=${title}&domain=${domain}&code=${code}`;
-    var requestUrl = `http://localhost:7071/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
+    var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?d=${title}&domain=${domain}&code=${code}`;
+    // var requestUrl = `http://localhost:7071/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
     var response;
     response = await axios.get(requestUrl);
 

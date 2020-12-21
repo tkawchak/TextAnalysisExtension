@@ -5,6 +5,7 @@
 
 function displayAnalysisResults(response) {
   // Get the desired element for result items
+  var summary = document.getElementById("summary");
   var resultList = document.getElementById("result-items");
   var keysToDisplay = ["author", "overall_score", "sentence_count", "processed_time", "syllable_count", "difficult_words", "average_sentence_length", 
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
@@ -13,6 +14,12 @@ function displayAnalysisResults(response) {
   // clear the result items
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
+  }
+
+  // display the summary
+  if (response.hasOwnProperty("summary"))
+  {
+    summary.innerText = response["summary"]
   }
 
   // display the new result items
