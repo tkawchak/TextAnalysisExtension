@@ -1,5 +1,5 @@
 html, body {
-  width: 250px;
+  width: 350px;
 }
 
 .hidden {
@@ -30,6 +30,7 @@ html, body {
 }
 
 #summary {
+  height: 70px;
   margin: 3% auto;
   padding: 5px;
   text-align: left;
