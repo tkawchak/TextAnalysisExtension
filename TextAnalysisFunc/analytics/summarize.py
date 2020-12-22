@@ -1,14 +1,16 @@
 from nltk import download
 from nltk.corpus import stopwords
 from nltk.cluster.util import cosine_distance
-import nltk.data
+from nltk.data import load
 import numpy as np
 import networkx as nx
 
 import logging
 from typing import List
 
-nltk.download("punkt")
+# Download packages from nltk
+download("punkt")
+download("stopwords")
 
 def get_sentences(content: str) -> List[str]:
     '''
@@ -26,7 +28,7 @@ def get_sentences(content: str) -> List[str]:
     content = content.strip()
     lines = content.split("\\n")
     sentences = []
-    sentence_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+    sentence_detector = load('tokenizers/punkt/english.pickle')
     for line in lines:
         line = line.strip()
         line_sentences = sentence_detector.tokenize(line)
@@ -130,7 +132,6 @@ def generate_summary(content: str, top_n: int=5) -> str:
     ---
     A summary of the content
     '''
-    download('stopwords')
     stop_words = stopwords.words('english')
     summarize_text = []
     
