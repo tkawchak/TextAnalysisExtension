@@ -3,7 +3,7 @@ import azure.functions as func
 
 from analytics.summarize import generate_summary
 
-NUM_SENTENCES = 4
+NUM_SENTENCES = 5
 
 def main(documents: func.DocumentList, outputdocument: func.Out[func.Document]):
     if documents:
