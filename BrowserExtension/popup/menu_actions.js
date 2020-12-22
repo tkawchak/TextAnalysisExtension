@@ -5,14 +5,28 @@
 
 function displayAnalysisResults(response) {
   // Get the desired element for result items
+  var summary = document.getElementById("summary");
+  var summarySection = document.getElementById("summary-section");
   var resultList = document.getElementById("result-items");
-  var keysToDisplay = ["author", "overall_score", "sentence_count", "processed_time", "syllable_count", "difficult_words", "average_sentence_length", 
+  var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length", 
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
     "lix_readability_index", "smog_index"];
 
   // clear the result items
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
+  }
+
+  // display the summary
+  if (response.hasOwnProperty("summary") && response["summary"] != null)
+  {
+    console.log(`[menu_actions.js] summary: ${response["summary"]}`);
+    summary.innerHTML = response["summary"]
+    summarySection.classList.remove("hidden");
+  }
+  else
+  {
+    console.warn("Summary has not been computed yet.");
   }
 
   // display the new result items

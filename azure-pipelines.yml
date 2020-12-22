@@ -2,25 +2,31 @@ variables:
   - name: NPM_VERSIONSPEC
     value: '12.x'
   - name: VM_IMAGE
-    value: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+    value: 'ubuntu-latest' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
     value: "Visual Studio Enterprise (dfb55888-9a13-4ea3-b705-ddf6b0801b05)"
-  - name: ProcessTextFunctionArtifactName
+  - name: ProcessTextFunctionName
     value: 'ProcessTextFunc'
+  - name: ProcessTextProjectPath
+    value: '$(System.DefaultWorkingDirectory)/ProcessText'
   - name: ProcessTextFunctionAppName
     value: 'ProcessTextFunc'
-  - name: ProcessTextFunctionName
-    value: 'ProcessTextHttp'
   - name: ProcessTextFunctionPath
-    value: 'ProcessText/$(ProcessTextFunctionAppName)'
-  - name: AzureFunctionPath
-    value: 'ProcessText'
+    value: '$(ProcessTextProjectPath)/$(ProcessTextFunctionAppName)'
   - name: BrowserExtensionPath
-    value: 'BrowserExtension'
-  - name: TextExtractionFunctionPath
-    value: 'TextExtractionFunc'
+    value: '$(System.DefaultWorkingDirectory)/BrowserExtension'
   - name: TextExtractionFunctionName
     value: 'TextExtractionFunc'
+  - name: TextExtractionFunctionPath
+    value: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionName)'
+  - name: TextExtractionFunctionArtifactPath
+    value: '$(Build.ArtifactStagingDirectory)/$(TextExtractionFunctionName)'
+  - name: TextAnalysisFunctionName
+    value: 'TextAnalysisFunc'
+  - name: TextAnalysisFunctionPath
+    value: '$(System.DefaultWorkingDirectory)/$(TextAnalysisFunctionName)'
+  - name: TextAnalysisFunctionArtifactPath
+    value: '$(Build.ArtifactStagingDirectory)/$(TextAnalysisFunctionName)'
 
 trigger:
   batch: 'true'
@@ -37,8 +43,7 @@ pr:
 
 pool:
   name: 'Azure Pipelines'
-  vmImage: 'windows-2019'
-
+  vmImage: '$(VM_IMAGE)'
 
 stages:
 
@@ -49,39 +54,39 @@ stages:
     jobs:
 
     - job: BuildNpm
-      displayName: "Build Project with Npm"
+      displayName: Build Browser Extension
       dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: NodeTool@0
-        displayName: "Download Node"
+        displayName: Download Node
         inputs:
           versionSpec: $(NPM_VERSIONSPEC)
       - task: Npm@1
-        displayName: "Npm Install"
+        displayName: Install Npm Packages
         inputs:
           command: 'install'
           workingDir: $(BrowserExtensionPath)
       - task: Npm@1
-        displayName: "Package Files with Npm"
+        displayName: Package Extension Files
         inputs:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
           customCommand: 'run package'
 
     - job: TestNpm
-      displayName: "Unit Test Npm Project"
+      displayName: Browser Extension Tests
       dependsOn: BuildNpm
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: NodeTool@0
-        displayName: "Download Node"
+        displayName: Download Node
         inputs:
           versionSpec: $(NPM_VERSIONSPEC)
       - task: Npm@1
-        displayName: "Npm Test"
+        displayName: Npm Tests
         inputs:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
@@ -89,43 +94,67 @@ stages:
     
     # Stage to build azure function projects
   - stage:  BuildFunctionProjects
-    displayName: "Build Azure Function Projects"
+    displayName: Build Azure Function Projects
     dependsOn: []
     jobs:
 
     - job: BuildAzureFunction
-      displayName: "Build Azure Function Projects"
+      displayName: Build Azure Function Projects
       dependsOn: []
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: "Build Azure Functions with Dotnet"
+        displayName: Build Process Text Azure Functions
         inputs:
           command: 'build'
-          projects: '$(AzureFunctionPath)/**/*.csproj'
+          projects: '$(ProcessTextProjectPath)/**/*.csproj'
           feedsToUse: 'select'
           versioningScheme: 'off'
 
     - job: TestAzureFunctions
-      displayName: "Unit Test Azure Function Projects"
+      displayName: Unit Test Azure Function Projects
       dependsOn: BuildAzureFunction
       pool:
         vmImage: $(VM_IMAGE)
       steps:
       - task: DotNetCoreCLI@2
-        displayName: "Unit Test Azure Functions with Dotnet"
+        displayName: Unit Test Process Text Functions
         inputs:
           command: 'test'
-          projects: '$(AzureFunctionPath)/**/*.Tests.csproj'
+          projects: '$(ProcessTextProjectPath)/**/*.Tests.csproj'
           testRunTitle: 'Azure Function Tests'
           feedsToUse: 'select'
           versioningScheme: 'off'
           nobuild: true
 
+    - job: TestTextAnalysis
+      displayName: Test Text Analysis Functions
+      dependsOn: []
+      pool:
+        vmImage: $(VM_IMAGE)
+      steps:
+
+      - task: UsePythonVersion@0
+        displayName: Install Python 3.8
+        inputs:
+          versionSpec: '3.8'
+          addToPath: true
+          architecture: 'x64'
+      
+      - task: PowerShell@2
+        displayName: Unit Test Text Analysis Functions
+        inputs:
+          targetType: 'inline'
+          script: |
+            python -m pip install -r requirements.txt
+            python -m unittest discover -s ./ -p "*_test.py" -v
+          pwsh: true
+          workingDirectory: '$(TextAnalysisFunctionPath)'
+
   # Prepare Azure Function code for Deployment and publish artifacts
   - stage: PrepareArtifacts
-    displayName: "Azure Function Artifacts"
+    displayName: Prepare Azure Function Artifacts
     dependsOn: BuildFunctionProjects
     jobs:
 
@@ -140,31 +169,62 @@ stages:
         inputs:
           command: 'publish'
           projects: '$(ProcessTextFunctionPath)/*.csproj'
-          arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip --configuration Release'
+          arguments: '--output $(build.ArtifactStagingDirectory)/$(ProcessTextFunctionName)/$(Build.BuildId).zip --configuration Release'
           zipAfterPublish: true
           publishWebProjects: false
       - task: PublishBuildArtifacts@1
         displayName: Publish Process Text Function Artifacts
         inputs:
-          ArtifactName: $(ProcessTextFunctionArtifactName)
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionArtifactName)/$(Build.BuildId).zip'
+          ArtifactName: $(ProcessTextFunctionName)
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(ProcessTextFunctionName)/$(Build.BuildId).zip'
       
     - job: PublishExtractTextFunction
       displayName: Publish Extract Text Function
       dependsOn: []
       steps:
       - task: Npm@1
+        displayName: Install npm packages
         inputs:
           command: 'install'
-          workingDir: '$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)'
+          workingDir: '$(TextExtractionFunctionPath)'
       - task: ArchiveFiles@2
         displayName: Package Text Extraction Function
         inputs:
-          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(TextExtractionFunctionPath)"
+          rootFolderOrFile: "$(TextExtractionFunctionPath)"
           includeRootFolder: false
-          archiveFile: "$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip"
+          archiveFile: "$(TextExtractionFunctionArtifactPath)/$(Build.BuildId).zip"
       - task: PublishBuildArtifacts@1
         displayName: Publish Text Extraction Function Artifacts
         inputs:
-          PathtoPublish: '$(System.ArtifactStagingDirectory)/$(TextExtractionFunctionName)/$(Build.BuildId).zip'
+          PathtoPublish: '$(TextExtractionFunctionArtifactPath)/$(Build.BuildId).zip'
           ArtifactName: $(TextExtractionFunctionName)
+
+    - job: PublishTextAnalysisFunction
+      displayName: Publish Text Analysis Function
+      dependsOn: []
+      steps:
+        - task: UsePythonVersion@0
+          displayName: Install Python 3.8
+          inputs:
+            versionSpec: '3.8'
+            addToPath: true
+            architecture: 'x64'
+        - task: PowerShell@2
+          displayName: Pip install Requirements
+          inputs:
+            targetType: 'inline'
+            pwsh: true
+            workingDirectory: '$(TextAnalysisFunctionPath)'
+            script: |
+              python -m pip install --target="$(TextAnalysisFunctionPath)/.python_packages/lib/site-packages" -r requirements.txt
+        - task: ArchiveFiles@2
+          displayName: Package Text Analysis Function
+          inputs:
+            rootFolderOrFile: "$(TextAnalysisFunctionPath)"
+            includeRootFolder: false
+            archiveFile: "$(TextAnalysisFunctionArtifactPath)/$(Build.BuildId).zip"
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Text Analysis Function Artifacts
+          inputs:
+            PathtoPublish: '$(TextAnalysisFunctionArtifactPath)/$(Build.BuildId).zip'
+            ArtifactName: $(TextAnalysisFunctionName)

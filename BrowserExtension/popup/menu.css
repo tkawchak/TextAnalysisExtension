@@ -1,5 +1,5 @@
 html, body {
-  width: 250px;
+  width: 350px;
 }
 
 .hidden {
@@ -22,12 +22,29 @@ html, body {
   background-color: #E5F2F2;
 }
 
+#summary-title {
+  margin: 3% auto;
+  padding: 5px;
+  text-align: center;
+  cursor: text;
+}
+
+#summary {
+  height: 70px;
+  margin: 3% auto;
+  padding: 5px;
+  text-align: left;
+  overflow-y: scroll;
+  word-wrap: normal;
+  cursor: text;
+}
+
 .result {
-    margin: 3% auto;
-    padding: 5px;
-    background-color: #a6bcc5;
-    display: flex;
-    justify-content: left;
+  margin: 3% auto;
+  padding: 5px;
+  background-color: #a6bcc5;
+  display: flex;
+  justify-content: left;
 }
 
 #analyze-results {
