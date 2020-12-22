@@ -8,39 +8,62 @@ import networkx as nx
 import logging
 from typing import List
 
-TEXT_TO_REMOVE = ["\n"]
 nltk.download("punkt")
 
 def get_sentences(content: str) -> List[str]:
+    '''
+    Return a list of sentences from input text
+
+    Arguments
+    ---
+    content: str
+        The text to split into sentences. May contain multiple lines of text.
+
+    Returns
+    ---
+    List of sentences
+    '''
     content = content.strip()
-    # lines = content.splitlines()
     lines = content.split("\\n")
-    # print("lines: ", lines)
     sentences = []
     sentence_detector = nltk.data.load('tokenizers/punkt/english.pickle')
     for line in lines:
         line = line.strip()
-        # print(line)
         line_sentences = sentence_detector.tokenize(line)
         for sentence in line_sentences:
             sentence.strip()
-            # print(sentence)
             sentences.append(sentence)
     
     sentence_word_lists = []
     for sentence in sentences:
-        # print(sentence)
         sentence_text = sentence.replace("[^a-zA-Z0-9]", " ").strip()
         sentence_words = sentence_text.split(" ")
 
         sentence_word_lists.append(sentence_words)
     
     return sentence_word_lists
-    # TODO: Can this be a generaor to make it optimized?
+    # TODO: Can we make this a generator to optimize this for large sentences?
     # for sentence in sentences:
     #     yield sentence
 
-def sentence_similarity(sentence1: str, sentence2: str, stopwords: List[str]=None):
+def sentence_similarity(sentence1: str, sentence2: str, stopwords: List[str]=None) -> float:
+    '''
+    Produce the sentence similarity between two sentences based on cosine distance.
+    Stopwords are not used for comparison
+
+    Arguments
+    ---
+    sentence1: str
+        The first sentence
+    sentence2: str
+        The second sentence
+    stopwords: List[str]
+        A list of stopwords to leave out of the distance computation
+
+    Returns
+    ---
+    The cosine distance of the two sentences
+    '''
     if stopwords is None:
         stopwords = []
 
@@ -66,6 +89,21 @@ def sentence_similarity(sentence1: str, sentence2: str, stopwords: List[str]=Non
     return 1 - cosine_distance(sentence1_vector, sentence2_vector)
 
 def build_similarity_matrix(sentences: List[str], stop_words: List[str]):
+    '''
+    Build a similarity matrix for a list of sentences.
+    This functions loops through all pairs of sentences and computes similarity.
+
+    Arguments
+    ---
+    sentences: List[str]
+        A list of sentences to build the similarity matrix for.
+    stop_words: List[str]
+        A list of stopwords to leave out of the similarity matrix
+
+    Returns
+    ---
+    The similarity matrix as a 2D numpy array
+    '''
     # Create an empty similarity matrix
     similarity_matrix = np.zeros((len(sentences), len(sentences)))
 
@@ -77,30 +115,33 @@ def build_similarity_matrix(sentences: List[str], stop_words: List[str]):
     
     return similarity_matrix
 
-def remove_unwanted_chars(text: str) -> str:
-    for string in TEXT_TO_REMOVE:
-        text = text.replace(string, "")
-    
-    return text
-
 def generate_summary(content: str, top_n: int=5) -> str:
+    '''
+    Generate a summary for some text
+
+    Arguments
+    ---
+    content: str
+        The content to summarize
+    top_n: int
+        The number of sentences to summarize
+
+    Returns
+    ---
+    A summary of the content
+    '''
     download('stopwords')
     stop_words = stopwords.words('english')
     summarize_text = []
-
-    content = remove_unwanted_chars(content)
     
     # Get a list of sentences
     sentences =  get_sentences(content)
     
     # Generate Similary Martix across sentences
-    # print(sentences)
     sentence_similarity_matrix = build_similarity_matrix(sentences, stop_words)
-    # print(sentence_similarity_matrix)
     
     # Rank sentences in similarity martix using pagerank
     sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_matrix)
-    # print(sentence_similarity_graph)
     scores = nx.pagerank(G=sentence_similarity_graph, max_iter=500)
     
     # Sort the sentences by rank and pick top sentences
