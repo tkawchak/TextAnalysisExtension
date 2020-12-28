@@ -3,6 +3,17 @@
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
 
+/**
+ * 
+ * @param {*} resultList 
+ */
+function clearCurrentResults(resultList) {
+  // clear the result items
+  while (resultList.lastElementChild) {
+    resultList.removeChild(resultList.lastElementChild);
+  }
+}
+
 function displayAnalysisResults(response) {
   // Get the desired element for result items
   var summary = document.getElementById("summary");
@@ -12,10 +23,7 @@ function displayAnalysisResults(response) {
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
     "lix_readability_index", "smog_index"];
 
-  // clear the result items
-  while (resultList.lastElementChild) {
-    resultList.removeChild(resultList.lastElementChild);
-  }
+  clearCurrentResults(resultList);
 
   // display the summary
   if (response.hasOwnProperty("summary") && response["summary"] != null)
@@ -99,6 +107,10 @@ function sendAnalyzeCommandToContentScript(tabs) {
   }
 }
 
+/**
+ * 
+ * @param {} tabs 
+ */
 function sendFetchCommandToContentScript(tabs) {
   for (var tab of tabs)
   {
@@ -110,13 +122,64 @@ function sendFetchCommandToContentScript(tabs) {
 }
 
 /**
+ * Show the buttons for analyzing custom text fields
+ */
+function showAnalyzeCustomTextFields() {
+  var itemsToHide = document.getElementsByClassName("show-default");
+  for (var i=0; i < itemsToHide.length; i++) {
+    itemsToHide[i].setAttribute("hidden", true);
+  }
+
+  var itemsToShow = document.getElementsByClassName("analyze-custom-text");
+  for (var i=0; i < itemsToShow.length; i++) {
+    itemsToShow[i].removeAttribute("hidden");
+  }
+}
+
+/**
+ * Analyze custom text field box
+ */
+async function analyzeCustomText() {
+  var text = document.getElementById("custom-text-box").value;
+  if (text == null || text.trim() == '') {
+    showAnalyzeCustomTextFields();
+  }
+  else {
+    console.log(`[menu_actions.js] Custom text: ${text}`);
+    // TODO: Analyze the text here
+  }
+  return
+}
+
+/**
+ * 
+ */
+async function analyzeSelectedText() {
+  return;
+}
+
+/**
+ * show the default menu options
+ */
+function showDefaultMenu() {
+  var defaultItems = document.getElementsByClassName("show-default");
+  for (var i=0; i < defaultItems.length; i++) {
+    defaultItems[i].removeAttribute("hidden");
+  }
+
+  document.getElementById("custom-text").setAttribute("hidden", true);
+  document.getElementById("back-button").setAttribute("hidden", true);
+}
+
+/**
  * Listen for clicks in the popup page.
  * Determine what action to take depending on what button was clicked
  */
 function listenForClicks() {
   document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("analyze-button")) {
-      console.log("In popup script, analyze button was clicked");
+    console.log(`[menu_actions.js] Clicked! Id: ${e.target.id}`);
+    if (e.target.id == "analyze-webpage-button") {
+      console.log("[menu_actions.js] Analyze Webpage button was clicked");
       browser.tabs.query({
         currentWindow: true,
         active: true
@@ -124,14 +187,26 @@ function listenForClicks() {
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
     }
-    else if (e.target.classList.contains("fetch-button")) {
-      console.log("In popup script, fetch button was clicked");
+    else if (e.target.id == "fetch-webpage-button") {
+      console.log("[menu_actions.js] Fetch Webpage data button was clicked");
       browser.tabs.query({
         currentWindow: true,
         active: true
       })
         .then(sendFetchCommandToContentScript)
         .catch(logError);
+    }
+    else if (e.target.id == "analyze-text-button") {
+      console.log("[menu_actions.js] Analyze Custom Text button was clicked");
+      analyzeCustomText();
+    }
+    else if (e.target.id == "analyze-selected-button") {
+      console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
+      analyzeSelectedText();
+    }
+    else if (e.target.id == "back-button") {
+      console.log("[menu_actions.js] Back button was clicked");
+      showDefaultMenu();
     }
     return;
   });

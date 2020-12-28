@@ -9,9 +9,18 @@
 
 <body>
   <div id="popup-content">
+    <div id="custom-text" class="hide-default analyze-custom-text" hidden>
+      <label id="custom-text-box-label" for="custom-text-box">Enter Text to Analyze</label>
+      <br>
+      <textarea id="custom-text-box"></textarea>
+      <br>
+    </div>
     <div id="popup-actions">
-        <div class="menuitem button analyze-button">Analyze</div>
-        <div class="menuitem button fetch-button">Fetch Data</div>
+      <div class="menuitem button show-default" id="analyze-webpage-button">Analyze Webpage</div>
+      <div class="menuitem button show-default" id="fetch-webpage-button">Fetch Webpage Data</div>
+      <div class="menuitem button show-default" id="analyze-selected-button">Analyze Selected Text</div>
+      <div class="menuitem button show-default analyze-custom-text" id="analyze-text-button">Analyze Custom Text</div>
+      <div class="menuitem button hide-default analyze-custom-text" id="back-button" hidden>Back</div>
     </div>
     <div id="analyze-results">
         <div id="summary-section" class="hidden">
