@@ -2,19 +2,28 @@
 // var logger = require("./telemetry/logging.js");
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
+const client = require("../client.js");
 
 /**
- * 
- * @param {*} resultList 
+ * Clear the current analysis results
  */
-function clearCurrentResults(resultList) {
+function clearCurrentAnalysisResults() {
   // clear the result items
+  console.log("[menu_actions.js] Clearing all existing analysis results");
+  var resultList = document.getElementById("result-items");
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
   }
 }
 
+/**
+ * Display analysis results for a webpage
+ * @param {*} response response from an analysis action
+ */
 function displayAnalysisResults(response) {
+  // Clear the existing results
+  clearCurrentAnalysisResults();
+
   // Get the desired element for result items
   var summary = document.getElementById("summary");
   var summarySection = document.getElementById("summary-section");
@@ -22,8 +31,6 @@ function displayAnalysisResults(response) {
   var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length", 
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
     "lix_readability_index", "smog_index"];
-
-  clearCurrentResults(resultList);
 
   // display the summary
   if (response.hasOwnProperty("summary") && response["summary"] != null)
@@ -61,7 +68,7 @@ function displayAnalysisResults(response) {
 
 /**
  * Handle the response from analyzing the current web page and display the results
- * @param {*} response 
+ * @param {*} response response from an analyze action
  */
 function handleAnalyzeResult(response) {
   var responseText = JSON.stringify(response);
@@ -71,7 +78,7 @@ function handleAnalyzeResult(response) {
 
 /**
  * Handle the response from fetching the current web page data
- * @param {*} response 
+ * @param {*} response The response from a fetch action
  */
 function handleFetchResult(response) {
   var responseText = JSON.stringify(response);
@@ -108,8 +115,17 @@ function sendAnalyzeCommandToContentScript(tabs) {
 }
 
 /**
+ * Analyze the user's custom text
+ * @param {string} text The text the analyze
+ */
+function sendAnalyzeCustomTextCommandtoContentScript(text) {
+  console.log(`[menu_actions.js] Analyzing text`);
+  return client.analyzeText(text);
+}
+
+/**
  * 
- * @param {} tabs 
+ * @param {*} tabs the tabs to send the command to
  */
 function sendFetchCommandToContentScript(tabs) {
   for (var tab of tabs)
@@ -125,6 +141,7 @@ function sendFetchCommandToContentScript(tabs) {
  * Show the buttons for analyzing custom text fields
  */
 function showAnalyzeCustomTextFields() {
+  clearCurrentAnalysisResults();
   var itemsToHide = document.getElementsByClassName("show-default");
   for (var i=0; i < itemsToHide.length; i++) {
     itemsToHide[i].setAttribute("hidden", true);
@@ -146,8 +163,11 @@ async function analyzeCustomText() {
   }
   else {
     console.log(`[menu_actions.js] Custom text: ${text}`);
-    // TODO: Analyze the text here
+    // TODO: Sanitize this input
+    sendAnalyzeCustomTextCommandtoContentScript(text);
   }
+
+  // TODO: Display the result from analyze text
   return
 }
 
@@ -162,6 +182,7 @@ async function analyzeSelectedText() {
  * show the default menu options
  */
 function showDefaultMenu() {
+  clearCurrentAnalysisResults();
   var defaultItems = document.getElementsByClassName("show-default");
   for (var i=0; i < defaultItems.length; i++) {
     defaultItems[i].removeAttribute("hidden");
@@ -178,21 +199,20 @@ function showDefaultMenu() {
 function listenForClicks() {
   document.addEventListener("click", (e) => {
     console.log(`[menu_actions.js] Clicked! Id: ${e.target.id}`);
+    var activeTab = browser.tabs.query({
+      currentWindow: true,
+      active: true
+    });
+
     if (e.target.id == "analyze-webpage-button") {
       console.log("[menu_actions.js] Analyze Webpage button was clicked");
-      browser.tabs.query({
-        currentWindow: true,
-        active: true
-      })
+      activeTab
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
     }
     else if (e.target.id == "fetch-webpage-button") {
       console.log("[menu_actions.js] Fetch Webpage data button was clicked");
-      browser.tabs.query({
-        currentWindow: true,
-        active: true
-      })
+      activeTab
         .then(sendFetchCommandToContentScript)
         .catch(logError);
     }
@@ -202,7 +222,9 @@ function listenForClicks() {
     }
     else if (e.target.id == "analyze-selected-button") {
       console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
-      analyzeSelectedText();
+      activeTab
+        .then(analyzeSelectedText)
+        .catch(logError);
     }
     else if (e.target.id == "back-button") {
       console.log("[menu_actions.js] Back button was clicked");

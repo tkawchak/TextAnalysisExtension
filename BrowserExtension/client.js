@@ -2,11 +2,12 @@ const axios = require('axios');
 const utilities = require('./utilities.js');
 
 module.exports = {
-    getWebpageData: getWebpageData,
+    analyzeWebpage: analyzeWebpage,
     getCurrentWebpageData: getCurrentWebpageData,
     processWebpage: processWebpage,
     processWebpageData: processWebpageData,
     fetchWebpageData: fetchCurrentWebpageData,
+    analyzeText: analyzeText,
 };
 
 /**
@@ -15,31 +16,60 @@ module.exports = {
 async function getCurrentWebpageData() {
     var url = utilities.getWebpageUrl();
     console.log(`[client.js] Fetching webpage data from URL ${url}`);
-    webpageData = await getWebpageData(url);
+    webpageData = await analyzeWebpage(url);
+    return webpageData;
+}
+
+/**
+ * Analyze some text
+ * @param {string} text 
+ */
+async function analyzeText(text) {
+    console.log(`[client.js] Extracting Text data for custom text`);
+    var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
+    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
+    // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
+
+    var webpageData = {};
+    var response = await axios.post(requestUrl, {
+        content: text,
+    });
+    if (response.status >= 200 && response.status < 300) {
+        console.log("[client.js] processing custom text successfully");
+        webpageData = response.data;
+    }
+    else {
+        var errorMessage = `[client.js] Unable to analyze text. ExtractText response status: ${response.status} and response body: ${response.data}`;
+        console.error(errorMessage);
+        throw errorMessage;
+    }
+
     return webpageData;
 }
 
 /**
  * Function to get web page data form a url.
  * Calls and api that parses the webpage text and then runs readability metrics on them.
- * 
  * @param {*} url The url to get webpage data from
  */
-async function getWebpageData(url) {
+async function analyzeWebpage(url) {
     console.log(`[client.js] Retrieving webpage data for ${url}`);
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?url=${url}&code=${code}`;
+    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
     // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
-    console.log("[client.js] sending request to get webpage data");
+    
     var webpageData = {};
-    var response = await axios.get(requestUrl);
+    var response = await axios.post(requestUrl, {
+        url: url,
+    });
     if (response.status >= 200 && response.status < 300) {
         console.log("[client.js] processed web page text successfully");
         webpageData = response.data;
     }
     else {
-        console.error(`[client.js] Unable to extract text from webpage. ExtractText response status: ${response.status} and response body: ${response.data}`);
-        throw `Unable to extract text from webpage. ExtractText response status: ${response.status} and response body: ${response.data}`;
+        var errorMessage = `[client.js] Unable to extract text from webpage. ExtractText response status: ${response.status} and response body: ${response.data}`;
+        console.error(errorMessage);
+        throw errorMessage;
     }
 
     return webpageData;

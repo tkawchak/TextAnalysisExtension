@@ -1,24 +1,38 @@
 var Mercury = require('@postlight/mercury-parser');
-// var url = 'https://www.foxnews.com/us/armed-man-reportedly-shot-after-throwing-incendiary-devices-at-ice-detention-center';
-//var FleschKincaid = require("flesch-kincaid");
 var Readability = require('text-readability');
+var extractor = require("./extractMetrics.js");
+var natural = require("natural")
 
+/**
+ * Parse api request
+ * @param {*} request The request input
+ * @param {*} context The request context
+ */
 function parseRequestInput(request, context) {
     context.log("Parsing request input");
-    if (request == null || request.query == null)
+    if (request == null || request.body == null)
     {
         return {
             status: 400,
-            body: "Please add request properties"
+            body: "Please add request body"
         }
     }
     context.log("Checking for valid url");
-    var url = request.query["url"];
+    var url = request.body["url"];
     var isUrlValid = isValidUrl(url, context);
-    if (!isUrlValid) {
+
+    context.log("Checking for valid content");
+    var content = request.body["content"];
+    var isContentValid = false;
+    if (content != null && content.trim() != "")
+    {
+        isContentValid = true;
+    }
+
+    if (!isUrlValid && !isContentValid) {
         return {
             status: 400,
-            body: "Please enter valid url."
+            body: "Please enter valid url or content."
         }
     }
 
@@ -26,11 +40,23 @@ function parseRequestInput(request, context) {
     return {
         status: 200,
         body: "Valid Url",
-        url: url
+        isUrlValid: isUrlValid,
+        isContentValid: isContentValid,
+        url: url,
+        content: content,
     }
 }
 
+/**
+ * Perform a check to make sure the url is valid
+ * @param {string} url the url to check
+ * @param {*} context for logging
+ */
 function isValidUrl(url, context) {
+    if (url == null) {
+        context.log("Url not present on request");
+        return false;
+    }
     if (!url.includes("://")) {
         context.log("Url does not contain '://'. INVALID.");
         return false;
@@ -43,49 +69,123 @@ function isValidUrl(url, context) {
     return true;
 }
 
+/**
+ * Get the text to use, either by parsing from the url or directly from the input
+ * @param {*} parsedInput the input to the function
+ * @param {*} context the azure functions context
+ */
+async function getParsedText(parsedInput, context) {
+    // use mercury to get the web page text
+    parsedTextResult = {};
+    var url = parsedInput.url;
+    if (parsedInput.isUrlValid) {
+        try {
+            context.log("Calling mercury service to parse text from url.");
+            parsedTextResult = await Mercury.parse(url, {contentType: 'text'});
+            context.log("Successfully retrieved parsed web page.");
+        }
+        catch (error) {
+            context.log(error);
+            throw error;
+        }
+    }
+    else {
+        context.log("Url not specified. Parsing user entered text");
+        text = parsedInput.content;
+        if (text == null || text.trim() == "")
+        {
+            throw `Could not parse text content`
+        }
+        parsedTextResult["content"] = text;
+    }
+
+    return parsedTextResult;
+}
+
+/**
+ * split the text into sentences and then rejoin it to 
+ * get rid of newlines and other separators
+ * The documentation for this tokenizer can be found here
+ * https://github.com/NaturalNode/natural#tokenizers
+ * This is from the 'natural' npm package
+ * @param {string} text the text to split
+ * @param {*} context the azure function context
+ */
+function splitSentences(text, context) {
+    context.log("parsing sentences...");
+
+    // Right now, the SentenceTokenizerNew is better, but not as robust as
+    // SentenceTokenizer, so we will try to use sentenceTokenizerNew and
+    // then default to SentenceTokenizer if there are errors
+    try {
+        var tokenizer = new natural.SentenceTokenizerNew();
+        sentences = tokenizer.tokenize(text);
+    }
+    catch (error) {
+        context.log(`Unable to parse with SentenceTokenizerNew because of ${error}`);
+        tokenizer = new natural.SentenceTokenizer();
+        sentences = tokenizer.tokenize(text);
+    }
+
+    // If the split sentence does not end in punctuation, then add a period because
+    // we need to be able to distinguish sentences after smushing them together.
+    for (var i=0; i<sentences.length; i++) {
+        if (sentences[i].match("([^.!?]*[.!?])+") == null) {
+            context.log(`Sentence without ".": ${sentences[i]}`);
+            sentences[i] = sentences[i] + ".";
+        }
+    }
+    // When the sentences are split, they still contain the punctuation
+    // so we only need to add a space when joining.
+    var joinedSentences = sentences.join(" ");
+
+    return joinedSentences;
+}
+
 // The main function that is executed in the azure function
 module.exports = async function (context, request) {
-    var parsedInputResult = parseRequestInput(request, context);
-    if (parsedInputResult.status != 200) {
-        return parsedInputResult;
+    var parsedInput = parseRequestInput(request, context);
+    if (parsedInput.status != 200) {
+        return parsedInput;
     }
     
-    // use mercury to get the web page text
-    var url = parsedInputResult.url;
+    // use mercury to get the web page text or use the provided content
     try {
-        context.log("Calling mercury service to parse text from url.");
-        var parsedTextResult = await Mercury.parse(url, {contentType: 'text'});
-        context.log("Successfully retrieved parsed web page.");
+        var parsedTextResult = await getParsedText(parsedInput, context);
     }
-    catch (exception) {
-        context.log(exception);
+    catch (error) {
+        context.log(error);
         return {
             status: 500,
-            body: `Could not parse text from url '${url}' because of exception '${exception}'`
+            body: error
         }
     }
 
+    // parse into sentences and join them back together
+    var content = splitSentences(parsedTextResult.content, context);
+    // var content = parsedTextResult.content;
+
     // Compute a bunch of readability metrics
-    var syllableCount = Readability.syllableCount(parsedTextResult.content, lang='en-US');
-    var lexiconCount = Readability.lexiconCount(parsedTextResult.content, removePunctuation=true);
-    var sentenceCount = Readability.sentenceCount(parsedTextResult.content);
-    var difficultWords = Readability.difficultWords(parsedTextResult.content);
-    var averageSentenceLength = Readability.averageSentenceLength(parsedTextResult.content);
-    var lixReadabilityIndex = Readability.lix(parsedTextResult.content);
-    var fleschEase = Readability.fleschReadingEase(parsedTextResult.content);
-    var fleschKincaidGrade = Readability.fleschKincaidGrade(parsedTextResult.content);
-    var colemanLiauIndex = Readability.colemanLiauIndex(parsedTextResult.content);
-    var automatedReadabilityIndex = Readability.automatedReadabilityIndex(parsedTextResult.content);
-    var daleChallReadabilityScore = Readability.daleChallReadabilityScore(parsedTextResult.content);
-    var linsearWriteIndex = Readability.linsearWriteFormula(parsedTextResult.content);
-    var gunningFogIndex = Readability.gunningFog(parsedTextResult.content);
-    var smogIndex = Readability.smogIndex(parsedTextResult.content);
-    var overallScore = Readability.textStandard(parsedTextResult.content);
+    var syllableCount = Readability.syllableCount(content, lang='en-US');
+    var lexiconCount = Readability.lexiconCount(content, removePunctuation=true);
+    var sentenceCount = Readability.sentenceCount(content);
+    var difficultWords = Readability.difficultWords(content);
+    var averageSentenceLength = Readability.averageSentenceLength(content);
+    var lixReadabilityIndex = Readability.lix(content);
+    var fleschEase = Readability.fleschReadingEase(content);
+    var fleschKincaidGrade = Readability.fleschKincaidGrade(content);
+    var colemanLiauIndex = Readability.colemanLiauIndex(content);
+    var automatedReadabilityIndex = Readability.automatedReadabilityIndex(content);
+    var daleChallReadabilityScore = Readability.daleChallReadabilityScore(content);
+    var linsearWriteIndex = Readability.linsearWriteFormula(content);
+    var gunningFogIndex = Readability.gunningFog(content);
+    var smogIndex = Readability.smogIndex(content);
+    var overallScore = Readability.textStandard(content);
 
     // Contruct the new response object
     var responseBody = {
         author: parsedTextResult.author || "",
-        content: parsedTextResult.content || "",
+        content: content || "",
         date_published: parsedTextResult.date_published || new Date(Date.UTC(0)).toJSON(),
         dek: parsedTextResult.dek || "",
         direction: parsedTextResult.direction || "",
