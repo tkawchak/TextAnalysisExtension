@@ -140,20 +140,7 @@ module.exports = async function (context, request) {
 
     // Contruct the new response object
     var responseBody = {
-        author: parsedTextResult.author || "",
         content: content || "",
-        date_published: parsedTextResult.date_published || new Date(Date.UTC(0)).toJSON(),
-        dek: parsedTextResult.dek || "",
-        direction: parsedTextResult.direction || "",
-        domain: parsedTextResult.domain || "",
-        excerpt: parsedTextResult.excerpt || "",
-        lead_image_url: parsedTextResult.lead_image_url || "",
-        next_page_url: parsedTextResult.next_page_url || "",
-        rendered_pages: parsedTextResult.rendered_pages || 0,
-        title: parsedTextResult.title || "",
-        total_pages: parsedTextResult.total_pages || 0,
-        url: parsedTextResult.url || "",
-        word_count: parsedTextResult.word_count || 0,
         syllable_count: syllableCount || 0,
         lexicon_count: lexiconCount || 0,
         sentence_count: sentenceCount || 0,

@@ -120,6 +120,9 @@ function sendAnalyzeCommandToContentScript(tabs) {
  */
 function sendAnalyzeCustomTextCommandtoContentScript(text) {
   console.log(`[menu_actions.js] Analyzing text`);
+
+  // TODO: Figure out which function we should actually send this request to.
+  // We just want to compute ther readability without storing the data
   return client.analyzeText(text);
 }
 

@@ -1,8 +1,9 @@
 const axios = require('axios');
+const ComputeReadability = require('../TextExtractionFunc/ComputeReadability/index.js');
 const utilities = require('./utilities.js');
 
 module.exports = {
-    analyzeWebpage: analyzeWebpage,
+    extractWebpageInfo: extractWebpageInfo,
     getCurrentWebpageData: getCurrentWebpageData,
     processWebpage: processWebpage,
     processWebpageData: processWebpageData,
@@ -16,8 +17,16 @@ module.exports = {
 async function getCurrentWebpageData() {
     var url = utilities.getWebpageUrl();
     console.log(`[client.js] Fetching webpage data from URL ${url}`);
-    webpageData = await analyzeWebpage(url);
-    return webpageData;
+    webpageData = await extractWebpageInfo(url);
+    webpageReadabilityMetrics = await computeReadability(webpageData.content);
+
+    // TODO: Fill out the rest of these with metrics.
+    // Does it make sense to create some classes with the objects?
+    var result = {
+        author: webpageData.author,
+        content: webpageData.content,
+    };
+    return result;
 }
 
 /**
@@ -48,15 +57,37 @@ async function analyzeText(text) {
 }
 
 /**
+ * compute the readability metrics of some text.
+ * @param {string} content 
+ */
+async function computeReadability(content) {
+    console.log(`[client.js] computing readability metrics`);
+    var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
+    // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ComputeReadability?code=${code}`;
+    var requestUrl = `http://localhost:7072/api/ComputeReadability?code=${code}`;
+
+    var response = await axios.post(requestUrl, {
+        content: content,
+    });
+    
+    // TODO: Parse the results from the ComputeReadability response.
+    // Does it make sense to create some classes for the data contracts?
+    var result = {
+        content: content,
+    };
+    return result;
+}
+
+/**
  * Function to get web page data form a url.
  * Calls and api that parses the webpage text and then runs readability metrics on them.
  * @param {*} url The url to get webpage data from
  */
-async function analyzeWebpage(url) {
+async function extractWebpageInfo(url) {
     console.log(`[client.js] Retrieving webpage data for ${url}`);
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
     var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
-    // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
+    // var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
     
     var webpageData = {};
     var response = await axios.post(requestUrl, {
