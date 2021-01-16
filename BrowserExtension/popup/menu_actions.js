@@ -11,9 +11,15 @@ function clearCurrentAnalysisResults() {
   // clear the result items
   console.log("[menu_actions.js] Clearing all existing analysis results");
   var resultList = document.getElementById("result-items");
+  var summary = document.getElementById("summary");
+  var summarySection = document.getElementById("summary-section");
+
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
   }
+
+  summary.value = "";
+  summarySection.classList.add("hidden");
 }
 
 /**
@@ -115,18 +121,6 @@ function sendAnalyzeCommandToContentScript(tabs) {
 }
 
 /**
- * Analyze the user's custom text
- * @param {string} text The text the analyze
- */
-function sendAnalyzeCustomTextCommandtoContentScript(text) {
-  console.log(`[menu_actions.js] Analyzing text`);
-
-  // TODO: Figure out which function we should actually send this request to.
-  // We just want to compute ther readability without storing the data
-  return client.analyzeText(text);
-}
-
-/**
  * 
  * @param {*} tabs the tabs to send the command to
  */
@@ -167,11 +161,10 @@ async function analyzeCustomText() {
   else {
     console.log(`[menu_actions.js] Custom text: ${text}`);
     // TODO: Sanitize this input
-    sendAnalyzeCustomTextCommandtoContentScript(text);
+    var textAnalysisResult = await client.computeReadability(text);
   }
 
-  // TODO: Display the result from analyze text
-  return
+  displayAnalysisResults(textAnalysisResult);
 }
 
 /**
@@ -187,12 +180,17 @@ async function analyzeSelectedText() {
 function showDefaultMenu() {
   clearCurrentAnalysisResults();
   var defaultItems = document.getElementsByClassName("show-default");
+  var customTextSection = document.getElementById("custom-text");
+  var customTextBox = document.getElementById("custom-text-box");
+  var backButton = document.getElementById("back-button");
+
   for (var i=0; i < defaultItems.length; i++) {
     defaultItems[i].removeAttribute("hidden");
   }
 
-  document.getElementById("custom-text").setAttribute("hidden", true);
-  document.getElementById("back-button").setAttribute("hidden", true);
+  customTextBox.value = "";
+  customTextSection.setAttribute("hidden", true);
+  backButton.setAttribute("hidden", true);
 }
 
 /**

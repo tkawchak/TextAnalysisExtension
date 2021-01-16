@@ -1,5 +1,4 @@
 const axios = require('axios');
-const ComputeReadability = require('../TextExtractionFunc/ComputeReadability/index.js');
 const utilities = require('./utilities.js');
 
 module.exports = {
@@ -9,6 +8,7 @@ module.exports = {
     processWebpageData: processWebpageData,
     fetchWebpageData: fetchCurrentWebpageData,
     analyzeText: analyzeText,
+    computeReadability: computeReadability,
 };
 
 /**
@@ -17,14 +17,41 @@ module.exports = {
 async function getCurrentWebpageData() {
     var url = utilities.getWebpageUrl();
     console.log(`[client.js] Fetching webpage data from URL ${url}`);
-    webpageData = await extractWebpageInfo(url);
-    webpageReadabilityMetrics = await computeReadability(webpageData.content);
+    var webpageData = await extractWebpageInfo(url);
+    var webpageReadabilityMetrics = await computeReadability(webpageData.content);
 
     // TODO: Fill out the rest of these with metrics.
     // Does it make sense to create some classes with the objects?
     var result = {
         author: webpageData.author,
         content: webpageData.content,
+        date_published: webpageData.date_published,
+        dek: webpageData.dek,
+        direction: webpageData.direction,
+        domain: webpageData.domain,
+        excerpt: webpageData.excerpt,
+        lead_image_url: webpageData.lead_image_url,
+        next_page_url: webpageData.next_page_url,
+        rendered_pages: webpageData.rendered_pages,
+        title: webpageData.title,
+        total_pages: webpageData.total_pages,
+        url: webpageData.url,
+        word_count: webpageData.word_count,
+        syllable_count: webpageReadabilityMetrics.syllable_count,
+        lexicon_count: webpageReadabilityMetrics.lexicon_count,
+        sentence_count: webpageReadabilityMetrics.sentence_count,
+        average_sentence_length: webpageReadabilityMetrics.average_sentence_length,
+        lix_readability_index: webpageReadabilityMetrics.lix_readability_index,
+        flesch_ease: webpageReadabilityMetrics.flesch_ease,
+        fleschkincaid_grade: webpageReadabilityMetrics.fleschkincaid_grade,
+        coleman_liau_index: webpageReadabilityMetrics.coleman_liau_index,
+        automated_readability_index: webpageReadabilityMetrics.automated_readability_index,
+        dale_chall_readability_score: webpageReadabilityMetrics.dale_chall_readability_score,
+        difficult_words: webpageReadabilityMetrics.difficult_words,
+        linsear_write_index: webpageReadabilityMetrics.linsear_write_index,
+        gunning_fog_index: webpageReadabilityMetrics.gunning_fog_index,
+        smog_index: webpageReadabilityMetrics.smog_index,
+        overall_score: webpageReadabilityMetrics.overall_score,
     };
     return result;
 }
@@ -66,16 +93,28 @@ async function computeReadability(content) {
     // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ComputeReadability?code=${code}`;
     var requestUrl = `http://localhost:7072/api/ComputeReadability?code=${code}`;
 
+    console.log(`[client.js] Sending request to ${requestUrl}`);
+
+    var readabilityData = {};
     var response = await axios.post(requestUrl, {
         content: content,
     });
+
+    console.log(`[client.js] Received response`);
+
+    if (response.status >= 200 && response.status < 300) {
+        console.log("[client.js] Successfully computed readability");
+        readabilityData = response.data;
+    }
+    else {
+        var errorMessage = `[client.js] Unable to extract readability. Response status: ${response.status} and response body: ${response.data}`;
+        console.error(errorMessage);
+        throw errorMessage;
+    }
+
+    console.log(`response: ${JSON.stringify(readabilityData)}`);
     
-    // TODO: Parse the results from the ComputeReadability response.
-    // Does it make sense to create some classes for the data contracts?
-    var result = {
-        content: content,
-    };
-    return result;
+    return readabilityData;
 }
 
 /**
@@ -86,8 +125,8 @@ async function computeReadability(content) {
 async function extractWebpageInfo(url) {
     console.log(`[client.js] Retrieving webpage data for ${url}`);
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
-    // var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
+    // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
+    var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
     
     var webpageData = {};
     var response = await axios.post(requestUrl, {

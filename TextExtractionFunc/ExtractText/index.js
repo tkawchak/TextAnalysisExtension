@@ -30,9 +30,7 @@ function parseRequestInput(request, context) {
         status: 200,
         body: "Valid Url",
         isUrlValid: isUrlValid,
-        isContentValid: isContentValid,
         url: url,
-        content: content,
     }
 }
 
@@ -99,14 +97,10 @@ module.exports = async function (context, request) {
         }
     }
 
-    // parse into sentences and join them back together
-    var content = splitSentences(parsedTextResult.content, context);
-    // var content = parsedTextResult.content;
-
     // Contruct the new response object
     var responseBody = {
         author: parsedTextResult.author || "",
-        content: content || "",
+        content: parsedTextResult.content || "",
         date_published: parsedTextResult.date_published || new Date(Date.UTC(0)).toJSON(),
         dek: parsedTextResult.dek || "",
         direction: parsedTextResult.direction || "",
