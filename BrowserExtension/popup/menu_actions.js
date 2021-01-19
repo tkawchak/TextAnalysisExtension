@@ -54,6 +54,11 @@ function displayAnalysisResults(response) {
   for (var i=0; i < keysToDisplay.length; i++)
   {
     var key = keysToDisplay[i];
+    if (response[key] == null || response[key] == "") {
+      console.warn(`[menu_actions.js] No value for key ${key}`);
+      continue;
+    }
+
     console.log(`Creating response item for key ${key}`);
     var newKey = document.createElement("div");
     newKey.className = "result-key";
@@ -121,7 +126,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
 }
 
 /**
- * 
+ * Send a command to fetch the data for the current webpage
  * @param {*} tabs the tabs to send the command to
  */
 function sendFetchCommandToContentScript(tabs) {
@@ -130,6 +135,20 @@ function sendFetchCommandToContentScript(tabs) {
     console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "fetch" })
       .then(handleFetchResult)
+      .catch(logError);
+  }
+}
+
+/**
+ * Send a command to analyze the text that is selected on the webpage.
+ * @param {*} tabs the tabs to send the command to
+ */
+function sendAnalyzeSelectedCommandToContentScript(tabs) {
+  for (var tab of tabs)
+  {
+    console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
+    browser.tabs.sendMessage(tab.id, { "command": "analyze-selected" })
+      .then(handleAnalyzeResult)
       .catch(logError);
   }
 }
@@ -165,13 +184,6 @@ async function analyzeCustomText() {
   }
 
   displayAnalysisResults(textAnalysisResult);
-}
-
-/**
- * 
- */
-async function analyzeSelectedText() {
-  return;
 }
 
 /**
@@ -224,7 +236,7 @@ function listenForClicks() {
     else if (e.target.id == "analyze-selected-button") {
       console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
       activeTab
-        .then(analyzeSelectedText)
+        .then(sendAnalyzeSelectedCommandToContentScript)
         .catch(logError);
     }
     else if (e.target.id == "back-button") {

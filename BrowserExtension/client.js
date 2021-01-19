@@ -9,6 +9,7 @@ module.exports = {
     fetchWebpageData: fetchCurrentWebpageData,
     analyzeText: analyzeText,
     computeReadability: computeReadability,
+    analyzeSelectedText: analyzeSelectedText,
 };
 
 /**
@@ -88,7 +89,7 @@ async function analyzeText(text) {
  */
 async function computeReadability(content) {
     console.log(`[client.js] computing readability metrics`);
-    var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
+    var code = `tNngSfLOUca4j0t3NRsVLOQeAxk3ApAL71WT/24ep9VJmrSizG6pZg==`;
     var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ComputeReadability?code=${code}`;
     // var requestUrl = `http://localhost:7072/api/ComputeReadability?code=${code}`;
 
@@ -110,7 +111,7 @@ async function computeReadability(content) {
         console.error(errorMessage);
         throw errorMessage;
     }
-    
+
     return readabilityData;
 }
 
@@ -124,7 +125,7 @@ async function extractWebpageInfo(url) {
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
     var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
     // var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
-    
+
     var webpageData = {};
     var response = await axios.post(requestUrl, {
         url: url,
@@ -168,7 +169,7 @@ async function processWebpageData(data) {
     var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=${code}`;
     // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=${code}`;
     var response;
-    
+
     // TODO: Create some contracts so we don't have to specify these values here.
     response = await axios.post(requestUrl, {
         author: data.author,
@@ -229,4 +230,26 @@ async function fetchCurrentWebpageData() {
         console.log(`[client.js] Unable to fetch data from webpage. GetProcessedText response code: ${response.status} and response body: ${response.data}`);
         throw `Unable to fetch data from webpage. GetProcessedText response code: ${response.status} and response body: ${response.data}`;
     }
+}
+
+/**
+ * Analyze the selected text on a current webpage
+ */
+async function analyzeSelectedText() {
+    var selectedObject = window.getSelection();
+    var text = selectedObject.toString();
+    console.log(`[client.js] Custom text: ${text}`);
+    var result = {};
+
+    if (text == null || text.trim() == "") return result;
+
+    try {
+        // TODO: Sanitize this input
+        result = await computeReadability(text);
+    }
+    catch (error) {
+        console.error(`[menu_actions.js] Unable to compute readability because ${error}`);
+    }
+    
+    return result;
 }
