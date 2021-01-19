@@ -2,8 +2,34 @@
 // var logger = require("./telemetry/logging.js");
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
+const client = require("../client.js");
 
+/**
+ * Clear the current analysis results
+ */
+function clearCurrentAnalysisResults() {
+  // clear the result items
+  console.log("[menu_actions.js] Clearing all existing analysis results");
+  var resultList = document.getElementById("result-items");
+  var summary = document.getElementById("summary");
+  var summarySection = document.getElementById("summary-section");
+
+  while (resultList.lastElementChild) {
+    resultList.removeChild(resultList.lastElementChild);
+  }
+
+  summary.value = "";
+  summarySection.classList.add("hidden");
+}
+
+/**
+ * Display analysis results for a webpage
+ * @param {*} response response from an analysis action
+ */
 function displayAnalysisResults(response) {
+  // Clear the existing results
+  clearCurrentAnalysisResults();
+
   // Get the desired element for result items
   var summary = document.getElementById("summary");
   var summarySection = document.getElementById("summary-section");
@@ -11,11 +37,6 @@ function displayAnalysisResults(response) {
   var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length", 
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
     "lix_readability_index", "smog_index"];
-
-  // clear the result items
-  while (resultList.lastElementChild) {
-    resultList.removeChild(resultList.lastElementChild);
-  }
 
   // display the summary
   if (response.hasOwnProperty("summary") && response["summary"] != null)
@@ -53,7 +74,7 @@ function displayAnalysisResults(response) {
 
 /**
  * Handle the response from analyzing the current web page and display the results
- * @param {*} response 
+ * @param {*} response response from an analyze action
  */
 function handleAnalyzeResult(response) {
   var responseText = JSON.stringify(response);
@@ -63,7 +84,7 @@ function handleAnalyzeResult(response) {
 
 /**
  * Handle the response from fetching the current web page data
- * @param {*} response 
+ * @param {*} response The response from a fetch action
  */
 function handleFetchResult(response) {
   var responseText = JSON.stringify(response);
@@ -99,6 +120,10 @@ function sendAnalyzeCommandToContentScript(tabs) {
   }
 }
 
+/**
+ * 
+ * @param {*} tabs the tabs to send the command to
+ */
 function sendFetchCommandToContentScript(tabs) {
   for (var tab of tabs)
   {
@@ -110,28 +135,101 @@ function sendFetchCommandToContentScript(tabs) {
 }
 
 /**
+ * Show the buttons for analyzing custom text fields
+ */
+function showAnalyzeCustomTextFields() {
+  clearCurrentAnalysisResults();
+  var itemsToHide = document.getElementsByClassName("show-default");
+  for (var i=0; i < itemsToHide.length; i++) {
+    itemsToHide[i].setAttribute("hidden", true);
+  }
+
+  var itemsToShow = document.getElementsByClassName("analyze-custom-text");
+  for (var i=0; i < itemsToShow.length; i++) {
+    itemsToShow[i].removeAttribute("hidden");
+  }
+}
+
+/**
+ * Analyze custom text field box
+ */
+async function analyzeCustomText() {
+  var text = document.getElementById("custom-text-box").value;
+  if (text == null || text.trim() == '') {
+    showAnalyzeCustomTextFields();
+  }
+  else {
+    console.log(`[menu_actions.js] Custom text: ${text}`);
+    // TODO: Sanitize this input
+    var textAnalysisResult = await client.computeReadability(text);
+  }
+
+  displayAnalysisResults(textAnalysisResult);
+}
+
+/**
+ * 
+ */
+async function analyzeSelectedText() {
+  return;
+}
+
+/**
+ * show the default menu options
+ */
+function showDefaultMenu() {
+  clearCurrentAnalysisResults();
+  var defaultItems = document.getElementsByClassName("show-default");
+  var customTextSection = document.getElementById("custom-text");
+  var customTextBox = document.getElementById("custom-text-box");
+  var backButton = document.getElementById("back-button");
+
+  for (var i=0; i < defaultItems.length; i++) {
+    defaultItems[i].removeAttribute("hidden");
+  }
+
+  customTextBox.value = "";
+  customTextSection.setAttribute("hidden", true);
+  backButton.setAttribute("hidden", true);
+}
+
+/**
  * Listen for clicks in the popup page.
  * Determine what action to take depending on what button was clicked
  */
 function listenForClicks() {
   document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("analyze-button")) {
-      console.log("In popup script, analyze button was clicked");
-      browser.tabs.query({
-        currentWindow: true,
-        active: true
-      })
+    console.log(`[menu_actions.js] Clicked! Id: ${e.target.id}`);
+    var activeTab = browser.tabs.query({
+      currentWindow: true,
+      active: true
+    });
+
+    if (e.target.id == "analyze-webpage-button") {
+      console.log("[menu_actions.js] Analyze Webpage button was clicked");
+      activeTab
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
     }
-    else if (e.target.classList.contains("fetch-button")) {
-      console.log("In popup script, fetch button was clicked");
-      browser.tabs.query({
-        currentWindow: true,
-        active: true
-      })
+    else if (e.target.id == "fetch-webpage-button") {
+      console.log("[menu_actions.js] Fetch Webpage data button was clicked");
+      activeTab
         .then(sendFetchCommandToContentScript)
         .catch(logError);
+    }
+    else if (e.target.id == "analyze-text-button") {
+      console.log("[menu_actions.js] Analyze Custom Text button was clicked");
+      analyzeCustomText();
+    }
+    else if (e.target.id == "analyze-selected-button") {
+      console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
+      activeTab
+        .then(analyzeSelectedText)
+        .catch(logError);
+    }
+    else if (e.target.id == "back-button") {
+      console.log("[menu_actions.js] Back button was clicked");
+      showDefaultMenu();
     }
     return;
   });

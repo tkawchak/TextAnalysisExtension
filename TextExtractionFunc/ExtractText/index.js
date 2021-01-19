@@ -1,20 +1,23 @@
 var Mercury = require('@postlight/mercury-parser');
-// var url = 'https://www.foxnews.com/us/armed-man-reportedly-shot-after-throwing-incendiary-devices-at-ice-detention-center';
-//var FleschKincaid = require("flesch-kincaid");
-var Readability = require('text-readability');
 
+/**
+ * Parse api request
+ * @param {*} request The request input
+ * @param {*} context The request context
+ */
 function parseRequestInput(request, context) {
     context.log("Parsing request input");
-    if (request == null || request.query == null)
+    if (request == null || request.body == null)
     {
         return {
             status: 400,
-            body: "Please add request properties"
+            body: "Please add request body"
         }
     }
     context.log("Checking for valid url");
-    var url = request.query["url"];
+    var url = request.body["url"];
     var isUrlValid = isValidUrl(url, context);
+
     if (!isUrlValid) {
         return {
             status: 400,
@@ -26,11 +29,21 @@ function parseRequestInput(request, context) {
     return {
         status: 200,
         body: "Valid Url",
-        url: url
+        isUrlValid: isUrlValid,
+        url: url,
     }
 }
 
+/**
+ * Perform a check to make sure the url is valid
+ * @param {string} url the url to check
+ * @param {*} context for logging
+ */
 function isValidUrl(url, context) {
+    if (url == null) {
+        context.log("Url not present on request");
+        return false;
+    }
     if (!url.includes("://")) {
         context.log("Url does not contain '://'. INVALID.");
         return false;
@@ -43,44 +56,46 @@ function isValidUrl(url, context) {
     return true;
 }
 
-// The main function that is executed in the azure function
-module.exports = async function (context, request) {
-    var parsedInputResult = parseRequestInput(request, context);
-    if (parsedInputResult.status != 200) {
-        return parsedInputResult;
-    }
-    
+/**
+ * Get the text to use, either by parsing from the url or directly from the input
+ * @param {*} parsedInput the input to the function
+ * @param {*} context the azure functions context
+ */
+async function getParsedText(parsedInput, context) {
     // use mercury to get the web page text
-    var url = parsedInputResult.url;
+    parsedTextResult = {};
+    var url = parsedInput.url;
     try {
         context.log("Calling mercury service to parse text from url.");
-        var parsedTextResult = await Mercury.parse(url, {contentType: 'text'});
+        parsedTextResult = await Mercury.parse(url, {contentType: 'text'});
         context.log("Successfully retrieved parsed web page.");
     }
-    catch (exception) {
-        context.log(exception);
-        return {
-            status: 500,
-            body: `Could not parse text from url '${url}' because of exception '${exception}'`
-        }
+    catch (error) {
+        context.log(error);
+        throw error;
     }
 
-    // Compute a bunch of readability metrics
-    var syllableCount = Readability.syllableCount(parsedTextResult.content, lang='en-US');
-    var lexiconCount = Readability.lexiconCount(parsedTextResult.content, removePunctuation=true);
-    var sentenceCount = Readability.sentenceCount(parsedTextResult.content);
-    var difficultWords = Readability.difficultWords(parsedTextResult.content);
-    var averageSentenceLength = Readability.averageSentenceLength(parsedTextResult.content);
-    var lixReadabilityIndex = Readability.lix(parsedTextResult.content);
-    var fleschEase = Readability.fleschReadingEase(parsedTextResult.content);
-    var fleschKincaidGrade = Readability.fleschKincaidGrade(parsedTextResult.content);
-    var colemanLiauIndex = Readability.colemanLiauIndex(parsedTextResult.content);
-    var automatedReadabilityIndex = Readability.automatedReadabilityIndex(parsedTextResult.content);
-    var daleChallReadabilityScore = Readability.daleChallReadabilityScore(parsedTextResult.content);
-    var linsearWriteIndex = Readability.linsearWriteFormula(parsedTextResult.content);
-    var gunningFogIndex = Readability.gunningFog(parsedTextResult.content);
-    var smogIndex = Readability.smogIndex(parsedTextResult.content);
-    var overallScore = Readability.textStandard(parsedTextResult.content);
+    return parsedTextResult;
+}
+
+// The main function that is executed in the azure function
+module.exports = async function (context, request) {
+    var parsedInput = parseRequestInput(request, context);
+    if (parsedInput.status != 200) {
+        return parsedInput;
+    }
+    
+    // use mercury to get the web page text or use the provided content
+    try {
+        var parsedTextResult = await getParsedText(parsedInput, context);
+    }
+    catch (error) {
+        context.log(error);
+        return {
+            status: 500,
+            body: error
+        }
+    }
 
     // Contruct the new response object
     var responseBody = {
@@ -98,21 +113,6 @@ module.exports = async function (context, request) {
         total_pages: parsedTextResult.total_pages || 0,
         url: parsedTextResult.url || "",
         word_count: parsedTextResult.word_count || 0,
-        syllable_count: syllableCount || 0,
-        lexicon_count: lexiconCount || 0,
-        sentence_count: sentenceCount || 0,
-        average_sentence_length: averageSentenceLength || 0,
-        lix_readability_index: lixReadabilityIndex || 0,
-        flesch_ease: fleschEase || 0,
-        fleschkincaid_grade: fleschKincaidGrade || 0,
-        coleman_liau_index: colemanLiauIndex || 0,
-        automated_readability_index: automatedReadabilityIndex || 0,
-        dale_chall_readability_score: daleChallReadabilityScore || 0,
-        difficult_words: difficultWords || 0,
-        linsear_write_index: linsearWriteIndex || 0,
-        gunning_fog_index: gunningFogIndex || 0,
-        smog_index: smogIndex || 0,
-        overall_score: overallScore || ""
     };
 
     context.log("function executed successfully");
