@@ -20,8 +20,7 @@ async function getCurrentWebpageData() {
     var webpageData = await extractWebpageInfo(url);
     var webpageReadabilityMetrics = await computeReadability(webpageData.content);
 
-    // TODO: Fill out the rest of these with metrics.
-    // Does it make sense to create some classes with the objects?
+    // TODO: Create some contracts so that we don't have to specify all of these here.
     var result = {
         author: webpageData.author,
         content: webpageData.content,
@@ -90,8 +89,8 @@ async function analyzeText(text) {
 async function computeReadability(content) {
     console.log(`[client.js] computing readability metrics`);
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-    // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ComputeReadability?code=${code}`;
-    var requestUrl = `http://localhost:7072/api/ComputeReadability?code=${code}`;
+    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ComputeReadability?code=${code}`;
+    // var requestUrl = `http://localhost:7072/api/ComputeReadability?code=${code}`;
 
     console.log(`[client.js] Sending request to ${requestUrl}`);
 
@@ -125,8 +124,8 @@ async function computeReadability(content) {
 async function extractWebpageInfo(url) {
     console.log(`[client.js] Retrieving webpage data for ${url}`);
     var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
-    // var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
-    var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
+    var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
+    // var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
     
     var webpageData = {};
     var response = await axios.post(requestUrl, {
@@ -171,7 +170,8 @@ async function processWebpageData(data) {
     var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=${code}`;
     // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=${code}`;
     var response;
-    // TODO: Clean up which data gets sent to azure function??
+    
+    // TODO: Create some contracts so we don't have to specify these values here.
     response = await axios.post(requestUrl, {
         author: data.author,
         content: data.content,
