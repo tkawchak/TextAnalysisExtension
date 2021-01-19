@@ -27,15 +27,19 @@ async function popupScriptListener(message) {
   if (message.command != undefined) {
     command = message.command;
     if (command == "analyze") {
-      console.log("In content script, processing web page");
+      console.log("[getDocumentText.js] Analyzing current webpage.");
       result = await client.processWebpage();
     }
     else if (command == "fetch") {
-      console.log("In content script, fetching data for web page");
+      console.log("[getDocumentText.js] Fetching data for current webpage.");
       result = await client.fetchWebpageData();
     }
+    else if (command == "analyze-selected") {
+      console.log("[getDocumentText.js] Analyzing selected text from current webpage.");
+      result = await client.analyzeSelectedText();
+    }
     else {
-      console.log(`In content script, received unrecognized command: ${command}`);
+      console.log(`[getDocumentText.js]received unrecognized command: ${command}`);
     }
   }
 
