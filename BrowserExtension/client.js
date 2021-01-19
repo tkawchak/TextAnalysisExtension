@@ -110,8 +110,6 @@ async function computeReadability(content) {
         console.error(errorMessage);
         throw errorMessage;
     }
-
-    console.log(`response: ${JSON.stringify(readabilityData)}`);
     
     return readabilityData;
 }
