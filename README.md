@@ -1,13 +1,52 @@
 # Text Analysis Extension
-
 This tool is being built as a Firefox Extension to perform analysis on webpage text.
 
-## Current Project Status
+## Current Functionalities
+* Analyze Readability of an entire webpage
+* Analyze Readability of selected text on a webpage
+* Analyze Readability of custom text
+* Computes a summary of a webpage using Extractive Summarization
+* Analyze image content in webpages
+
+## Future Directions
+* Compute Summaries uses Generative Summarization
+* Give suggestions for how to improve content writing quality / readability.
+
+Other ideas? Let me know by creating an issue!
+
+## Project Status
 ### Master Build
 [![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=master)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=master)
 
 ### Develop Build
 [![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=develop)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=develop)
+
+# Readability Scores
+Often the best way to "improve" these readability scores by making text more readable is to use shorter sentences and shorter words.
+
+## Flesch-Kincaid Readability
+There are two [Flesch-Kincaid Readability Tests](https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests) and both can be used to score text readability.
+### Flesch Reading-Ease
+This score ranges from 0 (very difficult to read) to 100 (very easy to read). It is computed with the following formula. 
+
+206.835 - 1.015 * (total words / total sentences) - 84.6 * (total syllables / total words)
+
+This score is affected more by words with many syllables.
+### Flesh-Kincaid Grade
+This is used more extensively for education, as it computes an estimated grade level. It is computed with the following formula.
+
+0.39 * (total words / total sentences) + 11.8 * (total syllables / total words) - 15.59
+
+This grade level emphasizes sentence length over word length.
+
+## Gunning Fog Index
+The [Gunning Fog Index](https://en.wikipedia.org/wiki/Gunning_fog_index) estimates the number of years of education someone needs to have in order to understand text on the first reading. So, a score of 12 means that an average person who graduated high school should be able to understand the text after reading it once. Per the wikipedia entry on gunning fog, "Texts for a wide audience generally need a fog index less than 12. Texts requiring near-universal understanding generally need an index less than 8."
+
+It is computed by the following formula, where "complex words" are words with 3 or more syllables.
+
+0.4 * ((words / sentences) + 100 * (complex words / words))
+
+To reduce this score, use less complex words with fewer syllables because they will be easier to understand.
 
 # Get the Code
 ```
