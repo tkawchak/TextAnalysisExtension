@@ -1,5 +1,12 @@
 # Text Analysis Extension
-This tool is being built as a Firefox Extension to perform analysis on webpage text.
+This tool is being built as a Firefox Extension to perform analysis on webpage text. Use it to analyze the readability of your favorite webpages, selected text on a webpage, or to compose your emails. Use it and let me know what you think!
+
+## Project CI Status
+### Master Build
+[![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=master)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=master)
+
+### Develop Build
+[![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=develop)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=develop)
 
 ## Current Functionalities
 * Analyze Readability of an entire webpage
@@ -9,47 +16,20 @@ This tool is being built as a Firefox Extension to perform analysis on webpage t
 * Analyze image content in webpages
 
 ## Future Directions
-* Compute Summaries uses Generative Summarization
+* Compute Summaries using Generative Summarization
 * Give suggestions for how to improve content writing quality / readability.
+* Add support for other browsers
 
 Other ideas? Let me know by creating an issue!
 
-## Project Status
-### Master Build
-[![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=master)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=master)
+# Data collection
+The extension does not collect any personal data. The only data that is stored in a cosmos DB instance is webpage data, extracted text, and any computed metrics such as a summary and readability metrics.
 
-### Develop Build
-[![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=develop)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=develop)
-
-# Readability Scores
-Often the best way to "improve" these readability scores by making text more readable is to use shorter sentences and shorter words.
-
-## Flesch-Kincaid Readability
-There are two [Flesch-Kincaid Readability Tests](https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests) and both can be used to score text readability.
-### Flesch Reading-Ease
-This score ranges from 0 (very difficult to read) to 100 (very easy to read). It is computed with the following formula. 
-
-206.835 - 1.015 * (total words / total sentences) - 84.6 * (total syllables / total words)
-
-This score is affected more by words with many syllables.
-### Flesh-Kincaid Grade
-This is used more extensively for education, as it computes an estimated grade level. It is computed with the following formula.
-
-0.39 * (total words / total sentences) + 11.8 * (total syllables / total words) - 15.59
-
-This grade level emphasizes sentence length over word length.
-
-## Gunning Fog Index
-The [Gunning Fog Index](https://en.wikipedia.org/wiki/Gunning_fog_index) estimates the number of years of education someone needs to have in order to understand text on the first reading. So, a score of 12 means that an average person who graduated high school should be able to understand the text after reading it once. Per the wikipedia entry on gunning fog, "Texts for a wide audience generally need a fog index less than 12. Texts requiring near-universal understanding generally need an index less than 8."
-
-It is computed by the following formula, where "complex words" are words with 3 or more syllables.
-
-0.4 * ((words / sentences) + 100 * (complex words / words))
-
-To reduce this score, use less complex words with fewer syllables because they will be easier to understand.
+# Donations
+I plan to keep this free and open source for the time being, but would greatly appreciate donations to support the server costs for running the application. If you feel so inclined, you can donate to here: [paypal.me/textanalysis](https://paypal.me/textanalysis?locale.x=en_US).
 
 # Get the Code
-```
+```bash
 git clone https://github.com/tkawchak/TextAnalysisExtension.git
 ```
 
@@ -57,36 +37,39 @@ git clone https://github.com/tkawchak/TextAnalysisExtension.git
 
 ## Navigate to the Browser Extension Folder
 Form the base folder of the repository, type:
-```
+```bash
 cd BrowserExtension
 ```
 
 ## Install Dependencies
 In order for these commands to run, you must install the dependencies from the packages.json file.
-```
+```bash
 npm install
 ```
 You will need to add sudo to this command if you do not have proper permissions.
-```
+```bash
 sudo npm install
 ```
 
 ## Package the Extension
-```
+```bash
 npm run package
 ```
-Under the hood, this uses the browserify command to package everything into two .js files.  One is requestServiceBundle.js and the other is getDocumentText.js.  requestServiceBundle.js is the background script that communicates with the azure resources and handles the extension events.  getDocumentText.js is the content script that can interact with the active web page and send data to the background script to be processed and sent to Azure.
+Under the hood, this uses the browserify command to package everything into web-compatible .js files.
 
 ## Test the Extension
-```
+```bash
 npm test
 ```
 or
-```
+```bash
 npm run test
 ```
 
-## Run
+## Other commands
+See the package.json file for more commands including "clean", "watch" to build whenever you make changes, and others.
+
+## Load the Extension into Firefox
 Make sure to follow the instructions in [Package the Extension](##Package-the-Extension) prior to running the extension.
 
 Open up a new window in firefox and go to the page 
@@ -97,71 +80,103 @@ Click the button that says
 ```
 Load Temporary Add-on...
 ```
-And select the **manifest.json** file in this repository.  The extension will be working in your Firefix Browswer!
+And select the **manifest.json** file in this repository. The extension will be working in your Firefix Browswer!
 
-# Developing the Azure Function to Process Text
-## Navigate to the Folder Containing the Azure Function
-From the root of the repository, type: 
-```
-cd ProcessText
-```
+# Install the Azure Function Development Tools
+Visit the [Azure Functions Docs](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local) for how to do this for your platform.
 
-## Install the Azure Function Development Tools
-Run the following command to install the npm package azure-function-core-tools globally.  Visit the [Azure Functions Docs](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local) for more information on Azure Functions.
-```
-npm install -g azure-functions-core-tools
+# Azure Function to Process Webpage Text
+Change to the proper folder (from the root of the project).
+```bash
+cd ProcessText/ProcessTextFunc
 ```
 
 ## Set the local.settings.json file settings
 Edit or create the file at the location
-```
+```bash
 ProcessText/ProcessTextFunc/local.settings.json
 ```
 Replace the settings with the proper connections and values for the cosmosDB and Azure Functions Azure Resources.
 
 ***TODO: Update this with the proper local contents of the local.settings.json file***
 
-## Run the Process Text Azure Function
-Change to the proper folder:
-```
-cd ProcessText/ProcessTextFunc
+## Install Dependensies
+```bash
+dotnet restore
 ```
 
+## Run the Azure Functions
 Start the Azure Functions host.  Run the Start Command.
-```
+```bash
 func host start --port 7071
 ```
 or 
-```
+```bash
 func start --port 7071
 ```
 
-## Test the Process Text Azure Function
+## Test the Azure Functions
 Change to the proper folder:
-```
+```bash
 cd ProcessText/ProcessTextFunc.Tests
 ```
 
 Run the dotnet test command:
-```
+```bash
 dotnet test
 ```
 This will run all tests in the project.
 
-## Run the Text Extraction Azure Function
+# Azure function to Extract Text (Javascript)
 Change to the proper folder:
-```
+```bash
 cd TextExtractionFunc
 ```
 
-Start the Azure Functions host.  This must be on a separate port form the Process Text Function
-```
+## Run the Azure Functions
+Start the Azure Functions host. This must be on a separete port from other Azure Functions.
+```bash
 func host start --port 7072
 ```
 or
-```
+```bash
 func start --port 7072
 ```
 
+## Install packages
+```bash
+npm install
+```
+
+## Test the Azure Functions
+Run all tests.
+```bash
+npm run test
+```
+
+# Azure Functions to Analyze Text (Python)
+Change to the proper folder:
+```bash
+cd TextAnalysisFunc
+```
+
+## Install packages
+```bash
+pip install -r requirements.txt
+```
+
+## Run the Azure Functions
+Start the Azure Functions host. This must be on a separete port from other Azure Functions.
+```bash
+func host start --port 7073
+```
+or
+```bash
+func start --port 7073
+```
+
+## Test the Azure Functions
+See the TextAnalysisFunc/README.md for details on testing.
+
 # Contact
-Inquiries about how to get the data?  Contact [Tom](mailto:tkawchak@gmail.com)
+Inquiries about how to get data or help with the project? Contact [Tom](mailto:tkawchak@gmail.com)
