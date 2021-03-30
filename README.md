@@ -1,5 +1,5 @@
 # Text Analysis Extension
-This tool is being built as a Firefox Extension to perform analysis on webpage text. Use it to analyze the readability of your favorite webpages, selected text on a webpage, or to compose your emails. Use it and let me know what you think!
+This tool is being built as a Firefox Extension to perform analysis on webpage text. Use it to analyze the readability of your favorite webpages, selected text on a webpage, or while composing your emails. Use it and let me know what you think!
 
 ## Project CI Status
 ### Master Build
@@ -26,7 +26,7 @@ Other ideas? Let me know by creating an issue!
 The extension does not collect any personal data. The only data that is stored in a cosmos DB instance is webpage data, extracted text, and any computed metrics such as a summary and readability metrics.
 
 # Donations
-I plan to keep this free and open source for the time being, but would greatly appreciate donations to support the server costs for running the application. If you feel so inclined, you can donate to here: [paypal.me/textanalysis](https://paypal.me/textanalysis?locale.x=en_US).
+I plan to keep this free and open source, but would greatly appreciate donations to support the server costs for running the application. If you feel so inclined, you can donate to here: [paypal.me/textanalysis](https://paypal.me/textanalysis?locale.x=en_US).
 
 # Get the Code
 ```bash
