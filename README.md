@@ -25,9 +25,6 @@ Other ideas? Let me know by creating an issue!
 # Data collection
 The extension does not collect any personal data. The only data that is stored in a cosmos DB instance is webpage data, extracted text, and any computed metrics such as a summary and readability metrics.
 
-# Donations
-I plan to keep this free and open source, but would greatly appreciate donations to support the server costs for running the application. If you feel so inclined, you can donate to here: [paypal.me/textanalysis](https://paypal.me/textanalysis?locale.x=en_US).
-
 # Get the Code
 ```bash
 git clone https://github.com/tkawchak/TextAnalysisExtension.git
