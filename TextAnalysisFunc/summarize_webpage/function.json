@@ -2,24 +2,10 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "type": "cosmosDBTrigger",
-      "name": "documents",
-      "direction": "in",
-      "leaseCollectionName": "leases",
-      "connectionStringSetting": "tkawchaktextanalysis_DOCUMENTDB",
-      "databaseName": "TextContent",
-      "collectionName": "Web",
-      "createLeaseCollectionIfNotExists": "true"
-    },
-    {
-      "name": "outputdocument",
-      "type": "cosmosDB",
-      "direction": "out",
-      "leaseCollectionName": "leases",
-      "connectionStringSetting": "tkawchaktextanalysis_DOCUMENTDB",
-      "databasename": "TextContent",
-      "collectionName": "Web",
-      "creaseLeaseCollectionIfNotExists": "true"
+      "name": "text",
+      "activity": "summarize_webpage",
+      "type": "activityTrigger",
+      "direction": "in"
     }
   ]
 }

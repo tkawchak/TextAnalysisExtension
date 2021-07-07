@@ -1,0 +1,11 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "context",
+      "orchestration": "analyze_text_orchestration",
+      "type": "orchestrationTrigger",
+      "direction": "in"
+    }
+  ]
+}

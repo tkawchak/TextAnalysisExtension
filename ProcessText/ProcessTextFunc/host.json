@@ -4,6 +4,24 @@
         "cosmosDB": {
             "connectionMode": "Gateway",
             "protocol": "Https"
+        },
+        "serviceBus": {
+            "serviceBusOptions": {
+                "retryOptions":{
+                    "mode": "exponential",
+                    "tryTimeout": "00:00:10",
+                    "delay": "00:00:00.80",
+                    "maxDelay": "00:01:00",
+                    "maxRetries": 4
+                },
+                "prefetchCount": 100,
+                "autoCompleteMessages": true,
+                "maxConcurrentCalls": 16,
+                "maxAutoRenewDuration": "00:05:00",
+                "autoComplete": false,
+                "messageWaitTimeout": "00:00:30",
+                "maxConcurrentSessions": 16
+            }
         }
     },
     "functions": ["ProcessTextHttp", "GetProcessedText"]
