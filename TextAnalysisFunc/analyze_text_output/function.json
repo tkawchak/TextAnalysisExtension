@@ -1,0 +1,21 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "document",
+      "activity": "analyze_text_output",
+      "type": "activityTrigger",
+      "direction": "in"
+    },
+    {
+      "name": "$return",
+      "type": "cosmosDB",
+      "direction": "out",
+      "leaseCollectionName": "leases",
+      "connectionStringSetting": "tkawchaktextanalysis_DOCUMENTDB",
+      "databasename": "TextContent",
+      "collectionName": "Web",
+      "creaseLeaseCollectionIfNotExists": "true"
+    }
+  ]
+}

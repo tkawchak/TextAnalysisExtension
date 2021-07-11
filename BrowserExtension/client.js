@@ -1,6 +1,8 @@
 const axios = require('axios');
 const utilities = require('./utilities.js');
 
+const badTitleCharactersRegex = new RegExp("[#]", "g");
+
 module.exports = {
     extractWebpageInfo: extractWebpageInfo,
     getCurrentWebpageData: getCurrentWebpageData,
@@ -170,15 +172,19 @@ async function processWebpageData(data) {
     // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=${code}`;
     var response;
 
+    var title = data.title.replace(badTitleCharactersRegex, "");
+    var domain = data.domain;
+    console.log(`[client.js] Sending request to process webpage with domain '${domain}' and title '${title}'`);
+
     // TODO: Create some contracts so we don't have to specify these values here.
     response = await axios.post(requestUrl, {
         author: data.author,
         content: data.content,
         date_published: data.date_published,
-        domain: data.domain,
+        domain: domain,
         excerpt: data.excerpt,
         lead_image_url: data.lead_image_url,
-        title: data.title,
+        title: title,
         url: data.url,
         syllable_count: data.syllable_count,
         lexicon_count: data.lexicon_count,
@@ -215,8 +221,9 @@ async function fetchCurrentWebpageData() {
 
     console.log(`[client.js] fetching data for webpage ${webpageData.url}`);
     var code = "Ds7yQ3yWjKLFc1bkg9B4FO4UOx5Coa4Dzy7tCt8I3NbrItaOeQYbfA==";
-    var title = webpageData.title;
+    var title = webpageData.title.replace(badTitleCharactersRegex, "");
     var domain = webpageData.domain;
+    console.log(`[client.js] Fetching data with Domain: ${domain}, Title: ${title}`);
     var requestUrl = `https://processtext.azurewebsites.net/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
     // var requestUrl = `http://localhost:7071/api/GetProcessedText?id=${title}&domain=${domain}&code=${code}`;
     var response;

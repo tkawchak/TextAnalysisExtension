@@ -24,12 +24,10 @@
     "package:clean": "npm run clean",
     "package:text": "browserify getDocumentText.js -o getDocumentText.bundle.js --standalone getdocumenttext",
     "package:text:watch": "watchify getDocumentText.js -o getDocumentText.bundle.js --standalone getdocumenttext -v",
-    "package:request": "browserify requestService.js -o requestService.bundle.js",
-    "package:request:watch": "watchify requestService.js -o requestService.bundle.js -v",
     "package:actions": "browserify popup/menu_actions.js -o popup/menu_actions.bundle.js",
     "package:actions:watch": "watchify popup/menu_actions.js -o popup/menu_actions.bundle.js -v",
     "package:logging": "browserify telemetry/logging -o logging.bundle.js",
-    "package": "npm run clean && npm run package:actions && npm run package:text && npm run package:request"
+    "package": "npm run clean && npm run package:actions && npm run package:text"
   },
   "repository": {
     "type": "git",

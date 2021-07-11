@@ -5,74 +5,81 @@
 namespace ProcessTextFunc
 {
     using System.IO;
-    using System.Net;
-    using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using ProcessTextFunc.Contracts;
-    using ProcessTextFunc.Exceptions;
 
     public static class ProcessTextHttp
     {
+        // Service bus trigger examples
+        // https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/azure-functions/functions-bindings-service-bus-output.md#c-2
         [FunctionName("ProcessTextHttp")]
-        public static async Task<HttpResponseMessage> Run(
+        public static async Task<IActionResult> Run(
             [HttpTrigger(
                 AuthorizationLevel.Function, "post", Route = null)] HttpRequest request,
-            ILogger log,
+            [ServiceBus(
+                "processtext",
+                Connection = "ProcessTextQueueServicebusConnectionString")] IAsyncCollector<dynamic> processTextQueue,
             [CosmosDB(
                 databaseName: "TextContent",
                 collectionName: "Web",
-                ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB")] IAsyncCollector<dynamic> outputDocument)
+                ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB")] IAsyncCollector<dynamic> outputDocument,
+            ILogger log)
         {
-            HttpResponseMessage httpResponse;
+            ObjectResult httpResponse;
             log.LogInformation("C# ProcessTextHttp function received request.");
 
             // format the data for the response message
             string bodyContent = string.Empty;
-            ProcessTextRequest requestContent;
+            string errorMessage = string.Empty;
             using (var reader = new StreamReader(request.Body))
             {
                 bodyContent = await reader.ReadToEndAsync();
             }
 
-            // TODO: Add better error handling here
-            if (!bodyContent.Equals(string.Empty))
+            ProcessTextRequest requestContent;
+            if (string.IsNullOrWhiteSpace(bodyContent))
             {
-                requestContent = JsonConvert.DeserializeObject<ProcessTextRequest>(bodyContent);
-                if (string.IsNullOrWhiteSpace(requestContent.Title))
-                {
-                    throw new MissingPropertyException("Title not specified");
-                }
-
-                if (string.IsNullOrWhiteSpace(requestContent.Domain))
-                {
-                    throw new MissingPropertyException("Domain not specified.");
-                }
-
-                log.LogInformation($"Received request to store data for webpage at {requestContent.Url}");
-
-                var outputDoc = Utils.Converters.ConvertProcessTextRequestToProcessedTextDocument(requestContent);
-                await outputDocument.AddAsync(outputDoc);
-
-                httpResponse = new HttpResponseMessage(HttpStatusCode.OK);
-                string message = $"Successfully Processed request to store data for webpage at {requestContent.Domain}.";
-                log.LogInformation(message);
-                httpResponse.Content = new StringContent(message);
+                errorMessage = "Error processing request - Request Body is empty. Cannot process an empty body.";
             }
-            else
+
+            requestContent = JsonConvert.DeserializeObject<ProcessTextRequest>(bodyContent);
+            if (string.IsNullOrWhiteSpace(requestContent.Title))
             {
-                string message = "Request Body is empty.  Cannot process an empty body.";
-                log.LogError(message);
-
-                httpResponse = new HttpResponseMessage(HttpStatusCode.NoContent)
-                {
-                    Content = new StringContent(message),
-                };
+                errorMessage = "Error processing request - Title not specified";
             }
+
+            if (string.IsNullOrWhiteSpace(requestContent.Domain))
+            {
+                errorMessage = "Error processing request - Domain not specified";
+            }
+
+            if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                log.LogError(errorMessage);
+                httpResponse = new BadRequestObjectResult(errorMessage);
+                return httpResponse;
+            }
+
+            log.LogInformation($"Received request to store data for webpage at {requestContent.Url}");
+            var outputDoc = Utils.Converters.ConvertProcessTextRequestToProcessedTextDocument(requestContent);
+            log.LogInformation($"Document Title: {outputDoc.Title}");
+            log.LogInformation($"Document Domain: {outputDoc.Domain}");
+
+            await processTextQueue.AddAsync(outputDoc);
+            log.LogInformation($"Sent webpage data to process text queue");
+
+            await outputDocument.AddAsync(outputDoc);
+            log.LogInformation($"Stored webpage data to storage");
+
+            string message = $"Successfully Processed request to store data for webpage at {requestContent.Domain}.";
+            log.LogInformation(message);
+            httpResponse = new OkObjectResult(message);
 
             return httpResponse;
         }
