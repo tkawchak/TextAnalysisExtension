@@ -7,3 +7,5 @@ dataclasses
 nltk
 numpy
 networkx
+transformers[torch]
+huggingface-hub
