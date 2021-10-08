@@ -9,10 +9,10 @@
   "author": "Tom Kawchak",
   "license": "ISC",
   "dependencies": {
-    "@postlight/mercury-parser": "^2.2.0",
-    "axios": "^0.21.1",
-    "flesch-kincaid": "^1.0.4",
-    "natural": "^2.4.0",
-    "text-readability": "^1.0.4"
+    "@postlight/mercury-parser": "^2.2.1",
+    "axios": "^0.22.0",
+    "flesch-kincaid": "^2.0.0",
+    "natural": "^5.1.1",
+    "text-readability": "^1.0.5"
   }
 }

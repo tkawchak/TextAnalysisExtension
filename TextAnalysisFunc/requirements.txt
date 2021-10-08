@@ -8,3 +8,4 @@ dataclasses
 nltk
 numpy
 networkx
+scipy

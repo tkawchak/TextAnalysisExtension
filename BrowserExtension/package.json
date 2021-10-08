@@ -4,19 +4,17 @@
   "description": "Web browser extension to perform text analysis for web pages.",
   "main": "getDocumentText.bundle.js",
   "dependencies": {
-    "@microsoft/applicationinsights-web": "^2.5.8",
-    "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.3",
-    "flesch-kincaid": "^1.0.0",
-    "linq": "^3.2.0",
-    "request": "^2.88.0",
-    "webpack": "^4.28.3",
-    "wordcount": "^1.1.1",
-    "x-ray": "^2.3.4"
+    "@microsoft/applicationinsights-web": "^2.7.0",
+    "acorn": "^8.5.0",
+    "axios": "^0.21.4",
+    "request": "^2.88.2",
+    "tslib": "^2.3.1",
+    "wordcount": "^1.1.1"
   },
   "devDependencies": {
     "browserify": "^16.5.2",
-    "watchify": "^3.11.1"
+    "watchify": "^4.0.0",
+    "webpack": "^5.58.1"
   },
   "scripts": {
     "test": "echo \"No tests specified!\"",
