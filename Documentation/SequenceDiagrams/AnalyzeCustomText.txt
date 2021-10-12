@@ -1,0 +1,6 @@
+title TextAnalysis - Analyze Custom / Selected Text
+
+User -> Client\nExtension: Analyze Text
+Client\nExtension -> ComputeReadability\nAzureFunc: Compute Readability Metrics\nPOST /ComputeReadability
+ComputeReadability\nAzureFunc --> Client\nExtension: Readability data
+Client\nExtension --> User: Show Readability Metrics
