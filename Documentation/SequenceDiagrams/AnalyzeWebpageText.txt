@@ -1,0 +1,14 @@
+title TextAnalysis - Analyze Webpage Text
+
+User -> Client\nExtension: Analyze Webpage
+Client\nExtension -> ExtractText\nAzureFunc: Extract text\nPOST /ExtractText
+ExtractText\nAzureFunc --> Client\nExtension: webpage data
+Client\nExtension -> ComputeReadability\nAzureFunc: Compute Readability Metrics\nPOST /ComputeReadability
+ComputeReadability\nAzureFunc --> Client\nExtension: Readability data
+Client\nExtension -> ProcessText\nAzureFunc: Store and Process data\nPOST /ProcessTextHttp
+ProcessText\nAzureFunc-> CosmosDB: Store Basic Data
+ProcessText\nAzureFunc -> ServiceBus\nQueue: Queue For Processing
+ProcessText\nAzureFunc --> Client\nExtension: Success / Failure Response
+Client\nExtension --> User: Show extracted\ndata to user
+ServiceBus\nQueue -> AnalyzeText\nAzureFuncs: Start Analysis funcs
+AnalyzeText\nAzureFuncs -> CosmosDB: Update entry with new data

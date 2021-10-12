@@ -1,0 +1,8 @@
+title TextAnalysis - Fetch Webpage Data
+
+User -> Client\nExtension: Fetch Webpage Data
+Client\nExtension -> GetProcessedText\nAzureFunc: Store and Process data\nPOST /GetProcessedText
+GetProcessedText\nAzureFunc-> CosmosDB: Fetch Webpage Data
+CosmosDB --> GetProcessedText\nAzureFunc: Webpage Data
+GetProcessedText\nAzureFunc --> Client\nExtension: Webpage Data
+Client\nExtension --> User: Show Webpage data to user
