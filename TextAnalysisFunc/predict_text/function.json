@@ -3,7 +3,7 @@
   "bindings": [
     {
       "name": "text",
-      "activity": "summarize_webpage",
+      "activity": "predict_text",
       "type": "activityTrigger",
       "direction": "in"
     }

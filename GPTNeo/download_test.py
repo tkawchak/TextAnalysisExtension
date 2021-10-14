@@ -6,7 +6,7 @@ import huggingface_hub
 # How to load these weights as storage for azure functions
 # https://docs.microsoft.com/en-us/azure/azure-functions/storage-considerations
 # Map Azure Functions to storage account
-# https://docs.microsoft.com/en-us/cli/azure/functionapp/function?view=azure-cli-latest#az-functionapp-function-delete
+# https://docs.microsoft.com/en-us/azure/azure-functions/scripts/functions-cli-mount-files-storage-linux
 
 # huggingface_hub.hf_hub_download("EleutherAI/gpt-neo-1.3B", "pytorch_model.bin")
 
@@ -24,6 +24,6 @@ prompt = "I like to have my AI write for me."
 
 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
 
-gen_tokens = model.generate(input_ids, do_sample=True, temperature=0.9, max_length=100,)
+gen_tokens = model.generate(input_ids, do_sample=True, temperature=0.9, max_length=200,)
 gen_text = tokenizer.batch_decode(gen_tokens)[0]
 print(gen_text)

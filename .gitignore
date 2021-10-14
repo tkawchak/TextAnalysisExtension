@@ -90,3 +90,8 @@ typings/
 bin/
 obj/
 *.config.json
+
+# Huggingface files
+tokenizer/
+1.3B/
+2.7B/
