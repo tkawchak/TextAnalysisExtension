@@ -68,6 +68,7 @@ namespace ProcessTextFunc.Utils
                 SentenceCount = document.SentenceCount,
                 SmogIndex = document.SmogIndex,
                 Summary = document.Summary,
+                Predicted = document.Predicted,
                 SyllableCount = document.SyllableCount,
                 Title = document.Title,
                 Url = document.Url,

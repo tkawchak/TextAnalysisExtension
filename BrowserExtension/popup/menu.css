@@ -39,6 +39,23 @@ html, body {
   cursor: text;
 }
 
+#predicted-title {
+  margin: 3% auto;
+  padding: 5px;
+  text-align: center;
+  cursor: text;
+}
+
+#predicted {
+  height: 70px;
+  margin: 3% auto;
+  padding: 5px;
+  text-align: left;
+  overflow-y: scroll;
+  word-wrap: normal;
+  cursor: text;
+}
+
 .result {
   margin: 3% auto;
   padding: 5px;

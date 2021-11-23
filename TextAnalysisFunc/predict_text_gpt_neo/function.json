@@ -1,0 +1,11 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "text",
+      "activity": "predict_text_gpt_neo",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ]
+}

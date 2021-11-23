@@ -1,34 +1,33 @@
 import logging
 import os
 import azure.functions as func
-from transformers import GPTNeoForCausalLM, GPT2Tokenizer
+import openai
 
-# from analytics.predict import predict_text
-# MOUNT_DIR = "/gptneo"
-MOUNT_DIR = "/Users/tomkawchak/Programs/firefoxExtensions/TextAnalysisExtension/GPTNeo"
-MODEL_PATH = "1.3B/EleutherAI__gpt-neo-1.3B.a4a110859b10643e414fbb4c171cae4b6b9c7e49"
-FILE_PATH = os.path.join(MOUNT_DIR, MODEL_PATH)
-
-# TODO: Figure out what plan will support this kind of workload
-# https://docs.microsoft.com/en-us/azure/azure-functions/dedicated-plan
-
-model = GPTNeoForCausalLM.from_pretrained(FILE_PATH)
-tokenizer = GPT2Tokenizer.from_pretrained(FILE_PATH)
+OPEN_AI_API_KEY = "OPENAI_API_KEY"
+openai.api_key = os.getenv(OPEN_AI_API_KEY)
 
 # This function has an activity trigger so that it fan be called from the orchestration function
 def main(text: str) -> str:
     logging.info("predicting text")
     predicted = predict_text(text)
+    logging.info(f"predicted text: {predicted}")
     return predicted
     
-def predict_text(text: str) -> str:
+def predict_text(text: str, max_tokens: int = 20) -> str:
     logging.info(f"predicting text from {text}")
-    try:
-        input_ids = tokenizer(text, return_tensors="pt").input_ids
+    predicted_text = None
 
-        gen_tokens = model.generate(input_ids, do_sample=True, temperature=0.9, max_length=200,)
-        gen_text = tokenizer.batch_decode(gen_tokens)[0]
-        return gen_text
+    try:
+        response = openai.Completion.create(
+            engine="davinci",
+            prompt=text,
+            temperature=0.7,
+            max_tokens=max_tokens)
+        logging.info(response)
+        num_choices = len(response["choices"])
+        logging.info(f"Received {num_choices} possible choices")
+        predicted_text = response["choices"][0]["text"]
     except:
         logging.exception(f"Error predicting text.")
-        return None
+
+    return predicted_text

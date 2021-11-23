@@ -13,6 +13,8 @@ function clearCurrentAnalysisResults() {
   var resultList = document.getElementById("result-items");
   var summary = document.getElementById("summary");
   var summarySection = document.getElementById("summary-section");
+  var predicted = document.getElementById("predicted");
+  var predictedSection = document.getElementById("predicted-section");
 
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
@@ -20,6 +22,8 @@ function clearCurrentAnalysisResults() {
 
   summary.value = "";
   summarySection.classList.add("hidden");
+  predicted.value = "";
+  predictedSection.classList.add("hidden");
 }
 
 /**
@@ -33,6 +37,8 @@ function displayAnalysisResults(response) {
   // Get the desired element for result items
   var summary = document.getElementById("summary");
   var summarySection = document.getElementById("summary-section");
+  var predicted = document.getElementById("predicted");
+  var predictedSection = document.getElementById("predicted-section")
   var resultList = document.getElementById("result-items");
   var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length", 
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
@@ -48,6 +54,17 @@ function displayAnalysisResults(response) {
   else
   {
     console.warn("Summary has not been computed yet.");
+  }
+
+  if (response.hasOwnProperty("predicted") && response["predicted"] != null) 
+  {
+    console.log(`[menu_actions.js] predicted: ${response["predicted"]}`)
+    predicted.innerHTML = response["predicted"]
+    predictedSection.classList.remove("hidden");
+  }
+  else
+  {
+    console.warn("Predicted Text has not been computed yet.");
   }
 
   // display the new result items

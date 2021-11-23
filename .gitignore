@@ -95,3 +95,6 @@ obj/
 tokenizer/
 1.3B/
 2.7B/
+
+# Docker files
+envfile
