@@ -5,7 +5,7 @@ from transformers import GPTNeoForCausalLM, GPT2Tokenizer
 
 # from analytics.predict import predict_text
 # MOUNT_DIR = "/gptneo"
-MOUNT_DIR = "/Users/tomkawchak/Programs/firefoxExtensions/TextAnalysisExtension/GPTNeo"
+MOUNT_DIR = "TextAnalysisExtension/GPTNeo"
 MODEL_PATH = "1.3B/EleutherAI__gpt-neo-1.3B.a4a110859b10643e414fbb4c171cae4b6b9c7e49"
 FILE_PATH = os.path.join(MOUNT_DIR, MODEL_PATH)
 
