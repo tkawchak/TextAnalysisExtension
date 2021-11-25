@@ -9,3 +9,5 @@ nltk
 numpy
 networkx
 scipy
+transformers[torch]
+openai

@@ -76,6 +76,9 @@ namespace ProcessTextFunc.Contracts
         [JsonProperty("summary")]
         public string Summary { get; set; }
 
+        [JsonProperty("predicted")]
+        public string Predicted {get; set; }
+
         [JsonProperty("syllable_count")]
         public int SyllableCount { get; set; }
 

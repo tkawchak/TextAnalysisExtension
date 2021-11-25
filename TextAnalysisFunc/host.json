@@ -12,5 +12,11 @@
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
     "version": "[2.*, 3.0.0)"
   },
-  "functions": ["summarize_webpage", "analyze_text_output", "analyze_text_orchestration", "analyze_text_handler"]
+  "functions": [
+    "summarize_webpage",
+    "predict_text",
+    "analyze_text_output",
+    "analyze_text_orchestration",
+    "analyze_text_handler"
+  ]
 }
