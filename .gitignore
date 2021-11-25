@@ -98,3 +98,6 @@ tokenizer/
 
 # Docker files
 envfile
+
+# Python files
+*.pyc
