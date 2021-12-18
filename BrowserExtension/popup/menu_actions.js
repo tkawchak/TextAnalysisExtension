@@ -3,6 +3,7 @@
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
 const client = require("../client.js");
+const {login, logout} = require("./example_login.js");
 
 /**
  * Clear the current analysis results
@@ -259,6 +260,17 @@ function listenForClicks() {
     else if (e.target.id == "back-button") {
       console.log("[menu_actions.js] Back button was clicked");
       showDefaultMenu();
+    }
+    else if (e.target.id == "login") {
+      console.log("[menu_actions.js] Login was clicked!");
+      login();
+    }
+    else if (e.target.id == "logout") {
+      console.log("[menu_actions.js] Logout was clicked!");
+      logout();
+    }
+    else {
+      console.log(`Unhandled button was clicked with id ${e.target.id}`);
     }
     return;
   });

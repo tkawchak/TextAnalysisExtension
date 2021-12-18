@@ -4,9 +4,12 @@
   "description": "Web browser extension to perform text analysis for web pages.",
   "main": "getDocumentText.bundle.js",
   "dependencies": {
+    "@azure/msal-browser": "^2.20.0",
     "@microsoft/applicationinsights-web": "^2.7.0",
     "acorn": "^8.5.0",
     "axios": "^0.21.4",
+    "install": "^0.13.0",
+    "npm": "^8.2.0",
     "request": "^2.88.2",
     "tslib": "^2.3.1",
     "wordcount": "^1.1.1"
@@ -18,14 +21,16 @@
   },
   "scripts": {
     "test": "echo \"No tests specified!\"",
-    "clean": "rm -f *.bundle.js",
+    "clean": "rm -rf *.bundle.js",
     "package:clean": "npm run clean",
     "package:text": "browserify getDocumentText.js -o getDocumentText.bundle.js --standalone getdocumenttext",
     "package:text:watch": "watchify getDocumentText.js -o getDocumentText.bundle.js --standalone getdocumenttext -v",
     "package:actions": "browserify popup/menu_actions.js -o popup/menu_actions.bundle.js",
     "package:actions:watch": "watchify popup/menu_actions.js -o popup/menu_actions.bundle.js -v",
+    "package:auth": "browserify background/auth.js -o background/auth.bundle.js",
+    "package:auth:watch": "watchify background/auth.js -o background/auth.bundle.js -v",
     "package:logging": "browserify telemetry/logging -o logging.bundle.js",
-    "package": "npm run clean && npm run package:actions && npm run package:text"
+    "package": "npm run clean && npm run package:actions && npm run package:text && npm run package:auth"
   },
   "repository": {
     "type": "git",

@@ -19,7 +19,12 @@
   "permissions": [
     "<all_urls>",
     "webRequest",
-    "activeTab"
+    "activeTab",
+    "identity"
+  ],
+
+  "web_accessible_resources": [
+    "popup/menu.html"
   ],
 
   "browser_action": {
@@ -31,7 +36,16 @@
     "default_popup": "popup/menu.html"
   },
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{3f209689-528e-49d4-9672-150a924611ee}",
+      "strict_min_version": "53a1"
+    }
+  },  
+
   "background": {
-    "scripts": ["requestService.bundle.js"]
+    "scripts": [
+      "auth.bundle.js"
+    ]
   }
 }
