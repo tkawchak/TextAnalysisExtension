@@ -3,7 +3,6 @@
 // const logger = logs.logger;
 // import logger from "./telemetry/application-insights.js"
 const client = require("../client.js");
-const {login, logout} = require("./example_login.js");
 
 /**
  * Clear the current analysis results
@@ -235,46 +234,55 @@ function listenForClicks() {
       active: true
     });
 
-    if (e.target.id == "analyze-webpage-button") {
+    // figure out which button was clicked and take appropriate action
+    switch(e.target.id) {
+
+      case "analyze-webpage-button": 
       console.log("[menu_actions.js] Analyze Webpage button was clicked");
       activeTab
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
-    }
-    else if (e.target.id == "fetch-webpage-button") {
+      break;
+
+    case "fetch-webpage-button":
       console.log("[menu_actions.js] Fetch Webpage data button was clicked");
       activeTab
         .then(sendFetchCommandToContentScript)
         .catch(logError);
-    }
-    else if (e.target.id == "analyze-text-button") {
+      break;
+      
+    case "analyze-text-button":
       console.log("[menu_actions.js] Analyze Custom Text button was clicked");
       analyzeCustomText();
-    }
-    else if (e.target.id == "analyze-selected-button") {
+      break;
+
+    case "analyze-selected-button":
       console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
       activeTab
         .then(sendAnalyzeSelectedCommandToContentScript)
         .catch(logError);
-    }
-    else if (e.target.id == "back-button") {
+      break;
+
+    case "back-button":
       console.log("[menu_actions.js] Back button was clicked");
       showDefaultMenu();
-    }
-    else if (e.target.id == "login") {
-      console.log("[menu_actions.js] Login was clicked!");
-      login();
-    }
-    else if (e.target.id == "logout") {
-      console.log("[menu_actions.js] Logout was clicked!");
-      logout();
-    }
-    else {
-      console.log(`Unhandled button was clicked with id ${e.target.id}`);
-    }
-    return;
-  });
+      break;
 
+    case "login":
+      console.log("[menu_actions.js] Login was clicked!");
+      authPort.postMessage({ action: "login" });
+      break;
+
+    case "logout":
+      console.log("[menu_actions.js] Logout was clicked!");
+      authPort.postMessage({ action: "logout" });
+      break;
+
+    default: 
+      console.log(`Unhandled button was clicked with id ${e.target.id}`);
+      break;
+    }
+  });
   return;
 }
 
@@ -293,7 +301,26 @@ function reportExecuteScriptError(error) {
  * and add a click handler.
  * If we couldn't inject the script, handle the error.
  */
-console.log("In popup script, loading the getDocumentText content script");
+console.log("[menu_actions.js] In popup script, loading the getDocumentText content script");
 browser.tabs.executeScript({file: "/getDocumentText.bundle.js"})
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
+
+
+// Create a port to connect to the background script
+console.log("[menu_actions.js] Setting up connection to auth backend.");
+var authPort = browser.runtime.connect({ name: "auth-port" });
+// authPort.postMessage({ greeting: "hello from content script" });
+
+async function handleAuthResponse(message) {
+  console.log("[menu_actions.js] Received message from auth script");
+  console.log(`[menu_actions.js] Response: ${message.status}`)
+}
+
+function handleDisconnect() {
+  console.warn("Connection failed");
+}
+
+// Add handlers for the authPort
+authPort.onMessage.addListener(handleAuthResponse);
+authPort.onDisconnect.addListener(handleDisconnect);

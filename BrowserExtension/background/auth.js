@@ -1,74 +1,77 @@
-// const msal = require("@azure/msal-browser");
+const msal = require("@azure/msal-browser");
+const {login, logout} = require("./msalUtils.js");
 
-// const AUTHORITY = 'https://login.microsoftonline.com/common/';
-// const REDIRECT_URL = browser.identity.getRedirectURL();
-// const CLIENT_ID = "6d02128a-1f5c-450c-8861-54d0aee8a155";
+const AUTHORITY = 'https://login.microsoftonline.com/common/';
+const REDIRECT_URL = browser.identity.getRedirectURL();
+const CLIENT_ID = "6d02128a-1f5c-450c-8861-54d0aee8a155";
 
-// const msalConfig = {
-//     auth: {
-//         clientId: CLIENT_ID,
-//         authority: AUTHORITY,
-//         redirectUri: REDIRECT_URL
-//     }
-// };
+// Set the redirect URI to the chromiumapp.com provided by firefox
+console.log(`[auth.js] Extension extension redirect URI set to ${REDIRECT_URL}`);
 
-// // package docs: https://www.npmjs.com/package/@azure/msal-browser
-// // github docs: https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/initialization.md#redirect-apis
-// const msalInstance = new msal.PublicClientApplication(msalConfig);
-// msalInstance.handleRedirectPromise().then((tokenResponse) => {
-//   // Check if the tokenResponse is null
-//   // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
-//   if (tokenResponse !== null) {
-//     console.log("Success!");
-//   }
-//   // If the tokenResponse === null, you are not coming back from an auth redirect.
-//   else if (tokenResponse === null) {
-//     console.log("Not an auth redirect");
-//   }
-//   else {
-//     console.log("Something else??");
-//   }
-// }).catch((error) => {
-//   console.error("Error during authenticaiton");
-//   console.error(error);
-//   // handle error, either in the library or coming back from the server
-// });
+// TODO: See this article for more on the authentication issues.
+// https://stackoverflow.com/questions/63534275/how-to-get-the-identity-launchwebauthflow-to-work-from-a-browser-extension-popup
+// The auth needs to happen from the background script and not the popup script,
+// so we will need to send messages to the background script to perform the login
 
-// // Acquire tokens: https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/acquire-token.md
-// var request = {
-//   scopes: ["User.Read"]
-// };
+const msalConfig = {
+  auth: {
+    clientId: CLIENT_ID,
+    authority: AUTHORITY,
+    redirectUri: REDIRECT_URL,
+    postLogoutRedirectUri: REDIRECT_URL,
+  },
+  cache: {
+    cacheLocation: "localStorage"
+  }
+};
 
-// msalInstance.loginPopup({
-//   redirectUri: REDIRECT_URL,
-// });
-// msalInstance.acquireTokenSilent(request).then(tokenResponse => {
-//   // Do something with the tokenResponse
-//   console.log("Successful token response");
-//   console.log(`${tokenReponse}`);
-// }).catch(error => {
-//   if (error instanceof msal.InteractionRequiredAuthError) {
-//       // fallback to interaction when silent call fails
-//       console.log("Interaction required. Obtaining access token by redirecting browser window..");
-//       return msalInstance.acquireTokenPopup(request);
-//   }
-//   else {
-//     console.log(`Something else happened: ${error}`);
-//   }
-// }).catch(error => {
-//   console.error(error);
-// });
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+var authPort;
 
-// Can also use loginRedirect and acquireTokenRedirect instead
-// of loginPopup and acquireTokenPopup
+// Add a listener for the function run when the content script
+// wants to connect to the function
+console.log(`[auth.js] Adding listener for incoming connections.`);
+browser.runtime.onConnect.addListener(connected);
 
-
-// See https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/identity/getRedirectURL for more
-console.log(`Getting browser redirect URL`);
-try {
-  var redirectURL = browser.identity.getRedirectURL();
-  console.log(`Redirect URL: ${redirectURL}`);
+// Set currently logged in account
+const accounts = msalInstance.getAllAccounts();
+if (accounts.length) {
+  console.log(`[auth.js] accounts is not empty. First value: ${accounts[0].username}`);
 }
-catch (error) {
-  console.error(`Unable to get redirect url because ${error}`);
+else {
+  console.log(`[auth.js] accounts is empty`);
+}
+
+// Function to handle to auth requests
+async function handleAuthMessage(message) {
+  console.log("[auth.js] [authBackend.js] Received message");
+
+  // In order to send a message back on the port:
+  // authPort.postMessage({ greeting: "hello from content script" });
+
+  if (message.action != undefined) {
+    var action = message.action;
+
+    console.log(`[auth.js] Action: ${action}`)
+    switch (action) {
+      case "login": login(msalInstance);
+        break;
+      case "logout": logout(msalInstance);
+        break;
+      default:
+        console.warn(`Action ${action} not recognized.`);
+    }
+
+    // Send auth response back
+    var responseMessage = `Executed command ${action}`;
+    authPort.postMessage({ status: responseMessage });
+  }
+}
+
+// Function to execute when the background script receives an event to connect
+// to the main content script
+function connected(port) {
+  console.log("[auth.js] Received connection request. Adding auth message handler.");
+  authPort = port;
+  authPort.onMessage.addListener(handleAuthMessage);
 }
