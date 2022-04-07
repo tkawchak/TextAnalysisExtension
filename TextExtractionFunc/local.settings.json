@@ -1,11 +1,13 @@
 {
-    "IsEncrypted": false,
-    "Values": {
-      "FUNCTIONS_WORKER_RUNTIME": "node"
-    },
-    "Host": {
-      "LocalHttpPort": 7071,
-      "CORS": "*",
-      "CORSCredentials": false
-    }
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "WEBSITE_NODE_DEFAULT_VERSION": "~14",
+    "FUNCTIONS_EXTENSION_VERSION": "~4"
+  },
+  "Host": {
+    "LocalHttpPort": 7072,
+    "CORS": "*",
+    "CORSCredentials": false
   }
+}
