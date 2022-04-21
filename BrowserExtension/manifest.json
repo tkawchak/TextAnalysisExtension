@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["getDocumentText.bundle.js"]
+      "js": ["getDocumentText.js"]
     }
   ],
 
@@ -45,7 +45,7 @@
 
   "background": {
     "scripts": [
-      "background/auth.bundle.js"
+      "background/auth.js"
     ]
   }
 }

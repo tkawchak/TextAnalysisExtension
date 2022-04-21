@@ -101,3 +101,7 @@ envfile
 
 # Python files
 *.pyc
+
+# Parcel (JS Build)
+.parcel*/
+dist/

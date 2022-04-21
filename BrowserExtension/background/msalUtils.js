@@ -1,14 +1,17 @@
 module.exports = {
   login: login,
-  logout: logout
+  logout: logout,
+  acquireToken: acquireToken,
 };
 
+// See this for some more info on where these functions came from
+// https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/samples/msal-browser-samples/ChromiumExtensionSample/auth.js
 
 /**
  * Generates a login url
  */
 async function getLoginUrl(msalInstance, request) {
-  console.log(`[auth.js] get login url`);
+  console.log(`[msalUtils.js] get login url`);
   return new Promise((resolve, reject) => {
     msalInstance.loginRedirect({
       ...request,
@@ -25,11 +28,12 @@ async function getLoginUrl(msalInstance, request) {
  * Generates an acquire token url
  */
 async function getAcquireTokenUrl(msalInstance, request) {
-  console.log(`[auth.js] get acquire token url`);
+  console.log(`[msalUtils.js] get acquire token redirect url for request ${JSON.stringify(request)}`);
   return new Promise((resolve, reject) => {
     msalInstance.acquireTokenRedirect({
       ...request,
       onRedirectNavigate: (url) => {
+        console.log(`[msalUtils.js] OnRedirect - Resolve with url ${url}`);
         resolve(url);
         return false;
       }
@@ -41,21 +45,22 @@ async function getAcquireTokenUrl(msalInstance, request) {
  * Generates a login url
  */
 async function launchWebAuthFlow(msalInstance, url) {
-  console.log(`[auth.js] launch web auth flow with url: ${url}`);
+  console.log(`[msalUtils.js] launch web auth flow with url: ${url}`);
   return new Promise((resolve, reject) => {
     browser.identity.launchWebAuthFlow({
       interactive: true,
       url
     }, (responseUrl) => {
       // Response urls includes a hash (login, acquire token calls)
-      console.log(`[auth.js] launch web auth flow responseUrl: ${responseUrl}`);
+      console.log(`[msalUtils.js] launch web auth flow responseUrl: ${responseUrl}`);
       if (responseUrl.includes("#")) {
-        console.log(`[auth.js] Performing a login: ${responseUrl}`);
-        msalInstance.handleRedirectPromise(`#${responseUrl.split("#")[1]}`)
+        const responseUrlPart = `#${responseUrl.split("#")[1]}`;
+        console.log(`[msalUtils.js] Performing a login`);
+        msalInstance.handleRedirectPromise(responseUrlPart)
           .then(resolve)
           .catch(reject)
       } else {
-        console.log(`[auth.js] Performing a logout: ${responseUrl}`);
+        console.log(`[msalUtils.js] Performing a logout`);
         // Logout calls
         resolve();
       }
@@ -67,7 +72,7 @@ async function launchWebAuthFlow(msalInstance, url) {
  * Generates a logout url
  */
 async function getLogoutUrl(msalInstance, request) {
-  console.log(`[auth.js] get logout url`);
+  console.log(`[msalUtils.js] get logout url`);
   return new Promise((resolve, reject) => {
     // msalInstance.logout({
     msalInstance.logoutRedirect({
@@ -84,37 +89,35 @@ async function getLogoutUrl(msalInstance, request) {
  * Attempts to silent acquire an access token, falling back to interactive.
  */
 async function acquireToken(msalInstance, request) {
-  console.log(`[auth.js] acquire token`);
+  console.log(`[msalUtils.js] acquiring token with request ${JSON.stringify(request)}`);
   return msalInstance.acquireTokenSilent(request)
     .catch(async (error) => {
-      console.error(error);
+      console.log(`[msaulUtils.js] Falling back to interactive token acquisition due to: ${error}`);
+      console.log(`[msalUtils.js] Getting acquire token URL for request ${JSON.stringify(request)}`);
       const acquireTokenUrl = await getAcquireTokenUrl(msalInstance, request);
+      console.log(`[msalUtils.js] Acquire token URL: ${acquireTokenUrl}`);
 
-      return launchWebAuthFlow(acquireTokenUrl);
-    })
+      return launchWebAuthFlow(msalInstance, acquireTokenUrl);
+    });
 }
 
 // Login
 async function login(msalInstance) {
   // These actions would be performed when a user clicks a "Login" button
-  console.log(`[auth.js] [auth.js] getting login url`);
+  console.log(`[msalUtils.js] getting login url`);
   const loginUrl = await getLoginUrl(msalInstance);
-  console.log(`[auth.js] launch web auth flow for login`);
+  console.log(`[msalUtils.js] launch web auth flow for login`);
   const loginResult = await launchWebAuthFlow(msalInstance, loginUrl);
-  console.log(`[auth.js] login result username - ${loginResult.account.username}`);
+  console.log(`[msalUtils.js] login result username - ${loginResult.account.username}`);
+  console.log(`[msalUtils.js] Login result token - ${loginResult.accessToken}`);
+  return loginResult;
 }
-
-// Acquire token
-// const { accessToken } = await acquireToken({
-//     scopes: [ "user.read" ],
-//     account: msalInstance.getAllAccounts()[0]
-// });
 
 // Logout
 async function logout(msalInstance) {
-  console.log(`[auth.js] getting logout url`);
+  console.log(`[msalUtils.js] getting logout url`);
   const logoutUrl = await getLogoutUrl(msalInstance);
-  console.log(`[auth.js] launching web auth flow for logout`);
+  console.log(`[msalUtils.js] launching web auth flow for logout`);
   await launchWebAuthFlow(msalInstance, logoutUrl);
-  console.log(`[auth.js] logged out`);
+  console.log(`[msalUtils.js] logged out`);
 }

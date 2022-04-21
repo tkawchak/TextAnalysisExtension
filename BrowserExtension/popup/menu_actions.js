@@ -302,7 +302,7 @@ function reportExecuteScriptError(error) {
  * If we couldn't inject the script, handle the error.
  */
 console.log("[menu_actions.js] In popup script, loading the getDocumentText content script");
-browser.tabs.executeScript({file: "/getDocumentText.bundle.js"})
+browser.tabs.executeScript({file: "/getDocumentText.js"})
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
 
