@@ -12,16 +12,17 @@ module.exports = {
     analyzeText: analyzeText,
     computeReadability: computeReadability,
     analyzeSelectedText: analyzeSelectedText,
+    analyzeCustomText: analyzeCustomText,
 };
 
 /**
  * get data for the current webpage
  */
-async function getCurrentWebpageData() {
+async function getCurrentWebpageData(functionCodes) {
     var url = utilities.getWebpageUrl();
     console.log(`[client.js] Fetching webpage data from URL ${url}`);
-    var webpageData = await extractWebpageInfo(url);
-    var webpageReadabilityMetrics = await computeReadability(webpageData.content);
+    var webpageData = await extractWebpageInfo(url, functionCodes);
+    var webpageReadabilityMetrics = await computeReadability(webpageData.content, functionCodes);
 
     // TODO: Create some contracts so that we don't have to specify all of these here.
     var result = {
@@ -62,9 +63,9 @@ async function getCurrentWebpageData() {
  * Analyze some text
  * @param {string} text 
  */
-async function analyzeText(text) {
+async function analyzeText(text, functionCodes) {
     console.log(`[client.js] Extracting Text data for custom text`);
-    var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
+    var code = functionCodes['ExtractTextFuncCode'];
     var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
     // var requestUrl = `http://localhost:7072/api/ExtractText?url=${url}&code=${code}`;
 
@@ -89,9 +90,9 @@ async function analyzeText(text) {
  * compute the readability metrics of some text.
  * @param {string} content 
  */
-async function computeReadability(content) {
+async function computeReadability(content, functionCodes) {
     console.log(`[client.js] computing readability metrics`);
-    var code = `tNngSfLOUca4j0t3NRsVLOQeAxk3ApAL71WT/24ep9VJmrSizG6pZg==`;
+    var code = functionCodes['ComputeReadabilityFuncCode'];
     var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ComputeReadability?code=${code}`;
     // var requestUrl = `http://localhost:7072/api/ComputeReadability?code=${code}`;
 
@@ -122,13 +123,14 @@ async function computeReadability(content) {
  * Calls and api that parses the webpage text and then runs readability metrics on them.
  * @param {*} url The url to get webpage data from
  */
-async function extractWebpageInfo(url) {
+async function extractWebpageInfo(url, functionCodes) {
     console.log(`[client.js] Retrieving webpage data for ${url}`);
-    var code = `s23M3iar2EJ9iyXfPVeHWQtCRD6BO0cTI87YtvDhnAkVawaoVTCpAw==`;
+    var code = functionCodes['ExtractTextFuncCode'];
     var requestUrl = `https://textextractionfunc.azurewebsites.net/api/ExtractText?code=${code}`;
     // var requestUrl = `http://localhost:7072/api/ExtractText?code=${code}`;
 
     var webpageData = {};
+    console.log(`[client.js] Request url: ${requestUrl}`);
     var response = await axios.post(requestUrl, {
         url: url,
     });
@@ -149,13 +151,13 @@ async function extractWebpageInfo(url) {
  * Send a webpage url to the request service for it to analyze
  * If that is successful, then it will fetch the data and display it.
  */
-async function processWebpage() {
+async function processWebpage(functionCodes) {
     console.log(`[client.js] processing web page data`);
-    var webpageData = await getCurrentWebpageData();
+    var webpageData = await getCurrentWebpageData(functionCodes);
     console.log(`[client.js] sending data to ProcessTextFunc for processing`);
-    webpageAnalysisResult = await processWebpageData(webpageData);
+    webpageAnalysisResult = await processWebpageData(webpageData, functionCodes);
     console.log(`[client.js] webpage processing result: ${JSON.stringify(webpageAnalysisResult)}`);
-    var webpageData = await fetchCurrentWebpageData();
+    var webpageData = await fetchCurrentWebpageData(functionCodes);
     return webpageData;
 }
 
@@ -165,9 +167,9 @@ async function processWebpage() {
  * 
  * @param {*} data The data from the webpage
  */
-async function processWebpageData(data) {
+async function processWebpageData(data, functionCodes) {
     // TODO: How to pass the code value as part of a header?
-    var code = `2ufJzrhP9OYCE6gl/afIMsIVyOm/azxo0Z5ChDQzxLXmY0GAaFP0xg==`;
+    var code = functionCodes['ProcessTextHttpFuncCode'];
     var requestUrl = `https://processtext.azurewebsites.net/api/ProcessTextHttp?code=${code}`;
     // var requestUrl = `http://localhost:7071/api/ProcessTextHttp?code=${code}`;
     var response;
@@ -216,11 +218,11 @@ async function processWebpageData(data) {
 /**
  * Fetch the data for the current webpage
  */
-async function fetchCurrentWebpageData() {
-    var webpageData = await getCurrentWebpageData();
+async function fetchCurrentWebpageData(functionCodes) {
+    var webpageData = await getCurrentWebpageData(functionCodes);
 
     console.log(`[client.js] fetching data for webpage ${webpageData.url}`);
-    var code = "Ds7yQ3yWjKLFc1bkg9B4FO4UOx5Coa4Dzy7tCt8I3NbrItaOeQYbfA==";
+    var code = functionCodes['GetProcessedTextFuncCode'];
     var title = webpageData.title.replace(badTitleCharactersRegex, "");
     var domain = webpageData.domain;
     console.log(`[client.js] Fetching data with Domain: ${domain}, Title: ${title}`);
@@ -242,17 +244,30 @@ async function fetchCurrentWebpageData() {
 /**
  * Analyze the selected text on a current webpage
  */
-async function analyzeSelectedText() {
+async function analyzeSelectedText(functionCodes) {
     var selectedObject = window.getSelection();
     var text = selectedObject.toString();
+    console.log(`[client.js] Selected text: ${text}`);
+    return await sanitizeAndComputeReadability(text, functionCodes);
+}
+
+/**
+ * Analyze the custom text
+ */
+async function analyzeCustomText(text, functionCodes) {
     console.log(`[client.js] Custom text: ${text}`);
+    return await sanitizeAndComputeReadability(text, functionCodes);
+}
+
+async function sanitizeAndComputeReadability(text, functionCodes) {
+    console.log(`[client.js] Computing readability for text ${text}`);
     var result = {};
 
     if (text == null || text.trim() == "") return result;
 
     try {
         // TODO: Sanitize this input
-        result = await computeReadability(text);
+        result = await computeReadability(text, functionCodes);
     }
     catch (error) {
         console.error(`[menu_actions.js] Unable to compute readability because ${error}`);

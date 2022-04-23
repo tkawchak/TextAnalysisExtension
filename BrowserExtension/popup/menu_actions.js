@@ -100,7 +100,7 @@ function displayAnalysisResults(response) {
  */
 function handleAnalyzeResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`In popup script, recieved response from analyze command: ${responseText}`);
+  console.log(`[menu_actions.js] recieved response from analyze command: ${responseText}`);
   displayAnalysisResults(response);
 }
 
@@ -110,8 +110,34 @@ function handleAnalyzeResult(response) {
  */
 function handleFetchResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`In popup script, recieved response from fetch command: ${responseText}`);
+  console.log(`[menu_actions.js] recieved response from fetch command: ${responseText}`);
   displayAnalysisResults(response);
+}
+
+/**
+ * Handle the response from logging in 
+ * @param {*} response The response from a login action
+ */
+function handleLoginResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(`[menu_actions.js] recieved response from login command: ${responseText}`);
+
+  // TODO: We need to do something here to let the user know that they are logged in.
+  //       Right now it is enough to log it, but when users use this we need to
+  //       actually show some feedback
+}
+
+/**
+ * Handle the response from logging out
+ * @param {*} response The response from a logout action
+ */
+function handleLogoutResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(`[menu_actions.js] recieved response from logout command: ${responseText}`);
+
+  // TODO: We need to do something here to let the user know that they are logged out.
+  //       Right now it is enough to log it, but when users use this we need to
+  //       actually show some feedback
 }
 
 /**
@@ -123,7 +149,7 @@ function logError(error) {
   errorElement.innerHTML = error.message;
   var errorContent = document.querySelector("#error-content");
   errorContent.classList.remove("hidden");
-  console.error(`In popup script, received error: ${error}`);
+  console.error(`[menu_actions.js] received error: ${error}`);
 }
 
 /**
@@ -135,7 +161,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
   // but there is really only one tab because the tab must be active
   for (var tab of tabs)
   {
-    console.log(`In popup script, sending analyze command to tab with id ${tab.id}`);
+    console.log(`[menu_actions.js] sending analyze command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "analyze" })
       .then(handleAnalyzeResult)
       .catch(logError);
@@ -149,7 +175,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
 function sendFetchCommandToContentScript(tabs) {
   for (var tab of tabs)
   {
-    console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
+    console.log(`[menu_actions.js] Sending fetch command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "fetch" })
       .then(handleFetchResult)
       .catch(logError);
@@ -163,9 +189,37 @@ function sendFetchCommandToContentScript(tabs) {
 function sendAnalyzeSelectedCommandToContentScript(tabs) {
   for (var tab of tabs)
   {
-    console.log(`In popup script, sending fetch command to tab with id ${tab.id}`);
+    console.log(`[menu_actions.js] Sending analyze-selected command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "analyze-selected" })
       .then(handleAnalyzeResult)
+      .catch(logError);
+  }
+}
+
+/**
+ * Send a command to login to the content script.
+ * @param {*} tabs the tabs to send the command to
+ */
+function sendLoginCommandToContentScript(tabs) {
+  for (var tab of tabs)
+  {
+    console.log(`[menu_actions.js] Sending login command to tab with id ${tab.id}`);
+    browser.tabs.sendMessage(tab.id, { "command": "login" })
+      .then(handleLoginResult)
+      .catch(logError);
+  }
+}
+
+/**
+ * Send a command to logout of the content script.
+ * @param {*} tabs the tabs to send the command to
+ */
+function sendLogoutCommandToContentScript(tabs) {
+  for (var tab of tabs)
+  {
+    console.log(`[menu_actions.js] Sending logout command to tab with id ${tab.id}`);
+    browser.tabs.sendMessage(tab.id, { "command": "logout" })
+      .then(handleLogoutResult)
       .catch(logError);
   }
 }
@@ -189,18 +243,21 @@ function showAnalyzeCustomTextFields() {
 /**
  * Analyze custom text field box
  */
-async function analyzeCustomText() {
+async function analyzeCustomText(tabs) {
   var text = document.getElementById("custom-text-box").value;
   if (text == null || text.trim() == '') {
     showAnalyzeCustomTextFields();
   }
-  else {
-    console.log(`[menu_actions.js] Custom text: ${text}`);
-    // TODO: Sanitize this input
-    var textAnalysisResult = await client.computeReadability(text);
-  }
 
-  displayAnalysisResults(textAnalysisResult);
+  else {
+    for (var tab of tabs) {
+      console.log(`[menu_actions.js] Custom text: ${text}`);
+      console.log(`[menu_actions.js] Sending analyze custom text command to tab with id ${tab.id}`)
+      browser.tabs.sendMessage(tab.id, { "command": "analyze-custom", "text": text })
+        .then(handleAnalyzeResult)
+        .catch(logError);
+    }
+  }
 }
 
 /**
@@ -234,35 +291,63 @@ function listenForClicks() {
       active: true
     });
 
-    if (e.target.id == "analyze-webpage-button") {
-      console.log("[menu_actions.js] Analyze Webpage button was clicked");
+    // figure out which button was clicked and take appropriate action
+    switch(e.target.id) {
+
+      case "analyze-webpage-button": 
+      console.log("[menu_actions.js] Analyze Webpage button was clicked.");
       activeTab
         .then(sendAnalyzeCommandToContentScript)
         .catch(logError);
-    }
-    else if (e.target.id == "fetch-webpage-button") {
-      console.log("[menu_actions.js] Fetch Webpage data button was clicked");
+      break;
+
+    case "fetch-webpage-button":
+      console.log("[menu_actions.js] Fetch Webpage data button was clicked.");
       activeTab
         .then(sendFetchCommandToContentScript)
         .catch(logError);
-    }
-    else if (e.target.id == "analyze-text-button") {
-      console.log("[menu_actions.js] Analyze Custom Text button was clicked");
-      analyzeCustomText();
-    }
-    else if (e.target.id == "analyze-selected-button") {
+      break;
+      
+    case "analyze-text-button":
+      console.log("[menu_actions.js] Analyze Custom Text button was clicked.");
+      activeTab
+        .then(analyzeCustomText)
+        .catch(logError);
+      break;
+
+    case "analyze-selected-button":
       console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
       activeTab
         .then(sendAnalyzeSelectedCommandToContentScript)
         .catch(logError);
-    }
-    else if (e.target.id == "back-button") {
-      console.log("[menu_actions.js] Back button was clicked");
-      showDefaultMenu();
-    }
-    return;
-  });
+      break;
 
+    case "back-button":
+      console.log("[menu_actions.js] Back button was clicked.");
+      showDefaultMenu();
+      break;
+
+    case "login":
+      console.log("[menu_actions.js] Login was clicked.");
+      activeTab
+        .then(sendLoginCommandToContentScript)
+        .catch(logError);
+      // TODO: How to handle if the login fails?
+      break;
+
+    case "logout":
+      console.log("[menu_actions.js] Logout was clicked.");
+      activeTab
+        .then(sendLogoutCommandToContentScript)
+        .catch(logError);
+      // TODO: How to handle if the logout fails?
+      break;
+
+    default: 
+      console.log(`[menu_actions.js] Unhandled button was clicked with id ${e.target.id}`);
+      break;
+    }
+  });
   return;
 }
 
@@ -273,7 +358,7 @@ function listenForClicks() {
 function reportExecuteScriptError(error) {
   document.querySelector("#popup-content").classList.add("hidden");
   document.querySelector("#error-content").classList.remove("hidden");
-  console.error(`Failed to execute content script: ${error.message}`);
+  console.error(`[menu_actions.js] Failed to execute content script: ${error.message}`);
 }
 
 /**
@@ -281,7 +366,7 @@ function reportExecuteScriptError(error) {
  * and add a click handler.
  * If we couldn't inject the script, handle the error.
  */
-console.log("In popup script, loading the getDocumentText content script");
-browser.tabs.executeScript({file: "/getDocumentText.bundle.js"})
+console.log("[menu_actions.js] Loading the getDocumentText content script");
+browser.tabs.executeScript({file: "/getDocumentText.js"})
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
