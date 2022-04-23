@@ -109,7 +109,6 @@ async function login(msalInstance) {
   console.log(`[msalUtils.js] launch web auth flow for login`);
   const loginResult = await launchWebAuthFlow(msalInstance, loginUrl);
   console.log(`[msalUtils.js] login result username - ${loginResult.account.username}`);
-  console.log(`[msalUtils.js] Login result token - ${loginResult.accessToken}`);
   return loginResult;
 }
 

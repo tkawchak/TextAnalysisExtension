@@ -76,7 +76,7 @@ console.log("[auth.js] Creating Interactive Browser Credential object");
 // }
 
 async function getSecret(msalInstance, secretName) {
-  console.log("[auth.js] Logging in...");
+  console.log(`[auth.js] Fetching secret ${secretName}`);
   try {
     var request = {
       scopes: ["https://vault.azure.net/.default"]
@@ -104,47 +104,74 @@ async function getSecret(msalInstance, secretName) {
   }
 }
 
-var authPort;
+async function getSecrets(msalInstance, secrets) {
+  console.log(`[auth.js] Fetching secrets ${secrets}`);
+  var secretValues = {}
+  for (var i = 0; i < secrets.length; i++) {
+    const secret = secrets[i];
+    var secretValue = await getSecret(msalInstance, secret);
+    secretValues[secret] = secretValue;
+  }
 
-// Add a listener for the function run when the content script
-// wants to connect to the function
-console.log(`[auth.js] Adding listener for incoming connections.`);
-browser.runtime.onConnect.addListener(connected);
+  return secretValues;
+}
+
+secrets = {};
 
 // Function to handle to auth requests
-async function handleAuthMessage(message) {
-  console.log("[auth.js] [authBackend.js] Received message");
-
-  // In order to send a message back on the port:
-  // authPort.postMessage({ greeting: "hello from content script" });
+function handleAuthMessage(message, sender, sendResponse) {
+  console.log("[auth.js] Received message");
 
   if (message.action != undefined) {
     var action = message.action;
+    var responseMessage;
 
     console.log(`[auth.js] Action: ${action}`)
     switch (action) {
+
       case "login":
         console.log(`[auth.js] Received login command.`)
-        await login(msalInstance);
-        const keyvaultSecret = getSecret(msalInstance, "testSecret");
-        break;
+        login(msalInstance).then(function(){
+          const secretsToFetch = message.secrets;
+          console.log(`[auth.js] Fetching secrets ${secretsToFetch}.`);
+          getSecrets(msalInstance, secretsToFetch).then(function(keyvaultSecrets){
+            console.log(`[auth.js] Successfully fetched all secret values.`);
+            secrets = keyvaultSecrets;
+            responseMessage = `Executed command login`;
+            sendResponse({loginResult: responseMessage, secrets: keyvaultSecrets});
+          }, function(e){console.error(e)});
+        });
+        return true;
+
       case "logout":
-        await logout(msalInstance);
-        break;
+        console.log(`[auths.js] Received logout command.`);
+        logout(msalInstance).then(function(){
+          console.log(`[auth.js] Successfully logged out.`);
+          secrets = {};
+          responseMessage = `Executed command logout`;
+          sendResponse({logoutResult: responseMessage});
+        }, function(e){console.error(e)});
+        return true;
+
+      case "getsecrets":
+        console.log(`[auth.js] Received getsecrets command.`);
+        if (Object.keys(secrets).length != 0) {
+          console.warn(`[auth.js] Secrets are empty. Please log in first.`);
+          responseMessage = `Please login first`;
+        }
+        else {
+          console.log(`[auth.js] User is already logged in. Returning function codes.`)
+          responseMessage = "Executed command getsecrets";
+        }
+        sendMessage({getsecretsResult: responseMessage, secrets: secrets});
+
       default:
         console.warn(`Action ${action} not recognized.`);
     }
-
-    // Send auth response back
-    var responseMessage = `Executed command ${action}`;
-    authPort.postMessage({ status: responseMessage });
   }
+
+  // TODO: Remove
+  return sendResponse({result: "None"});
 }
 
-// Function to execute when the background script receives an event to connect
-// to the main content script
-function connected(port) {
-  console.log("[auth.js] Received connection request. Adding auth message handler.");
-  authPort = port;
-  authPort.onMessage.addListener(handleAuthMessage);
-}
+browser.runtime.onMessage.addListener(handleAuthMessage);
