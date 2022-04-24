@@ -1,6 +1,6 @@
 variables:
   - name: NPM_VERSIONSPEC
-    value: '12.x'
+    value: '16.x'
   - name: VM_IMAGE
     value: 'ubuntu-latest' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
   - name: AZURE_SUBSCRIPTION
