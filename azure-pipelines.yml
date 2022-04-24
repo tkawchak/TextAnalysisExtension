@@ -15,6 +15,8 @@ variables:
     value: '$(ProcessTextProjectPath)/$(ProcessTextFunctionAppName)'
   - name: BrowserExtensionPath
     value: '$(System.DefaultWorkingDirectory)/BrowserExtension'
+  - name: BrowserExtensionArtifactsPath
+    value: '$(BrowserExtensionPath)/dist/webext-prod'
   - name: TextExtractionFunctionName
     value: 'TextExtractionFunc'
   - name: TextExtractionFunctionPath
@@ -73,7 +75,13 @@ stages:
         inputs:
           command: 'custom'
           workingDir: $(BrowserExtensionPath)
-          customCommand: 'run package'
+          customCommand: 'run build'
+      - task: PublishPipelineArtifact@1
+        displayName: Publish Browser Extension Artifacts
+        inputs:
+          targetPath: $(BrowserExtensionArtifactsPath)
+          artifactName: TextAnalysisExtension
+            
 
     - job: TestNpm
       displayName: Browser Extension Tests
