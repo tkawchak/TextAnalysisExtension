@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="menu.css"/>
-  </head>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="menu.css" />
+</head>
 
 <body>
   <div id="popup-content">
@@ -15,6 +15,7 @@
       <textarea id="custom-text-box"></textarea>
       <br>
     </div>
+
     <div id="popup-actions">
       <div class="menuitem button show-default" id="analyze-webpage-button">Analyze Webpage</div>
       <div class="menuitem button show-default" id="fetch-webpage-button">Fetch Webpage Data</div>
@@ -24,23 +25,30 @@
       <div class="menuitem button show-default login" id="login">Login</div>
       <div class="menuitem button show-default logout" id="logout">Logout</div>
     </div>
+
+    <div id="loading-status" class="hidden">
+      <div id="loading-icon" class="spin"></div>
+    </div>
+
     <div id="analyze-results">
-        <div id="summary-section" class="hidden">
-          <h3 id="summary-title">Summary</h3>
-          <p id="summary"></p>
-        </div>
-        <div id="predicted-section" class="hidden">
-          <h3 id="predicted-title">Predicted</h3>
-          <p id="predicted"></p>
-        </div>
-        <div id="result-items">
-            <!-- <div class="result"><div class="result-key">Score: </div><div class="result-value">92.30</div></div> -->
-        </div>
+      <div id="summary-section" class="hidden">
+        <h3 id="summary-title">Summary</h3>
+        <p id="summary"></p>
+      </div>
+      <div id="predicted-section" class="hidden">
+        <h3 id="predicted-title">Predicted</h3>
+        <p id="predicted"></p>
+      </div>
+      <div id="result-items">
+        <!-- <div class="result"><div class="result-key">Score: </div><div class="result-value">92.30</div></div> -->
+      </div>
     </div>
   </div>
+
   <div id="error-content" class="hidden">
     <p id="error-message">Can't analyze webpage.</p>
   </div>
+
   <script src="menu_actions.js" type="module"></script>
 </body>
 

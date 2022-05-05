@@ -27,12 +27,31 @@ function clearCurrentAnalysisResults() {
 }
 
 /**
+ * Show the loading status
+ */
+function showLoadingStatus() {
+  console.log("[menu_actions.js] Showing loading status");
+  var spinner = document.getElementById("loading-status");
+  spinner.classList.remove("hidden");
+}
+
+/**
+ * Hide the loading status
+ */
+function hideLoadingStatus() {
+  console.log("[menu_actions.js] Hiding loading status");
+  var spinner = document.getElementById("loading-status");
+  spinner.classList.add("hidden");
+}
+
+/**
  * Display analysis results for a webpage
  * @param {*} response response from an analysis action
  */
 function displayAnalysisResults(response) {
   // Clear the existing results
   clearCurrentAnalysisResults();
+  hideLoadingStatus();
 
   // Get the desired element for result items
   var summary = document.getElementById("summary");
@@ -121,6 +140,7 @@ function handleFetchResult(response) {
 function handleLoginResult(response) {
   var responseText = JSON.stringify(response);
   console.log(`[menu_actions.js] recieved response from login command: ${responseText}`);
+  hideLoadingStatus();
 
   // TODO: We need to do something here to let the user know that they are logged in.
   //       Right now it is enough to log it, but when users use this we need to
@@ -134,6 +154,7 @@ function handleLoginResult(response) {
 function handleLogoutResult(response) {
   var responseText = JSON.stringify(response);
   console.log(`[menu_actions.js] recieved response from logout command: ${responseText}`);
+  hideLoadingStatus();
 
   // TODO: We need to do something here to let the user know that they are logged out.
   //       Right now it is enough to log it, but when users use this we need to
@@ -145,11 +166,24 @@ function handleLogoutResult(response) {
  * @param {*} error The error message
  */
 function logError(error) {
+  hideLoadingStatus();
   var errorElement = document.querySelector("#error-message");
   errorElement.innerHTML = error.message;
   var errorContent = document.querySelector("#error-content");
   errorContent.classList.remove("hidden");
   console.error(`[menu_actions.js] received error: ${error}`);
+}
+
+/**
+ * Clear the error message so that it does not show up anymore
+ */
+function hideError() {
+  console.log("[menu_actions.js] Clearing error message");
+  var errorElement = document.querySelector("#error-message");
+  errorElement.innerHTML = "";
+  var errorContent = document.querySelector("#error-content");
+  errorContent.classList.add("hidden");
+  console.log("[menu_actions.js] Cleared error message");
 }
 
 /**
@@ -159,6 +193,7 @@ function logError(error) {
 function sendAnalyzeCommandToContentScript(tabs) {
   // Here we loop through all of the tabs
   // but there is really only one tab because the tab must be active
+  showLoadingStatus();
   for (var tab of tabs)
   {
     console.log(`[menu_actions.js] sending analyze command to tab with id ${tab.id}`);
@@ -173,6 +208,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
  * @param {*} tabs the tabs to send the command to
  */
 function sendFetchCommandToContentScript(tabs) {
+  showLoadingStatus();
   for (var tab of tabs)
   {
     console.log(`[menu_actions.js] Sending fetch command to tab with id ${tab.id}`);
@@ -187,6 +223,7 @@ function sendFetchCommandToContentScript(tabs) {
  * @param {*} tabs the tabs to send the command to
  */
 function sendAnalyzeSelectedCommandToContentScript(tabs) {
+  showLoadingStatus();
   for (var tab of tabs)
   {
     console.log(`[menu_actions.js] Sending analyze-selected command to tab with id ${tab.id}`);
@@ -201,6 +238,9 @@ function sendAnalyzeSelectedCommandToContentScript(tabs) {
  * @param {*} tabs the tabs to send the command to
  */
 function sendLoginCommandToContentScript(tabs) {
+  
+  clearCurrentAnalysisResults();
+  showLoadingStatus();
   for (var tab of tabs)
   {
     console.log(`[menu_actions.js] Sending login command to tab with id ${tab.id}`);
@@ -215,6 +255,8 @@ function sendLoginCommandToContentScript(tabs) {
  * @param {*} tabs the tabs to send the command to
  */
 function sendLogoutCommandToContentScript(tabs) {
+  clearCurrentAnalysisResults();
+  showLoadingStatus();
   for (var tab of tabs)
   {
     console.log(`[menu_actions.js] Sending logout command to tab with id ${tab.id}`);
@@ -265,6 +307,7 @@ async function analyzeCustomText(tabs) {
  */
 function showDefaultMenu() {
   clearCurrentAnalysisResults();
+  hideLoadingStatus();
   var defaultItems = document.getElementsByClassName("show-default");
   var customTextSection = document.getElementById("custom-text");
   var customTextBox = document.getElementById("custom-text-box");
@@ -286,6 +329,7 @@ function showDefaultMenu() {
 function listenForClicks() {
   document.addEventListener("click", (e) => {
     console.log(`[menu_actions.js] Clicked! Id: ${e.target.id}`);
+    hideError();
     var activeTab = browser.tabs.query({
       currentWindow: true,
       active: true
