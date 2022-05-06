@@ -117,6 +117,7 @@ async function getSecrets(msalInstance, secrets) {
 }
 
 secrets = {};
+loggedInUsername = "";
 
 // Function to handle to auth requests
 function handleAuthMessage(message, sender, sendResponse) {
@@ -131,14 +132,19 @@ function handleAuthMessage(message, sender, sendResponse) {
 
       case "login":
         console.log(`[auth.js] Received login command.`)
-        login(msalInstance).then(function(){
+        login(msalInstance).then(function(loginResult){
           const secretsToFetch = message.secrets;
           console.log(`[auth.js] Fetching secrets ${secretsToFetch}.`);
           getSecrets(msalInstance, secretsToFetch).then(function(keyvaultSecrets){
             console.log(`[auth.js] Successfully fetched all secret values.`);
             secrets = keyvaultSecrets;
             responseMessage = `Executed command login`;
-            sendResponse({loginResult: responseMessage, secrets: keyvaultSecrets});
+            loggedInUsername = loginResult.account.username;
+            sendResponse({
+              loginResult: responseMessage,
+              user: loggedInUsername,
+              secrets: keyvaultSecrets,
+            });
           }, function(e){console.error(e)});
         });
         return true;
@@ -148,6 +154,7 @@ function handleAuthMessage(message, sender, sendResponse) {
         logout(msalInstance).then(function(){
           console.log(`[auth.js] Successfully logged out.`);
           secrets = {};
+          loggedInUsername = "";
           responseMessage = `Executed command logout`;
           sendResponse({logoutResult: responseMessage});
         }, function(e){console.error(e)});
@@ -163,7 +170,19 @@ function handleAuthMessage(message, sender, sendResponse) {
           console.log(`[auth.js] User is already logged in. Returning function codes.`)
           responseMessage = "Executed command getsecrets";
         }
-        sendMessage({getsecretsResult: responseMessage, secrets: secrets});
+        sendResponse({getsecretsResult: responseMessage, secrets: secrets});
+
+      case "getuser":
+        console.log(`[auth.js] Received getuser command.`);
+        if (loggedInUsername != "") {
+          console.warn(`[auth.js] No user is logged in.`);
+          responseMessage = "No user is logged in";
+        }
+        else {
+          console.log(`[auth.js] User ${loggedInUsername} is logged in.`);
+          responseMessage = `Found logged in user ${loggedInUsername}`;
+        }
+        sendResponse({getuserResult: responseMessage, user: loggedInUsername});
 
       default:
         console.warn(`Action ${action} not recognized.`);
