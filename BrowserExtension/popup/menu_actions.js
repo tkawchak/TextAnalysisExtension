@@ -26,13 +26,22 @@ function clearCurrentAnalysisResults() {
   predictedSection.classList.add("hidden");
 }
 
+function showElementById(id) {
+  var element = document.getElementById(id);
+  element.classList.remove("hidden");
+}
+
+function hideElementbyId(id) {
+  var element = document.getElementById(id);
+  element.classList.add("hidden");
+}
+
 /**
  * Show the loading status
  */
 function showLoadingStatus() {
   console.log("[menu_actions.js] Showing loading status");
-  var spinner = document.getElementById("loading-status");
-  spinner.classList.remove("hidden");
+  showElementById("loading-status");
 }
 
 /**
@@ -40,8 +49,36 @@ function showLoadingStatus() {
  */
 function hideLoadingStatus() {
   console.log("[menu_actions.js] Hiding loading status");
-  var spinner = document.getElementById("loading-status");
-  spinner.classList.add("hidden");
+  hideElementbyId("loading-status");
+}
+
+/**
+ * Show that a given user is logged in
+ * @param {string} user The user to display as logged in
+ */
+function showLoggedInUser(user) {
+  console.log(`[menu_actions.js] Showing logged in user ${user}`);
+  var loggedInUser = document.getElementById("logged-in-user");
+  loggedInUser.innerHTML = user;
+  showElementById("logged-in-status");
+  showElementById("logged-in-user");
+  hideElementbyId("logged-out-status");
+  hideElementbyId("login");
+  showElementById("logout");
+}
+
+/**
+ * Show a status that no user is logged in
+ */
+function showLoggedOutStatus() {
+  console.log("[menu_actions.js] Setting status to logged out");
+  var loggedInUser = document.getElementById("logged-in-user");
+  loggedInUser.innerHTML = "";
+  hideElementbyId("logged-in-status");
+  hideElementbyId("logged-in-user");
+  showElementById("logged-out-status");
+  showElementById("login");
+  hideElementbyId("logout");
 }
 
 /**
@@ -141,10 +178,7 @@ function handleLoginResult(response) {
   var responseText = JSON.stringify(response);
   console.log(`[menu_actions.js] recieved response from login command: ${responseText}`);
   hideLoadingStatus();
-
-  // TODO: We need to do something here to let the user know that they are logged in.
-  //       Right now it is enough to log it, but when users use this we need to
-  //       actually show some feedback
+  showLoggedInUser(response);
 }
 
 /**
@@ -155,10 +189,7 @@ function handleLogoutResult(response) {
   var responseText = JSON.stringify(response);
   console.log(`[menu_actions.js] recieved response from logout command: ${responseText}`);
   hideLoadingStatus();
-
-  // TODO: We need to do something here to let the user know that they are logged out.
-  //       Right now it is enough to log it, but when users use this we need to
-  //       actually show some feedback
+  showLoggedOutStatus();
 }
 
 /**
@@ -308,18 +339,18 @@ async function analyzeCustomText(tabs) {
 function showDefaultMenu() {
   clearCurrentAnalysisResults();
   hideLoadingStatus();
-  var defaultItems = document.getElementsByClassName("show-default");
-  var customTextSection = document.getElementById("custom-text");
+  var showDefaultItems = document.getElementsByClassName("show-default");
+  var hideDefaultItems = document.getElementsByClassName("hide-default");
   var customTextBox = document.getElementById("custom-text-box");
-  var backButton = document.getElementById("back-button");
 
-  for (var i=0; i < defaultItems.length; i++) {
-    defaultItems[i].removeAttribute("hidden");
+  for (var i=0; i < showDefaultItems.length; i++) {
+    showDefaultItems[i].removeAttribute("hidden");
+  }
+  for (var i=0; i < hideDefaultItems.length; i++) {
+    hideDefaultItems[i].setAttribute("hidden", true);
   }
 
   customTextBox.value = "";
-  customTextSection.setAttribute("hidden", true);
-  backButton.setAttribute("hidden", true);
 }
 
 /**
@@ -405,12 +436,20 @@ function reportExecuteScriptError(error) {
   console.error(`[menu_actions.js] Failed to execute content script: ${error.message}`);
 }
 
+showDefaultMenu();
+
 /**
  * When the popup loads, inject a content script into the active tab,
  * and add a click handler.
  * If we couldn't inject the script, handle the error.
  */
-console.log("[menu_actions.js] Loading the getDocumentText content script");
+console.log("[menu_actions.js] Loading the getDocumentText content script.");
 browser.tabs.executeScript({file: "/getDocumentText.js"})
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
+
+console.log("[menu-actions.js] Checking if user is already logged in.");
+let getUserResponse = await browser.runtime.sendMessage({action: "getuser"});
+if (getUserResponse.user != "") {
+  showLoggedInUser(getUserResponse.user);
+}

@@ -107,7 +107,7 @@ function handleMesssageFromAuthService(message) {
   if (message.loginResult != undefined) {
     console.log(`[getDocumentText.js] Processing auth service login result ${message.loginResult}`);
     functionCodes = message.secrets;
-    return "logged in";
+    return message.user;
   }
 
   else if (message.logoutResult != undefined) {
