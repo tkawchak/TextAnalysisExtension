@@ -18,9 +18,9 @@
 
   "permissions": [
     "<all_urls>",
-    "webRequest",
     "activeTab",
-    "identity"
+    "identity",
+    "webRequest"
   ],
 
   "web_accessible_resources": [
