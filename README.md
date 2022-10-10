@@ -50,15 +50,9 @@ sudo npm install
 
 ## Package the Extension
 ```bash
-npm run package
-```
-
-Under the hood, this uses the browserify command to package everything into web-compatible .js files.
-
-TODO: This should now be slightly different, using parcel to build the extension: https://parceljs.org/recipes/web-extension/
-```bash
 npm run build
 ```
+Under the hood, this uses the browserify command to package everything into web-compatible .js files. This project is using parcel to build the extension: https://parceljs.org/recipes/web-extension/
 
 ## Test the Extension
 ```bash

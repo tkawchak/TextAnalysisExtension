@@ -162,7 +162,7 @@ function handleAuthMessage(message, sender, sendResponse) {
 
       case "getsecrets":
         console.log(`[auth.js] Received getsecrets command.`);
-        if (Object.keys(secrets).length != 0) {
+        if (Object.keys(secrets).length == 0) {
           console.warn(`[auth.js] Secrets are empty. Please log in first.`);
           responseMessage = `Please login first`;
         }
@@ -174,7 +174,7 @@ function handleAuthMessage(message, sender, sendResponse) {
 
       case "getuser":
         console.log(`[auth.js] Received getuser command.`);
-        if (loggedInUsername != "") {
+        if (loggedInUsername == "") {
           console.warn(`[auth.js] No user is logged in.`);
           responseMessage = "No user is logged in";
         }
