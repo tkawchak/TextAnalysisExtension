@@ -10,31 +10,25 @@ html, body {
   cursor: pointer;
 }
 
-#login-status {
-  background-color: #d5dd8d;
-  display: table;
-  width: 100%;
-}
-
 .account {
   display: table-cell;
-  text-align: center;
   padding: 5px;
+  text-align: center;
 }
 
 .hidden {
   display: none;
 }
 
+#login-status {
+  background-color: #d5dd8d;
+}
 #logged-in-status {
   width: 20%;
 }
 #logged-in-user {
   width: 80%;
   text-align: left;
-}
-#logged-out-status {
-  width: 100%;
 }
 
 .menuitem:hover {

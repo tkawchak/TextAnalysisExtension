@@ -13,7 +13,6 @@ namespace ProcessTextFunc.Utils
         {
             var processedText = new ProcessedText
             {
-                Id = request.Title,
                 Author = request.Author,
                 AutomatedReadabilityIndex = request.AutomatedReadabilityIndex,
                 AverageSentenceLength = request.AverageSentenceLength,

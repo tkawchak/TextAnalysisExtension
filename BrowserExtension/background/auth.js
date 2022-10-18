@@ -171,6 +171,7 @@ function handleAuthMessage(message, sender, sendResponse) {
           responseMessage = "Executed command getsecrets";
         }
         sendResponse({getsecretsResult: responseMessage, secrets: secrets});
+        break;
 
       case "getuser":
         console.log(`[auth.js] Received getuser command.`);
@@ -183,6 +184,7 @@ function handleAuthMessage(message, sender, sendResponse) {
           responseMessage = `Found logged in user ${loggedInUsername}`;
         }
         sendResponse({getuserResult: responseMessage, user: loggedInUsername});
+        break;
 
       default:
         console.warn(`Action ${action} not recognized.`);

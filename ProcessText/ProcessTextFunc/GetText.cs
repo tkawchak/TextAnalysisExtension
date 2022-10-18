@@ -10,6 +10,7 @@ namespace ProcessTextFunc
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Primitives;
     using ProcessTextFunc.Contracts;
     using ProcessTextFunc.Utils;
 
@@ -20,12 +21,11 @@ namespace ProcessTextFunc
             [HttpTrigger(
                 AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
             ILogger log,
-            [CosmosDB(
-                databaseName: "TextContent",
-                collectionName: "Web",
-                ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB",
-                Id = "{Query.id}",
-                PartitionKey = "{Query.domain}")] ProcessedText document)
+            [Table(
+                tableName: "WebPages",
+                partitionKey: "{Query.domain}",
+                rowKey: "{Query.id}",
+                Connection = "TableStorageConnectionString")] ProcessedText document)
         {
             log.LogInformation("C# GetProcessedText function received request.");
 
@@ -36,7 +36,18 @@ namespace ProcessTextFunc
             }
             else
             {
-                return new NotFoundObjectResult(request.Query);
+                StringValues domain, title;
+                if (request.Query.TryGetValue("domain", out domain) && request.Query.TryGetValue("id", out title))
+                {
+                    log.LogWarning($"Did not find any documents with title '{title}' and domain '{domain}'");
+                    return new NotFoundObjectResult($"Title: {title}, Domain: {domain}");
+                }
+                else
+                {
+                    string error_message = "Both 'id' and 'domain' must be specified.";
+                    log.LogWarning($"Invalid query string arguments specified. {error_message}");
+                    return new BadRequestObjectResult(error_message);
+                }
             }
         }
     }

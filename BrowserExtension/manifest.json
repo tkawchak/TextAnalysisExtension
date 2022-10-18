@@ -3,7 +3,7 @@
   "name": "Text Analysis Extension",
   "version": "0.1",
 
-  "description": "Performs text analysis on web pages.  Current text analysis performed is basic flesch-kincaid analysis and grade reading level analysis.  This will be sent to an azure function which will process the data and then ingest it to a cosmosDB that is set up in azure.",
+  "description": "Performs text analysis on web pages.  Current text analysis performed is basic flesch-kincaid analysis and grade reading level analysis.  This will be sent to an azure function which will process the data and store the result.",
 
   "icons": {
      "32": "icons/TextAnalysisLogo32.png"

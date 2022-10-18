@@ -5,11 +5,36 @@
 namespace ProcessTextFunc.Contracts
 {
     using System;
+    using Azure;
+    using Azure.Data.Tables;
     using Newtonsoft.Json;
 
     [Serializable]
-    public class ProcessedText
+    public class ProcessedText : ITableEntity
     {
+        // PartitionKey just points to the domain
+        public string PartitionKey
+        {
+            get { return this.Domain; }
+            set { this.Domain = value; }
+        }
+
+        // RowKey just points to the Title (Unique)
+        public string RowKey
+        {
+            get { return this.Title; }
+            set { this.Title = value; }
+        }
+
+        // Timestamp just points to ProcessedTime
+        public DateTimeOffset? Timestamp
+        {
+            get { return new DateTimeOffset(this.ProcessedTime); }
+            set { this.ProcessedTime = value.Value.DateTime; }
+        }
+
+        public ETag ETag { get; set; }
+
         [JsonProperty("author")]
         public string Author { get; set; }
 
@@ -48,9 +73,6 @@ namespace ProcessTextFunc.Contracts
 
         [JsonProperty("gunning_fog_index")]
         public float GunningFoxIndex { get; set; }
-
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         [JsonProperty("lead_image_url")]
         public string LeadImageUrl { get; set; }

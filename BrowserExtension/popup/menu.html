@@ -10,10 +10,10 @@
 <body>
   <div id="popup-content">
     <div id="login-status">
-      <div id="logged-in-status" class="account hidden">User:</div><div id="logged-in-user" class="account hidden">N/A</div>
-      <div id="logged-out-status" class="account">Not Logged In</div>
+      <div class="account"><div id="logged-in-status" class="account">User:</div><div id="logged-in-user" class="account">N/A</div></div>
     </div>
-    <div id="custom-text" class="hide-default analyze-custom-text" hidden>
+
+    <div id="custom-text" class="hide-default analyze-custom-text">
       <label id="custom-text-box-label" for="custom-text-box">Enter Text to Analyze</label>
       <br>
       <textarea id="custom-text-box"></textarea>
@@ -25,12 +25,12 @@
       <div class="menuitem button show-default" id="fetch-webpage-button">Fetch Webpage Data</div>
       <div class="menuitem button show-default" id="analyze-selected-button">Analyze Selected Text</div>
       <div class="menuitem button show-default analyze-custom-text" id="analyze-text-button">Analyze Custom Text</div>
-      <div class="menuitem button hide-default analyze-custom-text" id="back-button" hidden>Back</div>
+      <div class="menuitem button hide-default analyze-custom-text" id="back-button">Back</div>
       <div class="menuitem button login" id="login">Login</div>
-      <div class="menuitem button logout hidden" id="logout">Logout</div>
+      <div class="menuitem button logout" id="logout">Logout</div>
     </div>
 
-    <div id="loading-status" class="hidden">
+    <div id="loading-status" class="hide-default">
       <div id="loading-icon" class="spin"></div>
     </div>
 
