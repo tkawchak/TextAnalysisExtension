@@ -7,10 +7,9 @@ def analyze_text_orchestration(context: df.DurableOrchestrationContext):
     logging.info("starting analyze_text_orchestration")
 
     input = context.get_input()
-    logging.info(f"input: {input}")
 
     document = json.loads(input)
-    logging.info(f"processing document with id: {document['id']}")
+    logging.info(f"processing document with title: {document['title']}")
     content = document["content"]
     title = document["title"]
 

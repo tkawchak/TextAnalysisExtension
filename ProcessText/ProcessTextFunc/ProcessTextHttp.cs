@@ -25,10 +25,9 @@ namespace ProcessTextFunc
             [ServiceBus(
                 "processtext",
                 Connection = "ProcessTextQueueServicebusConnectionString")] IAsyncCollector<dynamic> processTextQueue,
-            [CosmosDB(
-                databaseName: "TextContent",
-                collectionName: "Web",
-                ConnectionStringSetting = "tkawchak-textanalysis_DOCUMENTDB")] IAsyncCollector<dynamic> outputDocument,
+            [Table(
+                tableName: "WebPages",
+                Connection = "TableStorageConnectionString")] IAsyncCollector<ProcessedText> outputDocument,
             ILogger log)
         {
             ObjectResult httpResponse;

@@ -163,7 +163,7 @@ async function processWebpage(functionCodes) {
 
 /**
  * Send a request to the azure function with the properly formatted data.
- * the data is then stored in the cosmos DB attached to it
+ * the data is then stored
  * 
  * @param {*} data The data from the webpage
  */

@@ -7,7 +7,7 @@ async def main(msg: func.ServiceBusMessage, starter: str):
     logging.info("starting analyze_text_handler")
     
     message_body = msg.get_body().decode('utf-8')
-    logging.info(f"message body: {message_body}")
+    logging.debug(f"message body: {message_body}")
 
     message_details = json.dumps({
         'message_id': msg.message_id,   
@@ -23,9 +23,9 @@ async def main(msg: func.ServiceBusMessage, starter: str):
         'time_to_live': msg.time_to_live,
         'to': msg.to,
         'user_properties': msg.user_properties,
-        'metadata' : msg.metadata
+        'metadata' : msg.metadata,
     })
-    logging.info(message_details)
+    logging.debug(message_details)
 
     # State the orchestration function
     logging.info("starting analyze_text_orchestration")

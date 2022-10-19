@@ -12,28 +12,26 @@ function clearCurrentAnalysisResults() {
   console.log("[menu_actions.js] Clearing all existing analysis results");
   var resultList = document.getElementById("result-items");
   var summary = document.getElementById("summary");
-  var summarySection = document.getElementById("summary-section");
   var predicted = document.getElementById("predicted");
-  var predictedSection = document.getElementById("predicted-section");
 
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
   }
 
   summary.value = "";
-  summarySection.classList.add("hidden");
   predicted.value = "";
-  predictedSection.classList.add("hidden");
+  hideElementbyId("summary-section");
+  hideElementbyId("predicted-section");
 }
 
 function showElementById(id) {
   var element = document.getElementById(id);
-  element.classList.remove("hidden");
+  element.removeAttribute("hidden");
 }
 
 function hideElementbyId(id) {
   var element = document.getElementById(id);
-  element.classList.add("hidden");
+  element.setAttribute("hidden", true);
 }
 
 /**
@@ -60,9 +58,6 @@ function showLoggedInUser(user) {
   console.log(`[menu_actions.js] Showing logged in user ${user}`);
   var loggedInUser = document.getElementById("logged-in-user");
   loggedInUser.innerHTML = user;
-  showElementById("logged-in-status");
-  showElementById("logged-in-user");
-  hideElementbyId("logged-out-status");
   hideElementbyId("login");
   showElementById("logout");
 }
@@ -73,12 +68,9 @@ function showLoggedInUser(user) {
 function showLoggedOutStatus() {
   console.log("[menu_actions.js] Setting status to logged out");
   var loggedInUser = document.getElementById("logged-in-user");
-  loggedInUser.innerHTML = "";
-  hideElementbyId("logged-in-status");
-  hideElementbyId("logged-in-user");
-  showElementById("logged-out-status");
-  showElementById("login");
+  loggedInUser.innerHTML = "N/A";
   hideElementbyId("logout");
+  showElementById("login");
 }
 
 /**
@@ -92,9 +84,7 @@ function displayAnalysisResults(response) {
 
   // Get the desired element for result items
   var summary = document.getElementById("summary");
-  var summarySection = document.getElementById("summary-section");
   var predicted = document.getElementById("predicted");
-  var predictedSection = document.getElementById("predicted-section")
   var resultList = document.getElementById("result-items");
   var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length", 
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
@@ -104,8 +94,8 @@ function displayAnalysisResults(response) {
   if (response.hasOwnProperty("summary") && response["summary"] != null)
   {
     console.log(`[menu_actions.js] summary: ${response["summary"]}`);
-    summary.innerHTML = response["summary"]
-    summarySection.classList.remove("hidden");
+    summary.innerHTML = response["summary"];
+    showElementById("summary-section");
   }
   else
   {
@@ -116,7 +106,7 @@ function displayAnalysisResults(response) {
   {
     console.log(`[menu_actions.js] predicted: ${response["predicted"]}`)
     predicted.innerHTML = response["predicted"]
-    predictedSection.classList.remove("hidden");
+    showElementById("predicted-section");
   }
   else
   {
@@ -200,8 +190,7 @@ function logError(error) {
   hideLoadingStatus();
   var errorElement = document.querySelector("#error-message");
   errorElement.innerHTML = error.message;
-  var errorContent = document.querySelector("#error-content");
-  errorContent.classList.remove("hidden");
+  showElementById("error-content");
   console.error(`[menu_actions.js] received error: ${error}`);
 }
 
@@ -212,8 +201,7 @@ function hideError() {
   console.log("[menu_actions.js] Clearing error message");
   var errorElement = document.querySelector("#error-message");
   errorElement.innerHTML = "";
-  var errorContent = document.querySelector("#error-content");
-  errorContent.classList.add("hidden");
+  hideElementbyId("error-content");
   console.log("[menu_actions.js] Cleared error message");
 }
 
@@ -431,8 +419,8 @@ function listenForClicks() {
  * Display the popup's error message, and hide the normal UI.
  */
 function reportExecuteScriptError(error) {
-  document.querySelector("#popup-content").classList.add("hidden");
-  document.querySelector("#error-content").classList.remove("hidden");
+  hideElementbyId("popup-content");
+  showElementById("error-content");
   console.error(`[menu_actions.js] Failed to execute content script: ${error.message}`);
 }
 
@@ -452,4 +440,6 @@ console.log("[menu-actions.js] Checking if user is already logged in.");
 let getUserResponse = await browser.runtime.sendMessage({action: "getuser"});
 if (getUserResponse.user != "") {
   showLoggedInUser(getUserResponse.user);
+} else {
+  showLoggedOutStatus();
 }
