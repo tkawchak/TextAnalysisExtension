@@ -86,36 +86,32 @@ function displayAnalysisResults(response) {
   var summary = document.getElementById("summary");
   var predicted = document.getElementById("predicted");
   var resultList = document.getElementById("result-items");
-  var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length", 
+  var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length",
     "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
     "lix_readability_index", "smog_index"];
 
   // display the summary
-  if (response.hasOwnProperty("summary") && response["summary"] != null)
-  {
+  if (response.hasOwnProperty("summary") && response["summary"] != null) {
     console.log(`[menu_actions.js] summary: ${response["summary"]}`);
     summary.innerHTML = response["summary"];
     showElementById("summary-section");
   }
-  else
-  {
+  else {
     console.warn("Summary has not been computed yet.");
   }
 
-  if (response.hasOwnProperty("predicted") && response["predicted"] != null) 
-  {
+  // display the predicted text
+  if (response.hasOwnProperty("predicted") && response["predicted"] != null) {
     console.log(`[menu_actions.js] predicted: ${response["predicted"]}`)
     predicted.innerHTML = response["predicted"]
     showElementById("predicted-section");
   }
-  else
-  {
+  else {
     console.warn("Predicted Text has not been computed yet.");
   }
 
   // display the new result items
-  for (var i=0; i < keysToDisplay.length; i++)
-  {
+  for (var i = 0; i < keysToDisplay.length; i++) {
     var key = keysToDisplay[i];
     if (response[key] == null || response[key] == "") {
       console.warn(`[menu_actions.js] No value for key ${key}`);
@@ -137,6 +133,28 @@ function displayAnalysisResults(response) {
   }
 }
 
+/**
+ * Display explain results for a webpage
+ * @param {*} response response from an explain action - just the plain text
+ */
+function displayExplainResults(response) {
+  // Clear the existing results
+  clearCurrentAnalysisResults();
+  hideLoadingStatus();
+
+  var explanation = document.getElementById("explain");
+
+  // display the explanation
+  if (response != null) {
+    console.log(`[menu_actions.js] explanation: ${response}`);
+    explanation.innerHTML = response;
+    showElementById("explain-section");
+  }
+  else {
+    console.warn("Explanation has not been computed yet.");
+  }
+}
+
 // TODO: Add some handling to the handleAnalyzeResult and handleFetchResult functions if there are no results yet
 // or if there is problem getting the results
 
@@ -148,6 +166,16 @@ function handleAnalyzeResult(response) {
   var responseText = JSON.stringify(response);
   console.log(`[menu_actions.js] recieved response from analyze command: ${responseText}`);
   displayAnalysisResults(response);
+}
+
+/**
+ * Handle the response from explaining the current text and display the results
+ * @param {*} response response from an explain action
+ */
+function handleExplainResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(`[menu_actions.js] recieved response from explain command: ${responseText}`);
+  displayExplainResults(response);
 }
 
 /**
@@ -213,8 +241,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
   // Here we loop through all of the tabs
   // but there is really only one tab because the tab must be active
   showLoadingStatus();
-  for (var tab of tabs)
-  {
+  for (var tab of tabs) {
     console.log(`[menu_actions.js] sending analyze command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "analyze" })
       .then(handleAnalyzeResult)
@@ -228,8 +255,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
  */
 function sendFetchCommandToContentScript(tabs) {
   showLoadingStatus();
-  for (var tab of tabs)
-  {
+  for (var tab of tabs) {
     console.log(`[menu_actions.js] Sending fetch command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "fetch" })
       .then(handleFetchResult)
@@ -243,11 +269,24 @@ function sendFetchCommandToContentScript(tabs) {
  */
 function sendAnalyzeSelectedCommandToContentScript(tabs) {
   showLoadingStatus();
-  for (var tab of tabs)
-  {
+  for (var tab of tabs) {
     console.log(`[menu_actions.js] Sending analyze-selected command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "analyze-selected" })
       .then(handleAnalyzeResult)
+      .catch(logError);
+  }
+}
+
+/**
+ * Send a command to explain the text that is selected on the webpage.
+ * @param {*} tabs the tabs to send the command to
+ */
+function sendExplainSelectedCommandToContentScript(tabs) {
+  showLoadingStatus();
+  for (var tab of tabs) {
+    console.log(`[menu_actions.js] Sending explain-selected command to tab with id ${tab.id}`);
+    browser.tabs.sendMessage(tab.id, { "command": "explain-selected" })
+      .then(handleExplainResult)
       .catch(logError);
   }
 }
@@ -257,11 +296,10 @@ function sendAnalyzeSelectedCommandToContentScript(tabs) {
  * @param {*} tabs the tabs to send the command to
  */
 function sendLoginCommandToContentScript(tabs) {
-  
+
   clearCurrentAnalysisResults();
   showLoadingStatus();
-  for (var tab of tabs)
-  {
+  for (var tab of tabs) {
     console.log(`[menu_actions.js] Sending login command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "login" })
       .then(handleLoginResult)
@@ -276,8 +314,7 @@ function sendLoginCommandToContentScript(tabs) {
 function sendLogoutCommandToContentScript(tabs) {
   clearCurrentAnalysisResults();
   showLoadingStatus();
-  for (var tab of tabs)
-  {
+  for (var tab of tabs) {
     console.log(`[menu_actions.js] Sending logout command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "logout" })
       .then(handleLogoutResult)
@@ -291,12 +328,12 @@ function sendLogoutCommandToContentScript(tabs) {
 function showAnalyzeCustomTextFields() {
   clearCurrentAnalysisResults();
   var itemsToHide = document.getElementsByClassName("show-default");
-  for (var i=0; i < itemsToHide.length; i++) {
+  for (var i = 0; i < itemsToHide.length; i++) {
     itemsToHide[i].setAttribute("hidden", true);
   }
 
   var itemsToShow = document.getElementsByClassName("analyze-custom-text");
-  for (var i=0; i < itemsToShow.length; i++) {
+  for (var i = 0; i < itemsToShow.length; i++) {
     itemsToShow[i].removeAttribute("hidden");
   }
 }
@@ -331,10 +368,10 @@ function showDefaultMenu() {
   var hideDefaultItems = document.getElementsByClassName("hide-default");
   var customTextBox = document.getElementById("custom-text-box");
 
-  for (var i=0; i < showDefaultItems.length; i++) {
+  for (var i = 0; i < showDefaultItems.length; i++) {
     showDefaultItems[i].removeAttribute("hidden");
   }
-  for (var i=0; i < hideDefaultItems.length; i++) {
+  for (var i = 0; i < hideDefaultItems.length; i++) {
     hideDefaultItems[i].setAttribute("hidden", true);
   }
 
@@ -355,60 +392,67 @@ function listenForClicks() {
     });
 
     // figure out which button was clicked and take appropriate action
-    switch(e.target.id) {
+    switch (e.target.id) {
 
-      case "analyze-webpage-button": 
-      console.log("[menu_actions.js] Analyze Webpage button was clicked.");
-      activeTab
-        .then(sendAnalyzeCommandToContentScript)
-        .catch(logError);
-      break;
+      case "analyze-webpage-button":
+        console.log("[menu_actions.js] Analyze Webpage button was clicked.");
+        activeTab
+          .then(sendAnalyzeCommandToContentScript)
+          .catch(logError);
+        break;
 
-    case "fetch-webpage-button":
-      console.log("[menu_actions.js] Fetch Webpage data button was clicked.");
-      activeTab
-        .then(sendFetchCommandToContentScript)
-        .catch(logError);
-      break;
-      
-    case "analyze-text-button":
-      console.log("[menu_actions.js] Analyze Custom Text button was clicked.");
-      activeTab
-        .then(analyzeCustomText)
-        .catch(logError);
-      break;
+      case "fetch-webpage-button":
+        console.log("[menu_actions.js] Fetch Webpage data button was clicked.");
+        activeTab
+          .then(sendFetchCommandToContentScript)
+          .catch(logError);
+        break;
 
-    case "analyze-selected-button":
-      console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
-      activeTab
-        .then(sendAnalyzeSelectedCommandToContentScript)
-        .catch(logError);
-      break;
+      case "analyze-text-button":
+        console.log("[menu_actions.js] Analyze Custom Text button was clicked.");
+        activeTab
+          .then(analyzeCustomText)
+          .catch(logError);
+        break;
 
-    case "back-button":
-      console.log("[menu_actions.js] Back button was clicked.");
-      showDefaultMenu();
-      break;
+      case "analyze-selected-button":
+        console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
+        activeTab
+          .then(sendAnalyzeSelectedCommandToContentScript)
+          .catch(logError);
+        break;
 
-    case "login":
-      console.log("[menu_actions.js] Login was clicked.");
-      activeTab
-        .then(sendLoginCommandToContentScript)
-        .catch(logError);
-      // TODO: How to handle if the login fails?
-      break;
+      case "explain-selected-button":
+        console.log("[menu_actions.js] Explain Selected Text button was clicked.");
+        activeTab
+          .then(sendExplainSelectedCommandToContentScript)
+          .catch(logError);
+        break;
 
-    case "logout":
-      console.log("[menu_actions.js] Logout was clicked.");
-      activeTab
-        .then(sendLogoutCommandToContentScript)
-        .catch(logError);
-      // TODO: How to handle if the logout fails?
-      break;
+      case "back-button":
+        console.log("[menu_actions.js] Back button was clicked.");
+        showDefaultMenu();
+        break;
 
-    default: 
-      console.log(`[menu_actions.js] Unhandled button was clicked with id ${e.target.id}`);
-      break;
+      case "login":
+        console.log("[menu_actions.js] Login was clicked.");
+        activeTab
+          .then(sendLoginCommandToContentScript)
+          .catch(logError);
+        // TODO: How to handle if the login fails?
+        break;
+
+      case "logout":
+        console.log("[menu_actions.js] Logout was clicked.");
+        activeTab
+          .then(sendLogoutCommandToContentScript)
+          .catch(logError);
+        // TODO: How to handle if the logout fails?
+        break;
+
+      default:
+        console.log(`[menu_actions.js] Unhandled button was clicked with id ${e.target.id}`);
+        break;
     }
   });
   return;
@@ -432,12 +476,12 @@ showDefaultMenu();
  * If we couldn't inject the script, handle the error.
  */
 console.log("[menu_actions.js] Loading the getDocumentText content script.");
-browser.tabs.executeScript({file: "/getDocumentText.js"})
+browser.tabs.executeScript({ file: "/getDocumentText.js" })
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
 
 console.log("[menu-actions.js] Checking if user is already logged in.");
-let getUserResponse = await browser.runtime.sendMessage({action: "getuser"});
+let getUserResponse = await browser.runtime.sendMessage({ action: "getuser" });
 if (getUserResponse.user != "") {
   showLoggedInUser(getUserResponse.user);
 } else {

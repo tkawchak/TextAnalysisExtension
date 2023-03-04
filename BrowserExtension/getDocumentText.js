@@ -4,6 +4,7 @@
 // import logger from "./telemetry/application-insights"
 
 const client = require('./client.js');
+const openAIClient = require('./openAIClient.js');
 
 // Load the request library for making http requests
 /**
@@ -67,6 +68,12 @@ async function popupScriptListener(message) {
         result = await client.analyzeSelectedText(functionCodes);
         break;
 
+      case "explain-selected":
+        console.log("[getDocumentText.js] explaining selected text from current webpage.");
+        await getSecretsAndThrowIfNotLoggedIn(functionCodes);
+        result = await openAIClient.explainText();
+        break;
+
       case "analyze-custom":
         console.log("[getDocumentText.js] Analyzing selected text from current webpage.");
         await getSecretsAndThrowIfNotLoggedIn(functionCodes);
@@ -76,7 +83,7 @@ async function popupScriptListener(message) {
 
       case "login":
         console.log(`[getDocumentText.js] Logging in user. Fetching secrets ${SECRETS}`);
-        let loginResponse = await browser.runtime.sendMessage({ action: "login" , secrets: SECRETS });
+        let loginResponse = await browser.runtime.sendMessage({ action: "login", secrets: SECRETS });
         result = handleMesssageFromAuthService(loginResponse);
         break;
 
@@ -89,7 +96,7 @@ async function popupScriptListener(message) {
       default:
         console.log(`[getDocumentText.js]received unrecognized command: ${command}`);
         result = `Unexpected command ${command}`;
-      }
+    }
   }
 
   return result;

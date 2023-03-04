@@ -1,6 +1,37 @@
 # Text Analysis Extension
 This tool is being built as a Firefox Extension to perform analysis on webpage text. Use it to analyze the readability of your favorite webpages, selected text on a webpage, or while composing your emails. Use it and let me know what you think!
 
+- [Text Analysis Extension](#text-analysis-extension)
+  - [Project CI Status](#project-ci-status)
+    - [Master Build](#master-build)
+    - [Develop Build](#develop-build)
+  - [Current Functionalities](#current-functionalities)
+  - [Future Directions](#future-directions)
+- [Data collection](#data-collection)
+- [Get the Code](#get-the-code)
+- [Developing the Browser Extension](#developing-the-browser-extension)
+  - [Navigate to the Browser Extension Folder](#navigate-to-the-browser-extension-folder)
+  - [Install Dependencies](#install-dependencies)
+  - [Package the Extension](#package-the-extension)
+  - [Test the Extension](#test-the-extension)
+  - [Other commands](#other-commands)
+  - [Load the Extension into Firefox](#load-the-extension-into-firefox)
+- [Install the Azure Function Development Tools](#install-the-azure-function-development-tools)
+- [Azure Function to Process Webpage Text](#azure-function-to-process-webpage-text)
+  - [Set the local.settings.json file settings](#set-the-localsettingsjson-file-settings)
+  - [Install Dependensies](#install-dependensies)
+  - [Run the Azure Functions](#run-the-azure-functions)
+  - [Test the Azure Functions](#test-the-azure-functions)
+- [Azure function to Extract Text (Javascript)](#azure-function-to-extract-text-javascript)
+  - [Run the Azure Functions](#run-the-azure-functions-1)
+  - [Install packages](#install-packages)
+  - [Test the Azure Functions](#test-the-azure-functions-1)
+- [Azure Functions to Analyze Text (Python)](#azure-functions-to-analyze-text-python)
+  - [Install packages](#install-packages-1)
+  - [Run the Azure Functions](#run-the-azure-functions-2)
+  - [Test the Azure Functions](#test-the-azure-functions-2)
+- [Contact](#contact)
+
 ## Project CI Status
 ### Master Build
 [![Build Status](https://dev.azure.com/tkawchak/TextAnalysisExtension/_apis/build/status/tkawchak.TextAnalysisExtension?branchName=master)](https://dev.azure.com/tkawchak/TextAnalysisExtension/_build/latest?definitionId=2&branchName=master)
