@@ -19,7 +19,14 @@ module.exports = {
 async function explainText(functionCodes) {
     var selectedObject = window.getSelection();
     var text = selectedObject.toString();
-    console.log(`[openAIClient.js] Selected text: ${text}`);
+    if (text == null || text.trim() == "") {
+        console.log(`[openAIClient.js] No Text selected`);
+        throw "No text selected";
+    }
+    else {
+        text = text.trim();
+        console.log(`[openAIClient.js] Selected text: ${text}`);
+    }
 
     const configuration = new Configuration({
         apiKey: functionCodes[OPEN_AI_API_KEY],
@@ -35,13 +42,13 @@ async function explainText(functionCodes) {
         temperature: 0.7,
         // n: 1,
     });
-    console.log(`Reponse: ${response}`);
+    console.log(`Response: ${response}`);
     if (response.status >= 200 && response.status < 300) {
         console.log("[openAIClient.js] Received explanation for text.");
     }
     else {
-        var errorMessage = `[openAIClient.js] Unable to explain text. open AI response status: ${response.status} and response body: ${response.data}`;
-        console.error(errorMessage);
+        var errorMessage = `Unable to explain text. OpenAI response status: ${response.status} and response body: ${response.data}`;
+        console.error(`[openAIClient.js] ${errorMessage}`);
         throw errorMessage;
     }
 

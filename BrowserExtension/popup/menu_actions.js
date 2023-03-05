@@ -20,8 +20,8 @@ function clearCurrentAnalysisResults() {
 
   summary.value = "";
   predicted.value = "";
-  hideElementbyId("summary-section");
-  hideElementbyId("predicted-section");
+  hideElementById("summary-section");
+  hideElementById("predicted-section");
 }
 
 function showElementById(id) {
@@ -29,7 +29,7 @@ function showElementById(id) {
   element.removeAttribute("hidden");
 }
 
-function hideElementbyId(id) {
+function hideElementById(id) {
   var element = document.getElementById(id);
   element.setAttribute("hidden", true);
 }
@@ -47,7 +47,7 @@ function showLoadingStatus() {
  */
 function hideLoadingStatus() {
   console.log("[menu_actions.js] Hiding loading status");
-  hideElementbyId("loading-status");
+  hideElementById("loading-status");
 }
 
 /**
@@ -58,7 +58,7 @@ function showLoggedInUser(user) {
   console.log(`[menu_actions.js] Showing logged in user ${user}`);
   var loggedInUser = document.getElementById("logged-in-user");
   loggedInUser.innerHTML = user;
-  hideElementbyId("login");
+  hideElementById("login");
   showElementById("logout");
 }
 
@@ -69,7 +69,7 @@ function showLoggedOutStatus() {
   console.log("[menu_actions.js] Setting status to logged out");
   var loggedInUser = document.getElementById("logged-in-user");
   loggedInUser.innerHTML = "N/A";
-  hideElementbyId("logout");
+  hideElementById("logout");
   showElementById("login");
 }
 
@@ -142,17 +142,11 @@ function displayExplainResults(response) {
   clearCurrentAnalysisResults();
   hideLoadingStatus();
 
-  var explanation = document.getElementById("explain");
-
   // display the explanation
-  if (response != null) {
-    console.log(`[menu_actions.js] explanation: ${response}`);
-    explanation.innerHTML = response;
-    showElementById("explain-section");
-  }
-  else {
-    console.warn("Explanation has not been computed yet.");
-  }
+  console.log(`[menu_actions.js] explanation: ${response}`);
+  var explanation = document.getElementById("explain");
+  explanation.innerHTML = response;
+  showElementById("explain-section");
 }
 
 // TODO: Add some handling to the handleAnalyzeResult and handleFetchResult functions if there are no results yet
@@ -164,7 +158,7 @@ function displayExplainResults(response) {
  */
 function handleAnalyzeResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] recieved response from analyze command: ${responseText}`);
+  console.log(`[menu_actions.js] Received response from analyze command: ${responseText}`);
   displayAnalysisResults(response);
 }
 
@@ -174,7 +168,7 @@ function handleAnalyzeResult(response) {
  */
 function handleExplainResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] recieved response from explain command: ${responseText}`);
+  console.log(`[menu_actions.js] Received response from explain command: ${responseText}`);
   displayExplainResults(response);
 }
 
@@ -184,7 +178,7 @@ function handleExplainResult(response) {
  */
 function handleFetchResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] recieved response from fetch command: ${responseText}`);
+  console.log(`[menu_actions.js] Received response from fetch command: ${responseText}`);
   displayAnalysisResults(response);
 }
 
@@ -194,7 +188,7 @@ function handleFetchResult(response) {
  */
 function handleLoginResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] recieved response from login command: ${responseText}`);
+  console.log(`[menu_actions.js] Received response from login command: ${responseText}`);
   hideLoadingStatus();
   showLoggedInUser(response);
 }
@@ -205,7 +199,7 @@ function handleLoginResult(response) {
  */
 function handleLogoutResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] recieved response from logout command: ${responseText}`);
+  console.log(`[menu_actions.js] Received response from logout command: ${responseText}`);
   hideLoadingStatus();
   showLoggedOutStatus();
 }
@@ -219,7 +213,7 @@ function logError(error) {
   var errorElement = document.querySelector("#error-message");
   errorElement.innerHTML = error.message;
   showElementById("error-content");
-  console.error(`[menu_actions.js] received error: ${error}`);
+  console.error(`[menu_actions.js] Received error: ${error}`);
 }
 
 /**
@@ -229,7 +223,7 @@ function hideError() {
   console.log("[menu_actions.js] Clearing error message");
   var errorElement = document.querySelector("#error-message");
   errorElement.innerHTML = "";
-  hideElementbyId("error-content");
+  hideElementById("error-content");
   console.log("[menu_actions.js] Cleared error message");
 }
 
@@ -242,7 +236,7 @@ function sendAnalyzeCommandToContentScript(tabs) {
   // but there is really only one tab because the tab must be active
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] sending analyze command to tab with id ${tab.id}`);
+    console.log(`[menu_actions.js] Sending analyze command to tab with id ${tab.id}`);
     browser.tabs.sendMessage(tab.id, { "command": "analyze" })
       .then(handleAnalyzeResult)
       .catch(logError);
@@ -463,7 +457,7 @@ function listenForClicks() {
  * Display the popup's error message, and hide the normal UI.
  */
 function reportExecuteScriptError(error) {
-  hideElementbyId("popup-content");
+  hideElementById("popup-content");
   showElementById("error-content");
   console.error(`[menu_actions.js] Failed to execute content script: ${error.message}`);
 }
