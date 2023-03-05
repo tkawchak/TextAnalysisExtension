@@ -4,10 +4,7 @@ const utilities = require('./utilities.js');
 const client = require('./client.js');
 
 const GPT_MODEL = "text-davinci-003";
-
-// TODO: How to get the API Key? Can we put it in keyvault like the function codes?
-const OPEN_AI_API_KEY = "";
-
+const OPEN_AI_API_KEY = "OpenAIAPIKey";
 const OPEN_AI_BASE_URL = "https://api.openai.com";
 
 module.exports = {
@@ -16,19 +13,21 @@ module.exports = {
 
 /**
  * get data for the current webpage
+ * @param {*} functionCodes The authentication codes needed for authenticating to OpenAI
+ }
  */
-async function explainText() {
+async function explainText(functionCodes) {
     var selectedObject = window.getSelection();
     var text = selectedObject.toString();
     console.log(`[openAIClient.js] Selected text: ${text}`);
 
     const configuration = new Configuration({
-        apiKey: OPEN_AI_API_KEY,
+        apiKey: functionCodes[OPEN_AI_API_KEY],
     });
     const openai = new OpenAIApi(configuration);
 
-    // for more options on this API call,
-    // See: https://platform.openai.com/docs/api-reference/completions/create#completions/create-model
+    // For more options on this API call,
+    // see: https://platform.openai.com/docs/api-reference/completions/create#completions/create-model
     const response = await openai.createCompletion({
         model: GPT_MODEL,
         prompt: `Please explain the following text: ${text}`,

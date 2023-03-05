@@ -22,6 +22,7 @@ const SECRETS = [
   'GetProcessedTextFuncCode',
   'ExtractTextFuncCode',
   'ComputeReadabilityFuncCode',
+  'OpenAIAPIKey',
 ];
 var functionCodes = {};
 
@@ -71,7 +72,7 @@ async function popupScriptListener(message) {
       case "explain-selected":
         console.log("[getDocumentText.js] explaining selected text from current webpage.");
         await getSecretsAndThrowIfNotLoggedIn(functionCodes);
-        result = await openAIClient.explainText();
+        result = await openAIClient.explainText(functionCodes);
         break;
 
       case "analyze-custom":
