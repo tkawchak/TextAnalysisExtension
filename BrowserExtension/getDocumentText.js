@@ -4,6 +4,7 @@
 // import logger from "./telemetry/application-insights"
 
 const client = require('./client.js');
+const openAIClient = require('./openAIClient.js');
 
 // Load the request library for making http requests
 /**
@@ -21,6 +22,7 @@ const SECRETS = [
   'GetProcessedTextFuncCode',
   'ExtractTextFuncCode',
   'ComputeReadabilityFuncCode',
+  'OpenAIAPIKey',
 ];
 var functionCodes = {};
 
@@ -28,7 +30,7 @@ async function getSecretsAndThrowIfNotLoggedIn(functionCodes) {
   if (Object.keys(functionCodes).length === 0) {
     console.log(`[getDocumentText.js] Attempting to fetch function codes from auth service.`);
     let getSecretsResponse = await browser.runtime.sendMessage({ action: "getsecrets" });
-    handleMesssageFromAuthService(getSecretsResponse);
+    handleMessageFromAuthService(getSecretsResponse);
   }
   if (Object.keys(functionCodes).length === 0) {
     console.warn(`[getDocumentText.js] Please login before analyzing a webpage.`);
@@ -67,6 +69,12 @@ async function popupScriptListener(message) {
         result = await client.analyzeSelectedText(functionCodes);
         break;
 
+      case "explain-selected":
+        console.log("[getDocumentText.js] Explaining selected text from current webpage.");
+        await getSecretsAndThrowIfNotLoggedIn(functionCodes);
+        result = await openAIClient.explainText(functionCodes);
+        break;
+
       case "analyze-custom":
         console.log("[getDocumentText.js] Analyzing selected text from current webpage.");
         await getSecretsAndThrowIfNotLoggedIn(functionCodes);
@@ -76,20 +84,20 @@ async function popupScriptListener(message) {
 
       case "login":
         console.log(`[getDocumentText.js] Logging in user. Fetching secrets ${SECRETS}`);
-        let loginResponse = await browser.runtime.sendMessage({ action: "login" , secrets: SECRETS });
-        result = handleMesssageFromAuthService(loginResponse);
+        let loginResponse = await browser.runtime.sendMessage({ action: "login", secrets: SECRETS });
+        result = handleMessageFromAuthService(loginResponse);
         break;
 
       case "logout":
         console.log("[getdocumentText.js] Logging out.");
         let logoutResponse = await browser.runtime.sendMessage({ action: "logout" });
-        result = handleMesssageFromAuthService(logoutResponse);
+        result = handleMessageFromAuthService(logoutResponse);
         break;
 
       default:
         console.log(`[getDocumentText.js]received unrecognized command: ${command}`);
         result = `Unexpected command ${command}`;
-      }
+    }
   }
 
   return result;
@@ -103,7 +111,7 @@ async function popupScriptListener(message) {
  * Handle messages from the auth service background script.
  * @param {*} message 
  */
-function handleMesssageFromAuthService(message) {
+function handleMessageFromAuthService(message) {
   if (message.loginResult != undefined) {
     console.log(`[getDocumentText.js] Processing auth service login result ${message.loginResult}`);
     functionCodes = message.secrets;
@@ -123,7 +131,7 @@ function handleMesssageFromAuthService(message) {
 
   else {
     console.warn(`[getDocumentText.js] Unrecognized message received from auth service: '${JSON.stringify(message)}'`);
-    return "Unexcpected response from auth service.";
+    return "Unexpected response from auth service.";
   }
 }
 

@@ -10,7 +10,10 @@
 <body>
   <div id="popup-content">
     <div id="login-status">
-      <div class="account"><div id="logged-in-status" class="account">User:</div><div id="logged-in-user" class="account">N/A</div></div>
+      <div class="account">
+        <div id="logged-in-status" class="account">User:</div>
+        <div id="logged-in-user" class="account">N/A</div>
+      </div>
     </div>
 
     <div id="custom-text" class="hide-default analyze-custom-text">
@@ -24,6 +27,7 @@
       <div class="menuitem button show-default" id="analyze-webpage-button">Analyze Webpage</div>
       <div class="menuitem button show-default" id="fetch-webpage-button">Fetch Webpage Data</div>
       <div class="menuitem button show-default" id="analyze-selected-button">Analyze Selected Text</div>
+      <div class="menuitem button show-default" id="explain-selected-button">Explain Selected Text</div>
       <div class="menuitem button show-default analyze-custom-text" id="analyze-text-button">Analyze Custom Text</div>
       <div class="menuitem button hide-default analyze-custom-text" id="back-button">Back</div>
       <div class="menuitem button login" id="login">Login</div>
@@ -46,6 +50,13 @@
       <div id="result-items">
         <!-- <div class="result"><div class="result-key">Score: </div><div class="result-value">92.30</div></div> -->
       </div>
+    </div>
+  </div>
+
+  <div id="explain-results">
+    <div id="explain-section" class="hide-default">
+      <h3 id="explain-title">Explanation</h3>
+      <p id="explain"></p>
     </div>
   </div>
 
