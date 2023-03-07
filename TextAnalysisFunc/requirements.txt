@@ -8,7 +8,7 @@ azure-functions-durable
 dataclasses
 nltk
 numpy
-networkx
+networkx<3.0
 scipy
 transformers[torch]
 openai

@@ -138,10 +138,10 @@ def generate_summary(content: str, top_n: int=5) -> str:
     # Get a list of sentences
     sentences =  get_sentences(content)
     
-    # Generate Similary Martix across sentences
+    # Generate Similarity Matrix across sentences
     sentence_similarity_matrix = build_similarity_matrix(sentences, stop_words)
     
-    # Rank sentences in similarity martix using pagerank
+    # Rank sentences in similarity matrix using pagerank
     sentence_similarity_graph = nx.from_numpy_array(sentence_similarity_matrix)
     scores = nx.pagerank(G=sentence_similarity_graph, max_iter=500)
     
