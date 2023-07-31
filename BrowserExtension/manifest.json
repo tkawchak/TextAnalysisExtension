@@ -36,6 +36,12 @@
     "default_popup": "popup/menu.html"
   },
 
+  "sidebar_action": {
+    "default_icon": "icons/TextAnalysisLogo32.png",
+    "default_title" : "Analyze Text",
+    "default_panel": "popup/menu.html"
+  },
+
   "browser_specific_settings": {
     "gecko": {
       "id": "{3f209689-528e-49d4-9672-150a924611ee}",

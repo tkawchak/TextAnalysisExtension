@@ -86,27 +86,39 @@ function displayAnalysisResults(response) {
   var summary = document.getElementById("summary");
   var predicted = document.getElementById("predicted");
   var resultList = document.getElementById("result-items");
-  var keysToDisplay = ["author", "overall_score", "sentence_count", "syllable_count", "difficult_words", "average_sentence_length",
-    "coleman_liau_index", "dale_chall_readability_score", "flesch_ease", "fleschkincaid_grade", "gunning_fog_index", "lexicon_count", "linsear_write_index",
-    "lix_readability_index", "smog_index"];
+  var keysToDisplay = [
+    "author",
+    "overall_score",
+    "sentence_count",
+    "syllable_count",
+    "difficult_words",
+    "average_sentence_length",
+    "coleman_liau_index",
+    "dale_chall_readability_score",
+    "flesch_ease",
+    "fleschkincaid_grade",
+    "gunning_fog_index",
+    "lexicon_count",
+    "linsear_write_index",
+    "lix_readability_index",
+    "smog_index",
+  ];
 
   // display the summary
   if (response.hasOwnProperty("summary") && response["summary"] != null) {
     console.log(`[menu_actions.js] summary: ${response["summary"]}`);
     summary.innerHTML = response["summary"];
     showElementById("summary-section");
-  }
-  else {
+  } else {
     console.warn("Summary has not been computed yet.");
   }
 
   // display the predicted text
   if (response.hasOwnProperty("predicted") && response["predicted"] != null) {
-    console.log(`[menu_actions.js] predicted: ${response["predicted"]}`)
-    predicted.innerHTML = response["predicted"]
+    console.log(`[menu_actions.js] predicted: ${response["predicted"]}`);
+    predicted.innerHTML = response["predicted"];
     showElementById("predicted-section");
-  }
-  else {
+  } else {
     console.warn("Predicted Text has not been computed yet.");
   }
 
@@ -131,6 +143,18 @@ function displayAnalysisResults(response) {
     newItem.appendChild(newValue);
     resultList.appendChild(newItem);
   }
+}
+
+function displaySummarizeResults(response) {
+  // Clear the existing results
+  clearCurrentAnalysisResults();
+  hideLoadingStatus();
+
+  // display the summary
+  console.log(`[menu_actions.js] summary: ${response}`);
+  var summary = document.getElementById("summary");
+  summary.innerHTML = response;
+  showElementById("summary-section");
 }
 
 /**
@@ -158,8 +182,18 @@ function displayExplainResults(response) {
  */
 function handleAnalyzeResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] Received response from analyze command: ${responseText}`);
+  console.log(
+    `[menu_actions.js] Received response from analyze command: ${responseText}`
+  );
   displayAnalysisResults(response);
+}
+
+function handleSummarizeResult(response) {
+  var responseText = JSON.stringify(response);
+  console.log(
+    `[menu_actions.js] Received response from summarize command: ${responseText}`
+  );
+  displaySummarizeResults(response);
 }
 
 /**
@@ -168,7 +202,9 @@ function handleAnalyzeResult(response) {
  */
 function handleExplainResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] Received response from explain command: ${responseText}`);
+  console.log(
+    `[menu_actions.js] Received response from explain command: ${responseText}`
+  );
   displayExplainResults(response);
 }
 
@@ -178,17 +214,21 @@ function handleExplainResult(response) {
  */
 function handleFetchResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] Received response from fetch command: ${responseText}`);
+  console.log(
+    `[menu_actions.js] Received response from fetch command: ${responseText}`
+  );
   displayAnalysisResults(response);
 }
 
 /**
- * Handle the response from logging in 
+ * Handle the response from logging in
  * @param {*} response The response from a login action
  */
 function handleLoginResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] Received response from login command: ${responseText}`);
+  console.log(
+    `[menu_actions.js] Received response from login command: ${responseText}`
+  );
   hideLoadingStatus();
   showLoggedInUser(response);
 }
@@ -199,7 +239,9 @@ function handleLoginResult(response) {
  */
 function handleLogoutResult(response) {
   var responseText = JSON.stringify(response);
-  console.log(`[menu_actions.js] Received response from logout command: ${responseText}`);
+  console.log(
+    `[menu_actions.js] Received response from logout command: ${responseText}`
+  );
   hideLoadingStatus();
   showLoggedOutStatus();
 }
@@ -236,8 +278,11 @@ function sendAnalyzeCommandToContentScript(tabs) {
   // but there is really only one tab because the tab must be active
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] Sending analyze command to tab with id ${tab.id}`);
-    browser.tabs.sendMessage(tab.id, { "command": "analyze" })
+    console.log(
+      `[menu_actions.js] Sending analyze command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "analyze" })
       .then(handleAnalyzeResult)
       .catch(logError);
   }
@@ -250,9 +295,29 @@ function sendAnalyzeCommandToContentScript(tabs) {
 function sendFetchCommandToContentScript(tabs) {
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] Sending fetch command to tab with id ${tab.id}`);
-    browser.tabs.sendMessage(tab.id, { "command": "fetch" })
+    console.log(
+      `[menu_actions.js] Sending fetch command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "fetch" })
       .then(handleFetchResult)
+      .catch(logError);
+  }
+}
+
+/**
+ * Send a command to summarize the webpage
+ * @param {*} tabs the tabs to send the command to
+ */
+function sendSummarizeCommandToContentScript(tabs) {
+  showLoadingStatus();
+  for (var tab of tabs) {
+    console.log(
+      `[menu_actions.js] Sending summarize command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "summarize" })
+      .then(handleSummarizeResult)
       .catch(logError);
   }
 }
@@ -264,9 +329,12 @@ function sendFetchCommandToContentScript(tabs) {
 function sendAnalyzeSelectedCommandToContentScript(tabs) {
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] Sending analyze-selected command to tab with id ${tab.id}`);
-    browser.tabs.sendMessage(tab.id, { "command": "analyze-selected" })
-      .then(handleAnalyzeResult)
+    console.log(
+      `[menu_actions.js] Sending analyze-selected command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "analyze-selected" })
+      .then(handleSummarizeResult)
       .catch(logError);
   }
 }
@@ -278,8 +346,11 @@ function sendAnalyzeSelectedCommandToContentScript(tabs) {
 function sendExplainSelectedCommandToContentScript(tabs) {
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] Sending explain-selected command to tab with id ${tab.id}`);
-    browser.tabs.sendMessage(tab.id, { "command": "explain-selected" })
+    console.log(
+      `[menu_actions.js] Sending explain-selected command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "explain-selected" })
       .then(handleExplainResult)
       .catch(logError);
   }
@@ -290,12 +361,14 @@ function sendExplainSelectedCommandToContentScript(tabs) {
  * @param {*} tabs the tabs to send the command to
  */
 function sendLoginCommandToContentScript(tabs) {
-
   clearCurrentAnalysisResults();
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] Sending login command to tab with id ${tab.id}`);
-    browser.tabs.sendMessage(tab.id, { "command": "login" })
+    console.log(
+      `[menu_actions.js] Sending login command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "login" })
       .then(handleLoginResult)
       .catch(logError);
   }
@@ -309,8 +382,11 @@ function sendLogoutCommandToContentScript(tabs) {
   clearCurrentAnalysisResults();
   showLoadingStatus();
   for (var tab of tabs) {
-    console.log(`[menu_actions.js] Sending logout command to tab with id ${tab.id}`);
-    browser.tabs.sendMessage(tab.id, { "command": "logout" })
+    console.log(
+      `[menu_actions.js] Sending logout command to tab with id ${tab.id}`
+    );
+    browser.tabs
+      .sendMessage(tab.id, { command: "logout" })
       .then(handleLogoutResult)
       .catch(logError);
   }
@@ -337,15 +413,16 @@ function showAnalyzeCustomTextFields() {
  */
 async function analyzeCustomText(tabs) {
   var text = document.getElementById("custom-text-box").value;
-  if (text == null || text.trim() == '') {
+  if (text == null || text.trim() == "") {
     showAnalyzeCustomTextFields();
-  }
-
-  else {
+  } else {
     for (var tab of tabs) {
       console.log(`[menu_actions.js] Custom text: ${text}`);
-      console.log(`[menu_actions.js] Sending analyze custom text command to tab with id ${tab.id}`)
-      browser.tabs.sendMessage(tab.id, { "command": "analyze-custom", "text": text })
+      console.log(
+        `[menu_actions.js] Sending analyze custom text command to tab with id ${tab.id}`
+      );
+      browser.tabs
+        .sendMessage(tab.id, { command: "analyze-custom", text: text })
         .then(handleAnalyzeResult)
         .catch(logError);
     }
@@ -382,42 +459,46 @@ function listenForClicks() {
     hideError();
     var activeTab = browser.tabs.query({
       currentWindow: true,
-      active: true
+      active: true,
     });
 
     // figure out which button was clicked and take appropriate action
     switch (e.target.id) {
-
       case "analyze-webpage-button":
         console.log("[menu_actions.js] Analyze Webpage button was clicked.");
-        activeTab
-          .then(sendAnalyzeCommandToContentScript)
-          .catch(logError);
+        activeTab.then(sendAnalyzeCommandToContentScript).catch(logError);
         break;
 
       case "fetch-webpage-button":
         console.log("[menu_actions.js] Fetch Webpage data button was clicked.");
-        activeTab
-          .then(sendFetchCommandToContentScript)
-          .catch(logError);
+        activeTab.then(sendFetchCommandToContentScript).catch(logError);
         break;
 
       case "analyze-text-button":
-        console.log("[menu_actions.js] Analyze Custom Text button was clicked.");
-        activeTab
-          .then(analyzeCustomText)
-          .catch(logError);
+        console.log(
+          "[menu_actions.js] Analyze Custom Text button was clicked."
+        );
+        activeTab.then(analyzeCustomText).catch(logError);
+        break;
+
+      case "summarize-webpage-button":
+        console.log("[menu_actions.js] Summarize Webpage button was clicked.");
+        activeTab.then(sendSummarizeCommandToContentScript).catch(logError);
         break;
 
       case "analyze-selected-button":
-        console.log("[menu_actions.js] Analyze Selected Text button was clicked.");
+        console.log(
+          "[menu_actions.js] Analyze Selected Text button was clicked."
+        );
         activeTab
           .then(sendAnalyzeSelectedCommandToContentScript)
           .catch(logError);
         break;
 
       case "explain-selected-button":
-        console.log("[menu_actions.js] Explain Selected Text button was clicked.");
+        console.log(
+          "[menu_actions.js] Explain Selected Text button was clicked."
+        );
         activeTab
           .then(sendExplainSelectedCommandToContentScript)
           .catch(logError);
@@ -430,22 +511,20 @@ function listenForClicks() {
 
       case "login":
         console.log("[menu_actions.js] Login was clicked.");
-        activeTab
-          .then(sendLoginCommandToContentScript)
-          .catch(logError);
+        activeTab.then(sendLoginCommandToContentScript).catch(logError);
         // TODO: How to handle if the login fails?
         break;
 
       case "logout":
         console.log("[menu_actions.js] Logout was clicked.");
-        activeTab
-          .then(sendLogoutCommandToContentScript)
-          .catch(logError);
+        activeTab.then(sendLogoutCommandToContentScript).catch(logError);
         // TODO: How to handle if the logout fails?
         break;
 
       default:
-        console.log(`[menu_actions.js] Unhandled button was clicked with id ${e.target.id}`);
+        console.log(
+          `[menu_actions.js] Unhandled button was clicked with id ${e.target.id}`
+        );
         break;
     }
   });
@@ -459,7 +538,9 @@ function listenForClicks() {
 function reportExecuteScriptError(error) {
   hideElementById("popup-content");
   showElementById("error-content");
-  console.error(`[menu_actions.js] Failed to execute content script: ${error.message}`);
+  console.error(
+    `[menu_actions.js] Failed to execute content script: ${error.message}`
+  );
 }
 
 showDefaultMenu();
@@ -469,15 +550,27 @@ showDefaultMenu();
  * and add a click handler.
  * If we couldn't inject the script, handle the error.
  */
-console.log("[menu_actions.js] Loading the getDocumentText content script.");
-browser.tabs.executeScript({ file: "/getDocumentText.js" })
-  .then(listenForClicks)
-  .catch(reportExecuteScriptError);
+function onPopupLoad() {
+  console.log("[menu_actions.js] Loading the getDocumentText content script.");
 
-console.log("[menu-actions.js] Checking if user is already logged in.");
-let getUserResponse = await browser.runtime.sendMessage({ action: "getuser" });
-if (getUserResponse.user != "") {
-  showLoggedInUser(getUserResponse.user);
-} else {
-  showLoggedOutStatus();
+  browser.tabs
+    .executeScript({ file: "/getDocumentText.js" })
+    .then(listenForClicks)
+    .catch(reportExecuteScriptError);
+
+  getUser().then({}).catch(reportExecuteScriptError);
 }
+
+async function getUser() {
+  console.log("[menu-actions.js] Checking if user is already logged in.");
+  let getUserResponse = await browser.runtime.sendMessage({
+    action: "getuser",
+  });
+  if (getUserResponse.user != "") {
+    showLoggedInUser(getUserResponse.user);
+  } else {
+    showLoggedOutStatus();
+  }
+}
+
+onPopupLoad();
