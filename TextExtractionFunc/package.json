@@ -9,7 +9,7 @@
   "author": "Tom Kawchak",
   "license": "ISC",
   "dependencies": {
-    "@postlight/mercury-parser": "^2.2.1",
+    "@postlight/parser": "^2.2.3",
     "axios": "^0.22.0",
     "flesch-kincaid": "^2.0.0",
     "natural": "^5.1.1",
