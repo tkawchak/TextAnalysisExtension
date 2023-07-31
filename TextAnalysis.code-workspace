@@ -1,0 +1,70 @@
+{
+  "folders": [
+    {
+      "name": "BrowserExtension",
+      "path": "BrowserExtension"
+    },
+    {
+      "name": "Documentation",
+      "path": "Documentation"
+    },
+    {
+      "name": "ProcessText",
+      "path": "ProcessText"
+    },
+    {
+      "name": "TextAnalysis",
+      "path": "TextAnalysisFunc"
+    },
+    {
+      "name": "TextExtraction",
+      "path": "TextExtractionFunc"
+    }
+  ],
+  "settings": {
+    "azureFunctions.deploySubpath": "TextAnalytics",
+    "azureFunctions.postDeployTask": "npm install",
+    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.projectRuntime": "~3",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "npm prune",
+    "azureFunctions.scmDoBuildDuringDeployment": true,
+    "azureFunctions.pythonVenv": ".venv",
+    "python.pythonPath": "/Users/tomkawchak/anaconda3/envs/TextAnalytics/bin/python3.8"
+  },
+  "launch": {
+    "configurations": [
+      {
+        "name": "Attach to ProcessText Azure Function",
+        "type": "coreclr",
+        "request": "attach",
+        "processId": "${command:azureFunctions.pickProcess}",
+        "preLaunchTask": "func: host start --port 7071"
+      },
+      {
+        "name": "Attach to TextAnalysis Azure Function",
+        "type": "node",
+        "request": "attach",
+        "port": 9073,
+        "preLaunchTask": "func: host start --port 7073"
+      },
+      {
+        "name": "Attach to TextExtraction Azure Function",
+        "type": "node",
+        "request": "attach",
+        "port": 9072,
+        "preLaunchTask": "func: host start --port 7072"
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Attach to all Azure Functions",
+        "configurations": [
+          "Attach to ProcessText Azure Function",
+          "Attach to TextAnalysis Azure Function",
+          "Attach to TextExtraction Azure Function"
+        ]
+      }
+    ]
+  }
+}
