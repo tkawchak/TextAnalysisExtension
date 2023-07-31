@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   width: 350px;
 }
 
@@ -36,7 +37,7 @@ html, body {
 }
 
 .menuitem {
-  background-color: #E5F2F2;
+  background-color: #e5f2f2;
 }
 
 #summary-title {
@@ -84,7 +85,7 @@ html, body {
 #custom-text {
   margin: 3% auto;
   padding: 5px;
-  width: 100%
+  width: 100%;
 }
 
 #custom-text-box-label {
@@ -129,7 +130,7 @@ html, body {
 }
 
 .spin::before {
-  animation: 1.0s linear infinite spinner;
+  animation: 1s linear infinite spinner;
   animation-play-state: inherit;
   border: solid 5px #cfd0d1;
   border-bottom-color: #1c87c9;
