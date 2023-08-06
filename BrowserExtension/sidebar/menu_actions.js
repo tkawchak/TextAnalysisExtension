@@ -13,6 +13,7 @@ function clearCurrentAnalysisResults() {
   var resultList = document.getElementById("result-items");
   var summary = document.getElementById("summary");
   var predicted = document.getElementById("predicted");
+  var explained = document.getElementById("explain");
 
   while (resultList.lastElementChild) {
     resultList.removeChild(resultList.lastElementChild);
@@ -20,8 +21,10 @@ function clearCurrentAnalysisResults() {
 
   summary.value = "";
   predicted.value = "";
+  explained.value = "";
   hideElementById("summary-section");
   hideElementById("predicted-section");
+  hideElementById("explain-section");
 }
 
 function showElementById(id) {
