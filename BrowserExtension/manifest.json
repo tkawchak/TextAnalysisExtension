@@ -23,17 +23,18 @@
     "webRequest"
   ],
 
-  "web_accessible_resources": [
-    "popup/menu.html"
-  ],
-
   "browser_action": {
     "browser_style": true,
     "default_icon": {
       "32": "icons/TextAnalysisLogo32.png"
     },
-    "default_title": "Analyze Text",
-    "default_popup": "popup/menu.html"
+    "default_title": "Analyze Text"
+  },
+
+  "sidebar_action": {
+    "default_icon": "icons/TextAnalysisLogo32.png",
+    "default_title" : "Analyze Text",
+    "default_panel": "sidebar/menu.html"
   },
 
   "browser_specific_settings": {
@@ -45,7 +46,8 @@
 
   "background": {
     "scripts": [
-      "background/auth.js"
+      "background/auth.js",
+      "background/openSidebar.js"
     ]
   }
 }

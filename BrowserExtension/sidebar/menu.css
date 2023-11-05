@@ -1,11 +1,14 @@
-html, body {
-  width: 350px;
+html,
+body {
+  min-width: 50px;
+  max-width: 500px;
 }
 
 .button {
-  margin: 3% auto;
+  margin: 10px auto;
   padding: 5px;
   text-align: center;
+  width: 200px;
   /* font-size: 1.5em; */
   cursor: pointer;
 }
@@ -36,36 +39,20 @@ html, body {
 }
 
 .menuitem {
-  background-color: #E5F2F2;
+  background-color: #e5f2f2;
 }
 
-#summary-title {
-  margin: 3% auto;
+.text-section-title {
+  margin: 10px;
   padding: 5px;
   text-align: center;
   cursor: text;
 }
 
-#summary {
-  height: 70px;
-  margin: 3% auto;
-  padding: 5px;
-  text-align: left;
-  overflow-y: scroll;
-  word-wrap: normal;
-  cursor: text;
-}
-
-#predicted-title {
-  margin: 3% auto;
-  padding: 5px;
-  text-align: center;
-  cursor: text;
-}
-
-#predicted {
-  height: 70px;
-  margin: 3% auto;
+.text-section {
+  min-height: 50px;
+  max-height: 200px;
+  margin: 10px;
   padding: 5px;
   text-align: left;
   overflow-y: scroll;
@@ -74,7 +61,7 @@ html, body {
 }
 
 .result {
-  margin: 3% auto;
+  margin: 10px;
   padding: 5px;
   background-color: #a6bcc5;
   display: flex;
@@ -82,9 +69,9 @@ html, body {
 }
 
 #custom-text {
-  margin: 3% auto;
+  margin: 10px;
   padding: 5px;
-  width: 100%
+  width: 100%;
 }
 
 #custom-text-box-label {
@@ -108,7 +95,7 @@ html, body {
 }
 
 #error-message {
-  margin: 3% auto;
+  margin: 10px;
   padding: 5px;
   text-align: center;
   cursor: pointer;
@@ -129,7 +116,7 @@ html, body {
 }
 
 .spin::before {
-  animation: 1.0s linear infinite spinner;
+  animation: 1s linear infinite spinner;
   animation-play-state: inherit;
   border: solid 5px #cfd0d1;
   border-bottom-color: #1c87c9;
