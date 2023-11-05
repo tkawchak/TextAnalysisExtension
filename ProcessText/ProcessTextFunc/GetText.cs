@@ -17,7 +17,7 @@ namespace ProcessTextFunc
     public static class GetProcessedText
     {
         [FunctionName("GetProcessedText")]
-        public static async Task<IActionResult> Run(
+        public static IActionResult Run(
             [HttpTrigger(
                 AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
             ILogger log,
